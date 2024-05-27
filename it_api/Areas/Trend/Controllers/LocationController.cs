@@ -19,7 +19,7 @@ namespace it_template.Areas.Trend.Controllers
             UserManager = UserMgr;
         }
         [HttpPost]
-        public async Task<JsonResult> Save(LocationModel LocationModel, List<string> list_users_id)
+        public async Task<JsonResult> Save(LocationModel LocationModel)
         {
             var jsonData = new { success = true, message = "" };
             try
@@ -97,6 +97,7 @@ namespace it_template.Areas.Trend.Controllers
                 var LocationModel = _context.LocationModel.Find(item.id);
                 LocationModel.parent = item.parent_id != null ? item.parent_id : 0;
                 LocationModel.count_child = item.count_child;
+                LocationModel.is_expand = item.is_expand;
                 LocationModel.stt = index++;
                 _context.Update(LocationModel);
             }
@@ -139,6 +140,7 @@ namespace it_template.Areas.Trend.Controllers
     {
         public int id { get; set; }
         public int count_child { get; set; }
+        public bool is_expand { get; set; }
 
         public int parent_id { get; set; }
     }

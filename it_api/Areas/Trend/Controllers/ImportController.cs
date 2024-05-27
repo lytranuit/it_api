@@ -924,6 +924,104 @@ namespace it_template.Areas.Trend.Controllers
             return Ok(list_Result);
         }
 
+        public async Task<IActionResult> importCA2()
+        {
+            return Ok();
+            // Khởi tạo workbook để đọc
+            Spire.Xls.Workbook book = new Spire.Xls.Workbook();
+            book.LoadFromFile("./wwwroot/data/trend/khinen/CA_23_05_24.xlsx", ExcelVersion.Version2013);
+
+            Spire.Xls.Worksheet sheet = book.Worksheets[0];
+            var lastrow = sheet.LastDataRow;
+            // nếu vẫn chưa gặp end thì vẫn lấy data
+            Console.WriteLine(lastrow);
+            var list_Result = new List<ResultModel>();
+            for (int rowIndex = 2; rowIndex < lastrow; rowIndex++)
+            {
+                // lấy row hiện tại
+                var nowRow = sheet.Rows[rowIndex];
+                if (nowRow == null)
+                    continue;
+                // vì ta dùng 3 cột A, B, C => data của ta sẽ như sau
+                //int numcount = nowRow.Cells.Count;
+                //for(int y = 0;y<numcount - 1 ;y++)
+                var code_vitri = nowRow.Cells[4] != null ? nowRow.Cells[4].Value : null;
+                // Xuất ra thông tin lên màn hình
+                Console.WriteLine("MS: {0} ", code_vitri);
+                Console.WriteLine("rowIndex: {0} ", rowIndex);
+
+                if (code_vitri == null)
+                    continue;
+
+                //var tansuat = nowRow.Cells[2] != null ? nowRow.Cells[2].Value : null;
+                //DateTime? date = nowRow.Cells[3] != null ? nowRow.Cells[3].DateTimeValue : null;
+                var tansuat_id = 4;
+                //switch (tansuat)
+                //{
+                //    case "Daily":
+                //        tansuat_id = 1;
+                //        break;
+                //    case "Twice per month":
+                //        tansuat_id = 2;
+                //        break;
+
+                //}
+                var phong = nowRow.Cells[1] != null ? nowRow.Cells[1].Value : null;
+                var list_name = phong.Split("\r\n", StringSplitOptions.None);
+                var khuvuc = nowRow.Cells[2] != null ? nowRow.Cells[2].Value : null;
+                var parent = 0;
+                switch (khuvuc)
+                {
+                    case "Xưởng dùng ngoài":
+                        parent = 1444;
+                        break;
+                    case "Xưởng thuốc uống Non-Betalactam":
+                        parent = 1443;
+                        break;
+
+                }
+                var department = list_name[0];
+                var department_en = list_name[1];
+                var finddepartment = _context.LocationModel.Where(d => d.name == department && d.parent == parent).FirstOrDefault();
+                if (finddepartment == null)
+                {
+                    finddepartment = new LocationModel()
+                    {
+                        name = department,
+                        name_en = department_en,
+                        parent = parent,
+                        stt = 0,
+                        count_child = 0,
+                        created_at = DateTime.Now,
+                    };
+                    _context.Add(finddepartment);
+                    _context.SaveChanges();
+                }
+                var findPoint = _context.PointModel.Where(d => d.code == code_vitri).FirstOrDefault();
+                if (findPoint == null)
+                {
+                    findPoint = new PointModel()
+                    {
+                        color = ColorTranslator.ToHtml(GenerateRandomColor(code_vitri)),
+                        code = code_vitri,
+                        frequency_id = tansuat_id,
+                        object_id = 4,
+                        location_id = finddepartment.id,
+                        created_at = DateTime.Now,
+                    };
+                    _context.Add(findPoint);
+                    _context.SaveChanges();
+                }
+
+                //EquipmentModel EquipmentModel = new EquipmentModel { code = code, name = name_vn, name_en = name_en, created_at = DateTime.Now };
+                //_context.Add(EquipmentModel);
+                //_context.SaveChanges();
+            }
+            _context.AddRange(list_Result);
+            _context.SaveChanges();
+
+            return Ok(list_Result);
+        }
         public async Task<IActionResult> importCA()
         {
             return Ok();

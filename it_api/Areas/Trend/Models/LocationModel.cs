@@ -17,6 +17,7 @@ namespace Vue.Models
         public int? parent { get; set; }
         public int? stt { get; set; }
         public int? count_child { get; set; }
+        public bool? is_expand { get; set; }
         public DateTime? deleted_at { get; set; }
         public DateTime? updated_at { get; set; }
         public DateTime? created_at { get; set; }

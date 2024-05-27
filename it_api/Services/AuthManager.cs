@@ -75,7 +75,7 @@ namespace it_api.Services
         {
             var jwtSettings = _configuration.GetSection("JWT");
             var expireValue = int.Parse(jwtSettings.GetSection("Expire").Value);
-            var expireTime = DateTime.Now.AddMinutes(expireValue);
+            var expireTime = DateTime.Now.AddDays(expireValue);
             var tokenOptions = new JwtSecurityToken(
                 issuer: jwtSettings.GetSection("ValidIssuer").Value,
                 audience: jwtSettings.GetSection("ValidAudience").Value,

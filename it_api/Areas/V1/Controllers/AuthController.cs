@@ -155,10 +155,13 @@ namespace it_template.Areas.V1.Controllers
                 _context.Add(audit);
                 await _context.SaveChangesAsync();
 
+
                 responseJson.authed = true;
                 responseJson.token = await _authManager.CreateToken(user);
+                var roles = await UserManager.GetRolesAsync(user);
                 responseJson.user = new UserInfo()
                 {
+                    roles = roles,
                     id = user.Id,
                     email = user.Email,
                     FullName = user.FullName,
@@ -166,25 +169,6 @@ namespace it_template.Areas.V1.Controllers
                     image_sign = user.image_sign,
                     key_private = _configuration["Key_Access"]
                 };
-                //var user = new ArrayList();
-                //responseJson.user = new 
-                //{
-
-                //};
-                //return Json(new
-                //    {
-                //        success = true,
-                //        roles = roles,
-                //        email = user.Email,
-                //        FullName = user.FullName,
-                //        image_url = user.image_url,
-                //        is_sign = is_sign,
-                //        image_sign = user.image_sign,
-                //        list_users = user.list_users,
-                //        id = user.Id,
-                //        token = token,
-                //        vaild_to = find.vaild_to.Value.ToString("yyyy-MM-dd HH:mm:ss")
-                //    }); ;
                 ////
                 Response.Cookies.Append(
                     _configuration["JWT:NameCookieAuth"],
@@ -355,6 +339,6 @@ namespace it_template.Areas.V1.Controllers
         }
 
 
-      
+
     }
 }

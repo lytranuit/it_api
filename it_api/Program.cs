@@ -14,6 +14,7 @@ using it_api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.Http.Features;
 //using Vue.Middleware;
 
 namespace Vue
@@ -59,26 +60,18 @@ namespace Vue
 
             builder.Services.AddScoped<AuthManager, AuthManager>();
 
-            //builder.Services.Configure<IdentityOptions>(options =>
-            //{
-            //    // Password settings.
-            //    options.Password.RequireDigit = true;
-            //    options.Password.RequireLowercase = true;
-            //    options.Password.RequireNonAlphanumeric = true;
-            //    options.Password.RequireUppercase = true;
-            //    options.Password.RequiredLength = 6;
-            //    options.Password.RequiredUniqueChars = 1;
-
-            //    // Lockout settings.
-            //    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-            //    options.Lockout.MaxFailedAccessAttempts = 3;
-            //    options.Lockout.AllowedForNewUsers = true;
-
-            //    // User settings.
-            //    options.User.AllowedUserNameCharacters =
-            //    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-            //    options.User.RequireUniqueEmail = true;
-            //});
+            builder.Services.Configure<FormOptions>(x =>
+            {
+                // Password settings.
+                x.BufferBody = false;
+                x.KeyLengthLimit = 2048; // 2 KiB
+                x.ValueLengthLimit = 4194304; // 32 MiB
+                x.ValueCountLimit = 2048;// 1024
+                x.MultipartHeadersCountLimit = 32; // 16
+                x.MultipartHeadersLengthLimit = 32768; // 16384
+                x.MultipartBoundaryLengthLimit = 256; // 128
+                x.MultipartBodyLengthLimit = 134217728; // 128 MiB
+            });
 
             //builder.Services.ConfigureApplicationCookie(options =>
             //{
