@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = null;
+}
+<center>
+    <table>
+        <tbody>
+            <tr>
+                <td width="600">
+                    <div>
+
+                        <p style="text-align:center;margin-bottom:30px">
+                            <img style="border:0;height:auto;line-height:100%;outline:none;text-decoration:none;width:400px;" src="@Model.link_logo" />
+                        </p>
+                        <div style="box-sizing:border-box;margin:0;padding:0 40px">
+                            <h2 style="text-align:left">Xin chào,</h2>
+                            <p style="text-align:left">Hệ thống Asta, thông tin lấy mẫu thời gian chờ.</p>
+                            <p style="text-align:left">Tên sản phẩm: <b>@Model.data.Hold?.tensp</b></p>
+                            <p style="text-align:left">Mã sản phẩm: <b>@Model.data.Hold?.masp</b></p>
+                            <p style="text-align:left">Số lô: <b>@Model.data.Hold?.malo</b></p>
+                            <p style="text-align:left">Công đoạn: <b>@Model.data.Hold?.stage?.name</b></p>
+                            <p style="text-align:left">Mẫu: <b>@Model.data.name</b></p>
+                            <p style="text-align:left">Ngày lấy mẫu: <b>@Model.data.date_theory.ToString("yyyy-MM-dd")</b></p>
+                            <p>Chi tiết:</p>
+                            <p style="text-align:center;">
+                                <a href="@Model.link" style="padding: 10px 30px;
+    display:inline-block;
+    background: #ffb009;
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    border-radius: 5px;">Đi Đến</a>
+                            </p>
+                            <p style="text-align:left">Trân trọng.</p>
+                            <p style="text-align:left">ASTA</p>
+                            <br>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</center>

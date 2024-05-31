@@ -36,6 +36,7 @@ namespace Vue
 
             var connectionString = builder.Configuration.GetConnectionString("ItConnection") ?? throw new InvalidOperationException("Connection string 'ItConnection' not found.");
             var EsignConnectionString = builder.Configuration.GetConnectionString("EsignConnection") ?? throw new InvalidOperationException("Connection string 'EsignConnectionString' not found.");
+            var HoldtimeConnectionString = builder.Configuration.GetConnectionString("HoldtimeConnection") ?? throw new InvalidOperationException("Connection string 'HoldtimeConnectionString' not found.");
 
 
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -47,7 +48,9 @@ namespace Vue
             builder.Services.AddDefaultIdentity<UserModel>(options => options.SignIn.RequireConfirmedAccount = false).AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<IdentityContext>(); ;
 
-
+            builder.Services.AddDbContext<HoldTimeContext>(options =>
+              options.UseSqlServer(HoldtimeConnectionString)
+              );
 
             builder.Services.AddDbContext<ItContext>(options =>
               options.UseSqlServer(connectionString)
@@ -166,6 +169,7 @@ namespace Vue
                     pattern: "{controller}/{action=Index}/{id?}");
 
             });
+            app.MapRazorPages();
             app.Run();
         }
     }
