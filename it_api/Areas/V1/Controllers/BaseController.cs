@@ -8,8 +8,7 @@ using System.Diagnostics;
 namespace it_template.Areas.V1.Controllers
 {
     [Area("V1")]
-    [Authorize(Roles = "Administrator,Manager Trend")]
-    //[Authorize]
+    [Authorize]
     public class BaseController : Controller
     {
         protected readonly ItContext _context;

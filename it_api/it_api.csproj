@@ -12,6 +12,10 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<Optimize>False</Optimize>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="appsettings.Development.json~RF3ce72485.TMP" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="FreeSpire.Office" Version="8.2.0" />
 		<PackageReference Include="CertificateManager" Version="1.0.8" />

@@ -42,8 +42,7 @@ namespace it_template.Areas.Holdtime.Controllers
             var type = Request.Form["type"].FirstOrDefault();
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
-            var timecheck2 = DateTime.Now.AddDays(-1);
-            var customerData = _context.HoldTimeModel.Where(d => d.deleted_at == null && d.date_reality == null && d.date_theory < timecheck2);
+            var customerData = _context.HoldTimeModel.Where(d => d.deleted_at == null && d.date_reality == null);
 
             int recordsTotal = customerData.Count();
 
@@ -71,6 +70,7 @@ namespace it_template.Areas.Holdtime.Controllers
             var datapost = customerData.OrderByDescending(d => d.id).Skip(skip).Take(pageSize)
                 .Include(d => d.Hold)
                 .ThenInclude(d => d.stage)
+                .OrderByDescending(d => d.date_theory)
                 .ToList();
             var data = new ArrayList();
             foreach (var record in datapost)
@@ -124,6 +124,7 @@ namespace it_template.Areas.Holdtime.Controllers
             var datapost = customerData.OrderByDescending(d => d.id).Skip(skip).Take(pageSize)
                 .Include(d => d.Hold)
                 .ThenInclude(d => d.stage)
+                .OrderByDescending(d => d.date_theory)
                 .ToList();
             var data = new ArrayList();
             foreach (var record in datapost)

@@ -39,15 +39,17 @@ namespace Vue.Controllers
 
         public async Task<JsonResult> cronjobHoldtimeDaily()
         {
-            var timecheck = DateTime.Now;
-            var timecheck1 = DateTime.Now.AddDays(1);
-            var timecheck2 = DateTime.Now.AddDays(-1);
+            var timecheck = DateTime.Now.Date.Date;
+            var timecheck1 = DateTime.Now.AddDays(1).Date;
+            var timecheck5 = DateTime.Now.AddDays(5).Date;
+            var timecheck2 = DateTime.Now.Date;
             //var tasks = _context.TaskModel.Where(d => d.deleted_at == null && (d.finished_at == null || d.progress != 100) && d.endDate != null && d.endDate < DateTime.Now.AddDays(1)).Include(d => d.assignees).ToList();
-            var holdtime = _holdtimecontext.HoldTimeModel
-                .Where(d => d.deleted_at == null && d.date_reality == null && d.date_theory >= timecheck && d.date_theory <= timecheck1)
-                .Include(d => d.Hold).ThenInclude(d => d.stage)
-                .ToList();
+            var query1 = _holdtimecontext.HoldTimeModel
+                .Where(d => d.deleted_at == null && d.date_reality == null && ((d.date_theory >= timecheck && d.date_theory <= timecheck1) || d.date_theory == timecheck5));
 
+            var sql = query1.ToQueryString();
+            var holdtime = query1.Include(d => d.Hold).ThenInclude(d => d.stage)
+                .ToList();
             foreach (var item in holdtime)
             {
                 var user_emails = _holdtimecontext.HoldAlertModel.Where(d => d.hold_id == item.hold_id).Include(d => d.user).Select(d => d.user.Email).ToList();

@@ -4,19 +4,22 @@ using Microsoft.AspNetCore.Authorization;
 using Vue.Data;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics;
+using Vue.Services;
 
-namespace it_template.Areas.Holdtime.Controllers
+namespace it_template.Areas.Info.Controllers
 {
-    [Area("Holdtime")]
-    [Authorize(Roles = "Administrator,Manager Holdtime,User")]
-    //[Authorize]
+    [Area("Info")]
+    //[Authorize(Roles = "Administrator,Manager Holdtime,User")]
+    [Authorize]
     public class BaseController : Controller
     {
-        protected readonly HoldTimeContext _context;
+        private AesOperation _AesOperation;
+        protected readonly NhansuContext _context;
 
-        public BaseController(HoldTimeContext context)
+        public BaseController(NhansuContext context, AesOperation aes)
         {
             _context = context;
+            _AesOperation = aes;
             var listener = _context.GetService<DiagnosticSource>();
             (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
         }

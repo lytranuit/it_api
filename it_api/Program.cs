@@ -37,6 +37,7 @@ namespace Vue
             var connectionString = builder.Configuration.GetConnectionString("ItConnection") ?? throw new InvalidOperationException("Connection string 'ItConnection' not found.");
             var EsignConnectionString = builder.Configuration.GetConnectionString("EsignConnection") ?? throw new InvalidOperationException("Connection string 'EsignConnectionString' not found.");
             var HoldtimeConnectionString = builder.Configuration.GetConnectionString("HoldtimeConnection") ?? throw new InvalidOperationException("Connection string 'HoldtimeConnectionString' not found.");
+            var Nhansu = builder.Configuration.GetConnectionString("Nhansu") ?? throw new InvalidOperationException("Connection string 'Nhansu' not found.");
 
 
             builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
@@ -50,6 +51,10 @@ namespace Vue
 
             builder.Services.AddDbContext<HoldTimeContext>(options =>
               options.UseSqlServer(HoldtimeConnectionString)
+              );
+
+            builder.Services.AddDbContext<NhansuContext>(options =>
+              options.UseSqlServer(Nhansu)
               );
 
             builder.Services.AddDbContext<ItContext>(options =>
