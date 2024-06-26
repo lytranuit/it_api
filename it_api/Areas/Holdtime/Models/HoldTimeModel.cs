@@ -23,6 +23,7 @@ namespace Holdtime.Models
         public string? note { get; set; }
         public int? num_get { get; set; }
         public bool? is_pass { get; set; }
+        public bool? is_remind { get; set; }
         public virtual List<HoldTimeTargetModel>? targets { get; set; }
 
 

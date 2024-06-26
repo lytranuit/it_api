@@ -45,7 +45,7 @@ namespace Vue.Controllers
             var timecheck2 = DateTime.Now.Date;
             //var tasks = _context.TaskModel.Where(d => d.deleted_at == null && (d.finished_at == null || d.progress != 100) && d.endDate != null && d.endDate < DateTime.Now.AddDays(1)).Include(d => d.assignees).ToList();
             var query1 = _holdtimecontext.HoldTimeModel
-                .Where(d => d.deleted_at == null && d.date_reality == null && ((d.date_theory >= timecheck && d.date_theory <= timecheck1) || d.date_theory == timecheck5));
+                .Where(d => d.deleted_at == null && d.date_reality == null && d.is_remind == true && ((d.date_theory >= timecheck && d.date_theory <= timecheck1) || d.date_theory == timecheck5));
 
             var sql = query1.ToQueryString();
             var holdtime = query1.Include(d => d.Hold).ThenInclude(d => d.stage)
@@ -74,7 +74,7 @@ namespace Vue.Controllers
             }
 
             ////Quá hạn
-            var query = _holdtimecontext.HoldTimeModel.Where(d => d.deleted_at == null && d.date_reality == null && d.date_theory < timecheck2).ToList();
+            var query = _holdtimecontext.HoldTimeModel.Where(d => d.deleted_at == null && d.date_reality == null && d.is_remind == true && d.date_theory < timecheck2).ToList();
 
             var hold_overdue = query.Select(d => d.hold_id).ToList();
             var user_overdue = _holdtimecontext.HoldAlertModel.Where(d => hold_overdue.Contains(d.hold_id))
