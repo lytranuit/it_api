@@ -23,6 +23,7 @@ namespace Vue.Models
 
         public decimal? limit_action { get; set; }
         public decimal? limit_alert { get; set; }
+        public string? created_by { get; set; }
 
 
         public int? limit_id { get; set; }

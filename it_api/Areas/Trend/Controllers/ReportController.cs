@@ -508,81 +508,297 @@ namespace it_template.Areas.Trend.Controllers
 
             var data = new ArrayList();
 
-            var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\Rawdata.xlsx";
             var documentPath = "/temp/Rawdata_" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
             string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
-
-            Workbook workbook = new Workbook();
-            workbook.LoadFromFile(viewPath);
-
-            //Create a font
-            ExcelFont font1 = workbook.CreateFont();
-            font1.FontName = "Times New Roman";
-            font1.IsBold = false;
-            font1.Size = 18;
-
-            //Create another font
-            ExcelFont font2 = workbook.CreateFont();
-            font2.IsBold = false;
-            font2.IsItalic = true;
-            font2.FontName = "Times New Roman";
-            font2.Size = 18;
-
-            Worksheet sheet1 = workbook.Worksheets[0];
-
-
-
-
-            if (list.Count > 0)
+            if (LimitModel.object_id == 2)
             {
-                Worksheet sheet = workbook.Worksheets[0];
-                int stt = 0;
-                var start_r = 5;
+                var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\0000052_A03_02 - Raw data for of microbial results of (room, equiment) quality monitoring_effec. 24.05.24_issue1.xlsx";
+                Workbook workbook = new Workbook();
+                workbook.LoadFromFile(viewPath);
 
-                DataTable dt = new DataTable();
-                dt.Columns.Add("stt", typeof(int));
-                dt.Columns.Add("ngay", typeof(string));
-                dt.Columns.Add("department", typeof(string));
-                dt.Columns.Add("area", typeof(string));
-                dt.Columns.Add("point_code", typeof(string));
-                dt.Columns.Add("target", typeof(string));
-                dt.Columns.Add("value", typeof(decimal));
+                //Create a font
+                ExcelFont font1 = workbook.CreateFont();
+                font1.FontName = "Times New Roman";
+                font1.IsBold = false;
+                font1.Size = 18;
 
-                var rowlocation = sheet1.Rows[1];
-                var rowpoint = sheet1.Rows[2];
-                var stt_cell = 2;
+                //Create another font
+                ExcelFont font2 = workbook.CreateFont();
+                font2.IsBold = false;
+                font2.IsItalic = true;
+                font2.FontName = "Times New Roman";
+                font2.Size = 18;
+
+                Worksheet sheet1 = workbook.Worksheets[0];
 
 
 
-                sheet.InsertRow(3, list.Count(), InsertOptionsType.FormatAsBefore);
-                foreach (var item in list)
+
+                if (list.Count > 0)
                 {
-                    var capsach = _context.LocationModel.Where(d => d.id == item.point.location.parent).FirstOrDefault();
-                    var khuvuc = _context.LocationModel.Where(d => d.id == capsach.parent).FirstOrDefault();
-                    DataRow dr1 = dt.NewRow();
-                    dr1["stt"] = (++stt);
-                    dr1["ngay"] = item.date.Value.ToString("dd/MM/yyyy");
-                    dr1["department"] = item.point.location.name;
-                    dr1["area"] = capsach.name + "-" + khuvuc.name;
-                    dr1["point_code"] = item.point.code;
-                    dr1["target"] = item.target.name;
-                    dr1["value"] = item.value;
+                    Worksheet sheet = workbook.Worksheets[0];
+                    int stt = 0;
+                    var start_r = 5;
 
-                    dt.Rows.Add(dr1);
-                    start_r++;
+                    DataTable dt = new DataTable();
+                    //dt.Columns.Add("stt", typeof(int));
+                    dt.Columns.Add("ngay", typeof(string));
+                    dt.Columns.Add("department", typeof(string));
+                    dt.Columns.Add("area", typeof(string));
+                    dt.Columns.Add("tansuat", typeof(string));
+                    dt.Columns.Add("point_code", typeof(string));
+                    dt.Columns.Add("target", typeof(string));
+                    dt.Columns.Add("value", typeof(string));
+
+                    var rowlocation = sheet1.Rows[1];
+                    var rowpoint = sheet1.Rows[2];
+                    var stt_cell = 2;
+
+
+
+                    sheet.InsertRow(5, list.Count(), InsertOptionsType.FormatAsBefore);
+                    foreach (var item in list)
+                    {
+                        var capsach = _context.LocationModel.Where(d => d.id == item.point.location.parent).FirstOrDefault();
+                        var khuvuc = _context.LocationModel.Where(d => d.id == capsach.parent).FirstOrDefault();
+                        var area = khuvuc != null ? capsach.name + "-" + khuvuc.name : capsach.name;
+                        var value_d = (double)item.value;
+                        var value = value_d.ToString("#,##0.##");
+                        if (item.target.value_type == "boolean")
+                        {
+                            if (item.value == 1)
+                            {
+                                value = item.target.text_yes;
+                            }
+                            else
+                            {
+                                value = item.target.text_no;
+                            }
+                        }
+                        else if (item.target.id == 11)
+                        {
+                            value = value_d.ToString("#,##0.0#");
+                        }
+                        DataRow dr1 = dt.NewRow();
+                        //dr1["stt"] = (++stt);
+                        dr1["ngay"] = item.date.Value.ToString("dd/MM/yyyy");
+                        dr1["department"] = item.point.location.name;
+                        dr1["area"] = area;
+                        dr1["tansuat"] = item.point.frequency;
+                        dr1["point_code"] = item.point.code;
+                        dr1["target"] = item.target.name;
+                        dr1["value"] = value;
+
+                        dt.Rows.Add(dr1);
+                        start_r++;
+
+                    }
+                    sheet.InsertDataTable(dt, false, 5, 1);
+                    sheet.DeleteRow(4);
+                    //sheet.DeleteColumn(3);
+                    //avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+                    //sheet.CalculateAllValue();
+                    //var avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+                    //var min = sheet.Range["C" + (start_r + 4)].FormulaNumberValue;
+                    //var max = sheet.Range["C" + (start_r + 5)].FormulaNumberValue;
 
                 }
-                sheet.InsertDataTable(dt, false, 3, 1);
-                sheet.DeleteRow(2);
-                //sheet.DeleteColumn(3);
-                //avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
-                //sheet.CalculateAllValue();
-                //var avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
-                //var min = sheet.Range["C" + (start_r + 4)].FormulaNumberValue;
-                //var max = sheet.Range["C" + (start_r + 5)].FormulaNumberValue;
+                workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
 
             }
-            workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
+            else if (LimitModel.object_id == 3)
+            {
+                var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\0000052_A02_02 - Raw data for Water system quality monitoring_effec. 24.05.24_issue1.xlsx";
+                Workbook workbook = new Workbook();
+                workbook.LoadFromFile(viewPath);
+
+                //Create a font
+                ExcelFont font1 = workbook.CreateFont();
+                font1.FontName = "Times New Roman";
+                font1.IsBold = false;
+                font1.Size = 18;
+
+                //Create another font
+                ExcelFont font2 = workbook.CreateFont();
+                font2.IsBold = false;
+                font2.IsItalic = true;
+                font2.FontName = "Times New Roman";
+                font2.Size = 18;
+
+                Worksheet sheet1 = workbook.Worksheets[0];
+
+
+
+
+                if (list.Count > 0)
+                {
+                    Worksheet sheet = workbook.Worksheets[0];
+                    int stt = 0;
+                    var start_r = 5;
+
+                    DataTable dt = new DataTable();
+                    //dt.Columns.Add("stt", typeof(int));
+                    dt.Columns.Add("ngay", typeof(string));
+                    dt.Columns.Add("department", typeof(string));
+                    dt.Columns.Add("area", typeof(string));
+                    dt.Columns.Add("tansuat", typeof(string));
+                    dt.Columns.Add("point_code", typeof(string));
+                    dt.Columns.Add("target", typeof(string));
+                    dt.Columns.Add("value", typeof(string));
+
+                    var rowlocation = sheet1.Rows[1];
+                    var rowpoint = sheet1.Rows[2];
+                    var stt_cell = 2;
+
+
+
+                    sheet.InsertRow(5, list.Count(), InsertOptionsType.FormatAsBefore);
+                    foreach (var item in list)
+                    {
+                        var capsach = _context.LocationModel.Where(d => d.id == item.point.location.parent).FirstOrDefault();
+                        var khuvuc = _context.LocationModel.Where(d => d.id == capsach.parent).FirstOrDefault();
+                        var area = khuvuc != null ? capsach.name + "-" + khuvuc.name : capsach.name;
+                        var value_d = (double)item.value;
+                        var value = value_d.ToString("#,##0.##");
+                        if (item.target.value_type == "boolean")
+                        {
+                            if (item.value == 1)
+                            {
+                                value = item.target.text_yes;
+                            }
+                            else
+                            {
+                                value = item.target.text_no;
+                            }
+                        }
+                        else if (item.target.id == 11)
+                        {
+                            value = value_d.ToString("#,##0.0#");
+                        }
+                        DataRow dr1 = dt.NewRow();
+                        //dr1["stt"] = (++stt);
+                        dr1["ngay"] = item.date.Value.ToString("dd/MM/yyyy");
+                        dr1["area"] = item.point.location.name;
+                        dr1["department"] = area;
+                        dr1["tansuat"] = item.point.frequency;
+                        dr1["point_code"] = item.point.code;
+                        dr1["target"] = item.target.name;
+                        dr1["value"] = value;
+
+                        dt.Rows.Add(dr1);
+                        start_r++;
+
+                    }
+                    sheet.InsertDataTable(dt, false, 5, 1);
+                    sheet.DeleteRow(4);
+                    //sheet.DeleteColumn(3);
+                    //avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+                    //sheet.CalculateAllValue();
+                    //var avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+                    //var min = sheet.Range["C" + (start_r + 4)].FormulaNumberValue;
+                    //var max = sheet.Range["C" + (start_r + 5)].FormulaNumberValue;
+
+                }
+                workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
+
+            }
+            else if (LimitModel.object_id == 4)
+            {
+                var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\0000052_A01_02 - Raw data for CA system quality monitoring_effec. 24.05.24_issue1.xlsx";
+                Workbook workbook = new Workbook();
+                workbook.LoadFromFile(viewPath);
+
+                //Create a font
+                ExcelFont font1 = workbook.CreateFont();
+                font1.FontName = "Times New Roman";
+                font1.IsBold = false;
+                font1.Size = 18;
+
+                //Create another font
+                ExcelFont font2 = workbook.CreateFont();
+                font2.IsBold = false;
+                font2.IsItalic = true;
+                font2.FontName = "Times New Roman";
+                font2.Size = 18;
+
+                Worksheet sheet1 = workbook.Worksheets[0];
+
+
+
+
+                if (list.Count > 0)
+                {
+                    Worksheet sheet = workbook.Worksheets[0];
+                    int stt = 0;
+                    var start_r = 5;
+
+                    DataTable dt = new DataTable();
+                    //dt.Columns.Add("stt", typeof(int));
+                    dt.Columns.Add("ngay", typeof(string));
+                    dt.Columns.Add("department", typeof(string));
+                    dt.Columns.Add("area", typeof(string));
+                    dt.Columns.Add("tansuat", typeof(string));
+                    dt.Columns.Add("point_code", typeof(string));
+                    dt.Columns.Add("target", typeof(string));
+                    dt.Columns.Add("value", typeof(string));
+
+                    var rowlocation = sheet1.Rows[1];
+                    var rowpoint = sheet1.Rows[2];
+                    var stt_cell = 2;
+
+
+
+                    sheet.InsertRow(5, list.Count(), InsertOptionsType.FormatAsBefore);
+                    foreach (var item in list)
+                    {
+                        var capsach = _context.LocationModel.Where(d => d.id == item.point.location.parent).FirstOrDefault();
+                        var khuvuc = _context.LocationModel.Where(d => d.id == capsach.parent).FirstOrDefault();
+                        var area = khuvuc != null ? capsach.name + "-" + khuvuc.name : capsach.name;
+                        var value_d = (double)item.value;
+                        var value = value_d.ToString("#,##0.##");
+                        if (item.target.value_type == "boolean")
+                        {
+                            if (item.value == 1)
+                            {
+                                value = item.target.text_yes;
+                            }
+                            else
+                            {
+                                value = item.target.text_no;
+                            }
+                        }
+                        else if (item.target.id == 11)
+                        {
+                            value = value_d.ToString("#,##0.0#");
+                        }
+                        DataRow dr1 = dt.NewRow();
+                        //dr1["stt"] = (++stt);
+                        dr1["ngay"] = item.date.Value.ToString("dd/MM/yyyy");
+                        dr1["area"] = item.point.location.name;
+                        dr1["department"] = area;
+                        dr1["tansuat"] = item.point.frequency;
+                        dr1["point_code"] = item.point.code;
+                        dr1["target"] = item.target.name;
+                        dr1["value"] = value;
+
+                        dt.Rows.Add(dr1);
+                        start_r++;
+
+                    }
+                    sheet.InsertDataTable(dt, false, 5, 1);
+                    sheet.DeleteRow(4);
+                    //sheet.DeleteColumn(3);
+                    //avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+                    //sheet.CalculateAllValue();
+                    //var avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+                    //var min = sheet.Range["C" + (start_r + 4)].FormulaNumberValue;
+                    //var max = sheet.Range["C" + (start_r + 5)].FormulaNumberValue;
+
+                }
+                workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
+
+            }
+
 
             return Json(new { success = true, link = Domain + documentPath, data = list });
 

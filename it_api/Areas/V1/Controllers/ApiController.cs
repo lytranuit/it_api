@@ -200,7 +200,7 @@ namespace it_template.Areas.V1.Controllers
                     var LocationResponse = new SelectLocationResponse
                     {
 
-                        id = model.id.ToString(),
+                        id = "D-" + model.id.ToString(),
                         label = model.code != null ? model.code + " " + model.name : model.name,
                         name = model.name,
                         is_location = true,

@@ -23,6 +23,7 @@ using Microsoft.CodeAnalysis;
 using System.Drawing;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 
 namespace it_template.Areas.Trend.Controllers
 {
@@ -109,77 +110,134 @@ namespace it_template.Areas.Trend.Controllers
                 if (chitieu_9 != null)
                 {
                     var chitieu_9_int = chitieu_9 == "ĐẠT" ? 1 : 0;
-                    var result_9 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 9 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_9_int,
-                        target_id = 9,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_9);
+                        var result_9 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_9_int,
+                            target_id = 9,
+                            date = date,
+                            object_id = 3,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_9);
+                        _context.Add(result_9);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_9_int;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
+
                     //_context.SaveChanges();
                 }
                 if (chitieu_10 != null)
                 {
                     var chitieu_10_int = chitieu_10 == "ĐẠT" ? 1 : 0;
-                    var result_10 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 10 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_10_int,
-                        target_id = 10,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_10);
+                        var result_10 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_10_int,
+                            target_id = 10,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_10);
+                        _context.Add(result_10);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_10_int;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
 
                 if (chitieu_11 != null)
                 {
-                    var result_11 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 11 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_11,
-                        target_id = 11,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_11);
+                        var result_11 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_11,
+                            target_id = 11,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_11);
+                        _context.Add(result_11);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_11;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
                 if (chitieu_12 != null)
                 {
-                    var result_12 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 12 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_12,
-                        target_id = 12,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_12);
+                        var result_12 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_12,
+                            target_id = 12,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_12);
+                        _context.Add(result_12);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_12;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
 
                 if (chitieu_13 != null)
                 {
-                    var result_13 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 13 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_13,
-                        target_id = 13,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_13);
+                        var result_13 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_13,
+                            target_id = 13,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_13);
+                        _context.Add(result_13);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_13;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
                 //EquipmentModel EquipmentModel = new EquipmentModel { code = code, name = name_vn, name_en = name_en, created_at = DateTime.Now };
                 //_context.Add(EquipmentModel);
                 //_context.SaveChanges();
             }
-            _context.AddRange(list_Result);
+            //_context.AddRange(list_Result);
             _context.SaveChanges();
 
             return Ok(list_Result);
@@ -244,7 +302,7 @@ namespace it_template.Areas.Trend.Controllers
                         code = code_vitri,
                         frequency_id = tansuat_id,
                         object_id = 3,
-                        location_id = 8,
+                        location_id = 7,
                         created_at = DateTime.Now,
                     };
                     _context.Add(findPoint);
@@ -255,77 +313,133 @@ namespace it_template.Areas.Trend.Controllers
                 if (chitieu_9 != null)
                 {
                     var chitieu_9_int = chitieu_9 == "ĐẠT" ? 1 : 0;
-                    var result_9 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 9 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_9_int,
-                        target_id = 9,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_9);
+                        var result_9 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_9_int,
+                            target_id = 9,
+                            date = date,
+                            object_id = 3,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_9);
+                        _context.Add(result_9);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_9_int;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
+
                     //_context.SaveChanges();
                 }
                 if (chitieu_10 != null)
                 {
                     var chitieu_10_int = chitieu_10 == "ĐẠT" ? 1 : 0;
-                    var result_10 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 10 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_10_int,
-                        target_id = 10,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_10);
+                        var result_10 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_10_int,
+                            target_id = 10,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_10);
+                        _context.Add(result_10);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_10_int;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
 
                 if (chitieu_11 != null)
                 {
-                    var result_11 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 11 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_11,
-                        target_id = 11,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_11);
+                        var result_11 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_11,
+                            target_id = 11,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_11);
+                        _context.Add(result_11);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_11;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
                 if (chitieu_12 != null)
                 {
-                    var result_12 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 12 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_12,
-                        target_id = 12,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_12);
+                        var result_12 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_12,
+                            target_id = 12,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_12);
+                        _context.Add(result_12);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_12;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
 
                 if (chitieu_13 != null)
                 {
-                    var result_13 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 13 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_13,
-                        target_id = 13,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_13);
+                        var result_13 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_13,
+                            target_id = 13,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_13);
+                        _context.Add(result_13);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_13;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
                 //EquipmentModel EquipmentModel = new EquipmentModel { code = code, name = name_vn, name_en = name_en, created_at = DateTime.Now };
                 //_context.Add(EquipmentModel);
                 //_context.SaveChanges();
             }
-            _context.AddRange(list_Result);
             _context.SaveChanges();
 
             return Ok(list_Result);
@@ -1125,14 +1239,14 @@ namespace it_template.Areas.Trend.Controllers
             return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
-            book.LoadFromFile("./wwwroot/data/trend/khinen/CA_26_04_24.xlsx", ExcelVersion.Version2013);
+            book.LoadFromFile("./wwwroot/data/trend/khinen/Raw data for CA system quality monitoring_2024.xlsx", ExcelVersion.Version2013);
 
             Spire.Xls.Worksheet sheet = book.Worksheets[0];
             var lastrow = sheet.LastDataRow;
             // nếu vẫn chưa gặp end thì vẫn lấy data
             Console.WriteLine(lastrow);
             var list_Result = new List<ResultModel>();
-            for (int rowIndex = 1; rowIndex < lastrow; rowIndex++)
+            for (int rowIndex = 7; rowIndex < lastrow; rowIndex++)
             {
                 // lấy row hiện tại
                 var nowRow = sheet.Rows[rowIndex];
@@ -1177,85 +1291,136 @@ namespace it_template.Areas.Trend.Controllers
                 if (chitieu_16 != null)
                 {
                     var chitieu_16_int = chitieu_16.ToUpper() == "ĐẠT" ? 1 : 0;
-                    var result_16 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 16 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_16_int,
-                        object_id = 4,
-                        target_id = 16,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    //list_Result.Add(result_16);
-                    _context.Add(result_16);
-                    _context.SaveChanges();
+
+                        var result_16 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_16_int,
+                            object_id = 4,
+                            target_id = 16,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        //list_Result.Add(result_16);
+                        _context.Add(result_16);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_16_int;
+                        _context.Update(find_result);
+                        _context.SaveChanges();
+                    }
                 }
                 if (chitieu_17 != null)
                 {
                     var chitieu_17_int = chitieu_17.ToUpper() == "ĐẠT" ? 1 : 0;
-                    var result_17 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 17 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_17_int,
-                        object_id = 4,
-                        target_id = 17,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    //list_Result.Add(result_17);
+                        var result_17 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_17_int,
+                            object_id = 4,
+                            target_id = 17,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        //list_Result.Add(result_17);
 
-                    _context.Add(result_17);
-                    _context.SaveChanges();
+                        _context.Add(result_17);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_17_int;
+                        _context.Update(find_result);
+                        _context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
 
                 if (chitieu_18 != null)
                 {
-                    var result_18 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 18 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_18,
-                        object_id = 4,
-                        target_id = 18,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    list_Result.Add(result_18);
-                    _context.Add(result_18);
-                    _context.SaveChanges();
+                        var result_18 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_18,
+                            object_id = 4,
+                            target_id = 18,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_18);
+                        _context.Add(result_18);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_18;
+                        _context.Update(find_result);
+                        _context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
                 if (chitieu_19 != null)
                 {
-                    var result_19 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 19 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_19,
-                        object_id = 4,
-                        target_id = 19,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    //list_Result.Add(result_19);
-                    _context.Add(result_19);
-                    _context.SaveChanges();
+                        var result_19 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_19,
+                            object_id = 4,
+                            target_id = 19,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        //list_Result.Add(result_19);
+                        _context.Add(result_19);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_19;
+                        _context.Update(find_result);
+                        _context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
 
                 if (chitieu_20 != null)
                 {
-                    var result_20 = new ResultModel()
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 20 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
                     {
-                        point_id = findPoint.id,
-                        value = chitieu_20,
-                        object_id = 4,
-                        target_id = 20,
-                        date = date,
-                        created_at = DateTime.Now
-                    };
-                    //list_Result.Add(result_20);
-                    _context.Add(result_20);
-                    _context.SaveChanges();
+                        var result_20 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_20,
+                            object_id = 4,
+                            target_id = 20,
+                            date = date,
+                            created_at = DateTime.Now
+                        };
+                        //list_Result.Add(result_20);
+                        _context.Add(result_20);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_20;
+                        _context.Update(find_result);
+                        _context.SaveChanges();
+                    }
                     //_context.SaveChanges();
                 }
                 //EquipmentModel EquipmentModel = new EquipmentModel { code = code, name = name_vn, name_en = name_en, created_at = DateTime.Now };
@@ -1273,16 +1438,17 @@ namespace it_template.Areas.Trend.Controllers
 
         public async Task<IActionResult> dataVisinhKho()
         {
-            return Ok();
+            //return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
             //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw data for of microbial results of  equiment quality monitoring_Kho 2023.xlsx", ExcelVersion.Version2013);
             //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw data for of microbial results of  equiment quality monitoring_Kho 2024.xlsx", ExcelVersion.Version2013);
-            book.LoadFromFile("./wwwroot/data/trend/visinh/Raw data for of microbial results of room quality monitoring_  RD _2023.xlsx", ExcelVersion.Version2013);
+            book.LoadFromFile("./wwwroot/data/trend/visinh/Raw/Raw data for of microbial results of  equiment quality monitoring_Kho 2024.xlsx", ExcelVersion.Version2013);
+            //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw/Raw data for of microbial results of room quality monitoring_  RD _2024.xlsx", ExcelVersion.Version2013);
 
             var worksheets = book.Worksheets.Count();
             var list_Result = new List<ResultModel>();
-            for (var worksheetsIndex = 1; worksheetsIndex < worksheets; worksheetsIndex++)
+            for (var worksheetsIndex = 0; worksheetsIndex < worksheets; worksheetsIndex++)
             {
                 Spire.Xls.Worksheet sheet = book.Worksheets[worksheetsIndex];
                 var lastrow = sheet.LastDataRow;
@@ -1321,15 +1487,27 @@ namespace it_template.Areas.Trend.Controllers
                         decimal? value = nowRow.Cells[columnIndex] != null && nowRow.Cells[columnIndex].Value != "NA" && nowRow.Cells[columnIndex].Value != "" ? (decimal)nowRow.Cells[columnIndex].NumberValue : null;
                         if (value != null)
                         {
-                            var result = new ResultModel()
+                            var find_result = _context.ResultModel.Where(d => d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                            if (find_result == null)
                             {
-                                point_id = findPoint.id,
-                                value = value,
-                                target_id = findPoint.target_id,
-                                date = date,
-                                created_at = DateTime.Now
-                            };
-                            list_Result.Add(result);
+                                var result = new ResultModel()
+                                {
+                                    point_id = findPoint.id,
+                                    value = value,
+                                    target_id = findPoint.target_id,
+                                    date = date,
+                                    object_id = 2,
+                                    created_at = DateTime.Now
+                                };
+                                list_Result.Add(result);
+                                result.point = null;
+                                _context.Add(result);
+                            }
+                            else
+                            {
+                                find_result.value = value;
+                                _context.Update(find_result);
+                            }
                             //_context.SaveChanges();
                         }
                     }
@@ -1353,7 +1531,7 @@ namespace it_template.Areas.Trend.Controllers
                 }
             }
 
-            _context.AddRange(list_Result);
+            //_context.AddRange(list_Result);
             _context.SaveChanges();
 
             return Ok(list_Result);
@@ -1365,11 +1543,11 @@ namespace it_template.Areas.Trend.Controllers
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
             //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw data for of microbial results of room quality monitoring_TPCN- GRADE D-2023.xlsx", ExcelVersion.Version2013);
 
-            book.LoadFromFile("./wwwroot/data/trend/visinh/Raw data for of microbial results of room quality monitoring_TPCN- GRADE D-2024.xlsx", ExcelVersion.Version2013);
+            book.LoadFromFile("./wwwroot/data/trend/visinh/Raw/Raw data for of microbial results of room quality monitoring_TPCN- GRADE D-2024.xlsx", ExcelVersion.Version2013);
 
             var worksheets = book.Worksheets.Count();
             var list_Result = new List<ResultModel>();
-            for (var worksheetsIndex = 1; worksheetsIndex < worksheets; worksheetsIndex++)
+            for (var worksheetsIndex = 0; worksheetsIndex < worksheets; worksheetsIndex++)
             {
                 Spire.Xls.Worksheet sheet = book.Worksheets[worksheetsIndex];
                 var lastrow = sheet.LastDataRow;
@@ -1408,15 +1586,25 @@ namespace it_template.Areas.Trend.Controllers
                         decimal? value = nowRow.Cells[columnIndex] != null && nowRow.Cells[columnIndex].Value != "NA" && nowRow.Cells[columnIndex].Value != "" ? (decimal)nowRow.Cells[columnIndex].NumberValue : null;
                         if (value != null)
                         {
-                            var result = new ResultModel()
+                            var find_result = _context.ResultModel.Where(d => d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                            if (find_result == null)
                             {
-                                point_id = findPoint.id,
-                                value = value,
-                                target_id = findPoint.target_id,
-                                date = date,
-                                created_at = DateTime.Now
-                            };
-                            list_Result.Add(result);
+                                var result = new ResultModel()
+                                {
+                                    point_id = findPoint.id,
+                                    value = value,
+                                    target_id = findPoint.target_id,
+                                    date = date,
+                                    created_at = DateTime.Now
+                                };
+                                list_Result.Add(result);
+                                _context.Add(result);
+                            }
+                            else
+                            {
+                                find_result.value = value;
+                                _context.Update(find_result);
+                            }
                             //_context.SaveChanges();
                         }
                     }
@@ -1440,7 +1628,7 @@ namespace it_template.Areas.Trend.Controllers
                 }
             }
 
-            _context.AddRange(list_Result);
+            //_context.AddRange(list_Result);
             _context.SaveChanges();
 
             return Ok(list_Result);
@@ -1448,11 +1636,11 @@ namespace it_template.Areas.Trend.Controllers
 
         public async Task<IActionResult> dataVisinhQC()
         {
-            return Ok();
+            //return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
-            //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw data for of microbial results of room quality monitoring_QC- GRADE D.xlsx", ExcelVersion.Version2013);
-            book.LoadFromFile("./wwwroot/data/trend/visinh/Raw data for of microbial results of  equiment quality monitoring_QC- GRADE C.xlsx", ExcelVersion.Version2013);
+            book.LoadFromFile("./wwwroot/data/trend/visinh/Raw/Raw data for of microbial results of room quality monitoring_QC- GRADE D.xlsx", ExcelVersion.Version2013);
+            //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw/Raw data for of microbial results of  equiment quality monitoring_QC- GRADE C.xlsx", ExcelVersion.Version2013);
 
             var worksheets = book.Worksheets.Count();
             var list_Result = new List<ResultModel>();
@@ -1497,15 +1685,25 @@ namespace it_template.Areas.Trend.Controllers
                         decimal? value = nowRow.Cells[columnIndex] != null && nowRow.Cells[columnIndex].Value != "NA" && nowRow.Cells[columnIndex].Value != "" ? (decimal)nowRow.Cells[columnIndex].NumberValue : null;
                         if (value != null)
                         {
-                            var result = new ResultModel()
+                            var find_result = _context.ResultModel.Where(d => d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                            if (find_result == null)
                             {
-                                point_id = findPoint.id,
-                                value = value,
-                                target_id = findPoint.target_id,
-                                date = date,
-                                created_at = DateTime.Now
-                            };
-                            list_Result.Add(result);
+                                var result = new ResultModel()
+                                {
+                                    point_id = findPoint.id,
+                                    value = value,
+                                    target_id = findPoint.target_id,
+                                    date = date,
+                                    created_at = DateTime.Now
+                                };
+                                list_Result.Add(result);
+                                _context.Add(result);
+                            }
+                            else
+                            {
+                                find_result.value = value;
+                                _context.Update(find_result);
+                            }
                             //_context.SaveChanges();
                         }
                     }
@@ -1529,7 +1727,7 @@ namespace it_template.Areas.Trend.Controllers
                 }
             }
 
-            _context.AddRange(list_Result);
+            //_context.AddRange(list_Result);
             _context.SaveChanges();
 
             return Ok(list_Result);

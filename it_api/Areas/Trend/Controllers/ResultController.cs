@@ -65,6 +65,7 @@ namespace it_template.Areas.Trend.Controllers
                 try
                 {
                     ResultModel.created_at = DateTime.Now;
+                    ResultModel.created_by = user_id;
 
 
                     _context.ResultModel.Add(ResultModel);
@@ -191,7 +192,10 @@ namespace it_template.Areas.Trend.Controllers
                 customerData = customerData.Where(d => d.target_id == target_id);
             }
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderByDescending(d => d.id).Skip(skip).Take(pageSize).Include(d => d.target).Include(d => d.point).ThenInclude(d => d.obj).ToList();
+            var datapost = customerData.OrderByDescending(d => d.id).Skip(skip).Take(pageSize)
+                .Include(d => d.target)
+                .Include(d => d.point)
+                .ThenInclude(d => d.obj).ToList();
             //var data = new ArrayList();
             //foreach (var record in datapost)
             //{
