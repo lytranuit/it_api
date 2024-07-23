@@ -247,240 +247,240 @@ namespace it_template.Areas.Trend.Controllers
 
         }
 
-        [HttpPost]
-        public async Task<JsonResult> xuatraw1(LimitModel LimitModel, List<int> list_point)
-        {
-            DateTime? date_from = null;
-            DateTime? date_to = null;
-            if (LimitModel.date_from != null && LimitModel.date_from.Value.Kind == DateTimeKind.Utc)
-            {
-                date_from = LimitModel.date_from.Value.ToLocalTime();
-            }
-            if (LimitModel.date_to != null && LimitModel.date_to.Value.Kind == DateTimeKind.Utc)
-            {
-                date_to = LimitModel.date_to.Value.ToLocalTime();
-            }
-            if (LimitModel.date_effect != null && LimitModel.date_effect.Value.Kind == DateTimeKind.Utc)
-            {
-                LimitModel.date_effect = LimitModel.date_effect.Value.ToLocalTime();
-            }
-            ////Lấy 
-            var list = _context.ResultModel
-                .Where(d => list_point.Contains(d.point_id.Value) && d.deleted_at == null && d.date >= date_from && d.date <= date_to && d.target_id == LimitModel.target_id && d.object_id == LimitModel.object_id)
-                .Include(d => d.point).ThenInclude(d => d.location).OrderBy(d => d.date).ToList();
+        //[HttpPost]
+        //public async Task<JsonResult> xuatraw1(LimitModel LimitModel, List<int> list_point)
+        //{
+        //    DateTime? date_from = null;
+        //    DateTime? date_to = null;
+        //    if (LimitModel.date_from != null && LimitModel.date_from.Value.Kind == DateTimeKind.Utc)
+        //    {
+        //        date_from = LimitModel.date_from.Value.ToLocalTime();
+        //    }
+        //    if (LimitModel.date_to != null && LimitModel.date_to.Value.Kind == DateTimeKind.Utc)
+        //    {
+        //        date_to = LimitModel.date_to.Value.ToLocalTime();
+        //    }
+        //    if (LimitModel.date_effect != null && LimitModel.date_effect.Value.Kind == DateTimeKind.Utc)
+        //    {
+        //        LimitModel.date_effect = LimitModel.date_effect.Value.ToLocalTime();
+        //    }
+        //    ////Lấy 
+        //    var list = _context.ResultModel
+        //        .Where(d => list_point.Contains(d.point_id.Value) && d.deleted_at == null && d.date >= date_from && d.date <= date_to && d.target_id == LimitModel.target_id && d.object_id == LimitModel.object_id)
+        //        .Include(d => d.point).ThenInclude(d => d.location).OrderBy(d => d.date).ToList();
 
-            var data = new ArrayList();
+        //    var data = new ArrayList();
 
-            var targetModel = _context.TargetModel.Where(d => d.id == LimitModel.target_id).FirstOrDefault();
+        //    var targetModel = _context.TargetModel.Where(d => d.id == LimitModel.target_id).FirstOrDefault();
 
-            var labels = list.Select(d => d.point.code).Distinct().OrderBy(d => d).ToList();
-            var list_data = list.GroupBy(d => d.date).Select(d => new
-            {
-                date = d.Key,
-                data = d.ToList(),
-            }).OrderBy(d => d.date).ToList();
-            if (LimitModel.object_id == 2)
-            {
-                var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\dulieu(Visinh).xlsx";
-                var documentPath = "/temp/dulieu(Visinh)_" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
-                string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+        //    var labels = list.Select(d => d.point.code).Distinct().OrderBy(d => d).ToList();
+        //    var list_data = list.GroupBy(d => d.date).Select(d => new
+        //    {
+        //        date = d.Key,
+        //        data = d.ToList(),
+        //    }).OrderBy(d => d.date).ToList();
+        //    if (LimitModel.object_id == 2)
+        //    {
+        //        var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\dulieu(Visinh).xlsx";
+        //        var documentPath = "/temp/dulieu(Visinh)_" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
+        //        string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
 
-                Workbook workbook = new Workbook();
-                workbook.LoadFromFile(viewPath);
+        //        Workbook workbook = new Workbook();
+        //        workbook.LoadFromFile(viewPath);
 
-                //Create a font
-                ExcelFont font1 = workbook.CreateFont();
-                font1.FontName = "Times New Roman";
-                font1.IsBold = false;
-                font1.Size = 18;
+        //        //Create a font
+        //        ExcelFont font1 = workbook.CreateFont();
+        //        font1.FontName = "Times New Roman";
+        //        font1.IsBold = false;
+        //        font1.Size = 18;
 
-                //Create another font
-                ExcelFont font2 = workbook.CreateFont();
-                font2.IsBold = false;
-                font2.IsItalic = true;
-                font2.FontName = "Times New Roman";
-                font2.Size = 18;
+        //        //Create another font
+        //        ExcelFont font2 = workbook.CreateFont();
+        //        font2.IsBold = false;
+        //        font2.IsItalic = true;
+        //        font2.FontName = "Times New Roman";
+        //        font2.Size = 18;
 
-                Worksheet sheet1 = workbook.Worksheets[0];
-
-
-                RichText richText1 = sheet1.Range["A1"].RichText;
-                richText1.Text = targetModel.name + "\r\n" + targetModel.name_en;
-                richText1.SetFont(0, targetModel.name.Length, font1);
-
-                richText1.SetFont(targetModel.name.Length - 1, richText1.Text.Length, font2);
+        //        Worksheet sheet1 = workbook.Worksheets[0];
 
 
-                if (list_data.Count > 0)
-                {
-                    Worksheet sheet = workbook.Worksheets[0];
-                    int stt = 0;
-                    var start_r = 5;
+        //        RichText richText1 = sheet1.Range["A1"].RichText;
+        //        richText1.Text = targetModel.name + "\r\n" + targetModel.name_en;
+        //        richText1.SetFont(0, targetModel.name.Length, font1);
 
-                    DataTable dt = new DataTable();
-                    dt.Columns.Add("stt", typeof(int));
-                    dt.Columns.Add("ngay", typeof(string));
-                    sheet.InsertColumn(4, labels.Count(), InsertOptionsType.FormatAsBefore);
-                    var rowlocation = sheet1.Rows[1];
-                    var rowpoint = sheet1.Rows[2];
-                    var stt_cell = 2;
-
-                    var locations = list.GroupBy(d => d.point.location.name).Select(d => new
-                    {
-                        location = d.Key,
-                        points = d.GroupBy(e => e.point.code).Select(e => new
-                        {
-                            point = e.Key,
-                            data = e.ToList()
-                        }).OrderBy(e => e.point).ToList(),
-                    }).OrderBy(d => d.location).ToList();
-
-                    foreach (var location in locations)
-                    {
-                        var cell = rowlocation.Cells[stt_cell];
-                        var columnname = ColumnIndexToColumnLetter(stt_cell + 1);
-                        var columnname2 = ColumnIndexToColumnLetter(stt_cell + location.points.Count());
-
-                        cell.Value = location.location;
-
-                        var range = sheet.Range[columnname + "2:" + columnname2 + "2"];
-                        range.Merge();
-                        foreach (var point in location.points)
-                        {
-                            var cell1 = rowpoint.Cells[stt_cell++];
-                            cell1.Value = point.point;
-
-                            dt.Columns.Add("value_" + point.point, typeof(decimal));
-                        }
-                    }
+        //        richText1.SetFont(targetModel.name.Length - 1, richText1.Text.Length, font2);
 
 
+        //        if (list_data.Count > 0)
+        //        {
+        //            Worksheet sheet = workbook.Worksheets[0];
+        //            int stt = 0;
+        //            var start_r = 5;
+
+        //            DataTable dt = new DataTable();
+        //            dt.Columns.Add("stt", typeof(int));
+        //            dt.Columns.Add("ngay", typeof(string));
+        //            sheet.InsertColumn(4, labels.Count(), InsertOptionsType.FormatAsBefore);
+        //            var rowlocation = sheet1.Rows[1];
+        //            var rowpoint = sheet1.Rows[2];
+        //            var stt_cell = 2;
+
+        //            var locations = list.GroupBy(d => d.point.location.name).Select(d => new
+        //            {
+        //                location = d.Key,
+        //                points = d.GroupBy(e => e.point.code).Select(e => new
+        //                {
+        //                    point = e.Key,
+        //                    data = e.ToList()
+        //                }).OrderBy(e => e.point).ToList(),
+        //            }).OrderBy(d => d.location).ToList();
+
+        //            foreach (var location in locations)
+        //            {
+        //                var cell = rowlocation.Cells[stt_cell];
+        //                var columnname = ColumnIndexToColumnLetter(stt_cell + 1);
+        //                var columnname2 = ColumnIndexToColumnLetter(stt_cell + location.points.Count());
+
+        //                cell.Value = location.location;
+
+        //                var range = sheet.Range[columnname + "2:" + columnname2 + "2"];
+        //                range.Merge();
+        //                foreach (var point in location.points)
+        //                {
+        //                    var cell1 = rowpoint.Cells[stt_cell++];
+        //                    cell1.Value = point.point;
+
+        //                    dt.Columns.Add("value_" + point.point, typeof(decimal));
+        //                }
+        //            }
 
 
-                    sheet.InsertRow(5, list_data.Count(), InsertOptionsType.FormatAsBefore);
-                    foreach (var item in list_data)
-                    {
-                        DataRow dr1 = dt.NewRow();
-                        dr1["stt"] = (++stt);
-                        dr1["ngay"] = item.date.Value.ToString("dd/MM/yyyy");
-
-                        foreach (var location in locations)
-                        {
-                            foreach (var point in location.points)
-                            {
-                                var d = item.data.Where(d => d.point.code == point.point).FirstOrDefault();
-                                if (d != null)
-                                {
-                                    dr1["value_" + point.point] = d.value;
-                                }
-                            }
-                        }
-                        dt.Rows.Add(dr1);
-                        start_r++;
-
-                    }
-                    sheet.InsertDataTable(dt, false, 5, 1);
-                    sheet.DeleteRow(4);
-                    //sheet.DeleteColumn(3);
-                    //avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
-                    //sheet.CalculateAllValue();
-                    //var avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
-                    //var min = sheet.Range["C" + (start_r + 4)].FormulaNumberValue;
-                    //var max = sheet.Range["C" + (start_r + 5)].FormulaNumberValue;
-
-                }
-                workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
-
-                return Json(new { success = true, link = Domain + documentPath, data = list });
-            }
-            else
-            {
-                var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\dulieu(Nuoc).xlsx";
-                var documentPath = "/temp/dulieu(Nuoc)_" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
-                string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
-
-                Workbook workbook = new Workbook();
-                workbook.LoadFromFile(viewPath);
-
-                //Create a font
-                ExcelFont font1 = workbook.CreateFont();
-                font1.FontName = "Times New Roman";
-                font1.IsBold = false;
-                font1.Size = 18;
-
-                //Create another font
-                ExcelFont font2 = workbook.CreateFont();
-                font2.IsBold = false;
-                font2.IsItalic = true;
-                font2.FontName = "Times New Roman";
-                font2.Size = 18;
-
-                Worksheet sheet1 = workbook.Worksheets[0];
 
 
-                RichText richText1 = sheet1.Range["A1"].RichText;
-                richText1.Text = targetModel.name + "\r\n" + targetModel.name_en;
-                richText1.SetFont(0, targetModel.name.Length, font1);
+        //            sheet.InsertRow(5, list_data.Count(), InsertOptionsType.FormatAsBefore);
+        //            foreach (var item in list_data)
+        //            {
+        //                DataRow dr1 = dt.NewRow();
+        //                dr1["stt"] = (++stt);
+        //                dr1["ngay"] = item.date.Value.ToString("dd/MM/yyyy");
 
-                richText1.SetFont(targetModel.name.Length, richText1.Text.Length, font2);
+        //                foreach (var location in locations)
+        //                {
+        //                    foreach (var point in location.points)
+        //                    {
+        //                        var d = item.data.Where(d => d.point.code == point.point).FirstOrDefault();
+        //                        if (d != null)
+        //                        {
+        //                            dr1["value_" + point.point] = d.value;
+        //                        }
+        //                    }
+        //                }
+        //                dt.Rows.Add(dr1);
+        //                start_r++;
+
+        //            }
+        //            sheet.InsertDataTable(dt, false, 5, 1);
+        //            sheet.DeleteRow(4);
+        //            //sheet.DeleteColumn(3);
+        //            //avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+        //            //sheet.CalculateAllValue();
+        //            //var avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+        //            //var min = sheet.Range["C" + (start_r + 4)].FormulaNumberValue;
+        //            //var max = sheet.Range["C" + (start_r + 5)].FormulaNumberValue;
+
+        //        }
+        //        workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
+
+        //        return Json(new { success = true, link = Domain + documentPath, data = list });
+        //    }
+        //    else
+        //    {
+        //        var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\dulieu(Nuoc).xlsx";
+        //        var documentPath = "/temp/dulieu(Nuoc)_" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
+        //        string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+
+        //        Workbook workbook = new Workbook();
+        //        workbook.LoadFromFile(viewPath);
+
+        //        //Create a font
+        //        ExcelFont font1 = workbook.CreateFont();
+        //        font1.FontName = "Times New Roman";
+        //        font1.IsBold = false;
+        //        font1.Size = 18;
+
+        //        //Create another font
+        //        ExcelFont font2 = workbook.CreateFont();
+        //        font2.IsBold = false;
+        //        font2.IsItalic = true;
+        //        font2.FontName = "Times New Roman";
+        //        font2.Size = 18;
+
+        //        Worksheet sheet1 = workbook.Worksheets[0];
 
 
-                if (list_data.Count > 0)
-                {
-                    Worksheet sheet = workbook.Worksheets[0];
-                    int stt = 0;
-                    var start_r = 4;
+        //        RichText richText1 = sheet1.Range["A1"].RichText;
+        //        richText1.Text = targetModel.name + "\r\n" + targetModel.name_en;
+        //        richText1.SetFont(0, targetModel.name.Length, font1);
 
-                    DataTable dt = new DataTable();
-                    dt.Columns.Add("stt", typeof(int));
-                    dt.Columns.Add("ngay", typeof(string));
-                    sheet.InsertColumn(4, labels.Count(), InsertOptionsType.FormatAsBefore);
-                    var row = sheet1.Rows[1];
-                    var stt_cell = 2;
-                    foreach (var label in labels)
-                    {
-                        var cell = row.Cells[stt_cell++];
-                        cell.Value = label;
+        //        richText1.SetFont(targetModel.name.Length, richText1.Text.Length, font2);
 
-                        dt.Columns.Add("value_" + label, typeof(decimal));
-                    }
-                    sheet.InsertRow(4, list_data.Count(), InsertOptionsType.FormatAsBefore);
-                    foreach (var item in list_data)
-                    {
-                        DataRow dr1 = dt.NewRow();
-                        dr1["stt"] = (++stt);
-                        dr1["ngay"] = item.date.Value.ToString("dd/MM/yyyy");
 
-                        foreach (var label in labels)
-                        {
-                            var d = item.data.Where(d => d.point.code == label).FirstOrDefault();
-                            if (d != null)
-                            {
-                                dr1["value_" + label] = d.value;
-                            }
-                        }
-                        dt.Rows.Add(dr1);
-                        start_r++;
+        //        if (list_data.Count > 0)
+        //        {
+        //            Worksheet sheet = workbook.Worksheets[0];
+        //            int stt = 0;
+        //            var start_r = 4;
 
-                    }
-                    sheet.InsertDataTable(dt, false, 4, 1);
-                    sheet.DeleteRow(3);
-                    //sheet.DeleteColumn(3);
-                    //avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
-                    //sheet.CalculateAllValue();
-                    //var avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
-                    //var min = sheet.Range["C" + (start_r + 4)].FormulaNumberValue;
-                    //var max = sheet.Range["C" + (start_r + 5)].FormulaNumberValue;
+        //            DataTable dt = new DataTable();
+        //            dt.Columns.Add("stt", typeof(int));
+        //            dt.Columns.Add("ngay", typeof(string));
+        //            sheet.InsertColumn(4, labels.Count(), InsertOptionsType.FormatAsBefore);
+        //            var row = sheet1.Rows[1];
+        //            var stt_cell = 2;
+        //            foreach (var label in labels)
+        //            {
+        //                var cell = row.Cells[stt_cell++];
+        //                cell.Value = label;
 
-                }
-                workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
+        //                dt.Columns.Add("value_" + label, typeof(decimal));
+        //            }
+        //            sheet.InsertRow(4, list_data.Count(), InsertOptionsType.FormatAsBefore);
+        //            foreach (var item in list_data)
+        //            {
+        //                DataRow dr1 = dt.NewRow();
+        //                dr1["stt"] = (++stt);
+        //                dr1["ngay"] = item.date.Value.ToString("dd/MM/yyyy");
 
-                return Json(new { success = true, link = Domain + documentPath, data = list });
-            }
+        //                foreach (var label in labels)
+        //                {
+        //                    var d = item.data.Where(d => d.point.code == label).FirstOrDefault();
+        //                    if (d != null)
+        //                    {
+        //                        dr1["value_" + label] = d.value;
+        //                    }
+        //                }
+        //                dt.Rows.Add(dr1);
+        //                start_r++;
 
-            return Json(new { success = false });
+        //            }
+        //            sheet.InsertDataTable(dt, false, 4, 1);
+        //            sheet.DeleteRow(3);
+        //            //sheet.DeleteColumn(3);
+        //            //avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+        //            //sheet.CalculateAllValue();
+        //            //var avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
+        //            //var min = sheet.Range["C" + (start_r + 4)].FormulaNumberValue;
+        //            //var max = sheet.Range["C" + (start_r + 5)].FormulaNumberValue;
 
-        }
+        //        }
+        //        workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
+
+        //        return Json(new { success = true, link = Domain + documentPath, data = list });
+        //    }
+
+        //    return Json(new { success = false });
+
+        //}
 
         [HttpPost]
         public async Task<JsonResult> xuatraw(LimitModel LimitModel, List<int> list_point)
@@ -606,7 +606,7 @@ namespace it_template.Areas.Trend.Controllers
                 workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
 
             }
-            else if (LimitModel.object_id == 3)
+            else if (LimitModel.object_id == 3 || LimitModel.object_id == 5 || LimitModel.object_id == 6)
             {
                 var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\0000052_A02_02 - Raw data for Water system quality monitoring_effec. 24.05.24_issue1.xlsx";
                 Workbook workbook = new Workbook();
