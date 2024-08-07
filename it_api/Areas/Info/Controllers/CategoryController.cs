@@ -1,73 +1,80 @@
 ﻿
 
 
+using Holdtime.Models;
+using Info.Models;
+using it_template.Areas.Trend.Controllers;
+using iText.Commons.Actions.Contexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Spire.Xls;
-using System.Collections;
 using System.Data;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Vue.Data;
 using Vue.Models;
+using Vue.Services;
 
-namespace it_template.Areas.Trend.Controllers
+namespace it_template.Areas.Info.Controllers
 {
 
-    public class TargetController : BaseController
+    public class CategoryController : BaseController
     {
         private readonly IConfiguration _configuration;
         private UserManager<UserModel> UserManager;
-        public TargetController(ItContext context, IConfiguration configuration, UserManager<UserModel> UserMgr) : base(context)
+        public CategoryController(NhansuContext context, AesOperation aes, IConfiguration configuration, UserManager<UserModel> UserMgr) : base(context, aes)
         {
             _configuration = configuration;
             UserManager = UserMgr;
         }
 
         [HttpPost]
-        public async Task<JsonResult> Delete(int id)
+        public async Task<JsonResult> Delete(string id)
         {
-            var Model = _context.TargetModel.Where(d => d.id == id).FirstOrDefault();
+            var Model = _context.CategoryModel.Where(d => d.id == id).FirstOrDefault();
             Model.deleted_at = DateTime.Now;
             _context.Update(Model);
             _context.SaveChanges();
             return Json(new { success = true, data = Model });
         }
         [HttpPost]
-        public async Task<JsonResult> Save(TargetModel TargetModel)
+        public async Task<JsonResult> Save(CategoryModel CategoryModel)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
             var user = await UserManager.GetUserAsync(currentUser);
-            TargetModel? TargetModel_old;
-            if (TargetModel.id == 0)
+            CategoryModel? CategoryModel_old;
+            if (CategoryModel.id == null)
             {
-                TargetModel.created_at = DateTime.Now;
+                CategoryModel.id = Guid.NewGuid().ToString();
+                CategoryModel.created_at = DateTime.Now;
+                CategoryModel.created_by = user_id;
 
 
-                _context.TargetModel.Add(TargetModel);
+                _context.CategoryModel.Add(CategoryModel);
 
                 _context.SaveChanges();
 
-                TargetModel_old = TargetModel;
+                CategoryModel_old = CategoryModel;
 
             }
             else
             {
 
-                TargetModel_old = _context.TargetModel.Where(d => d.id == TargetModel.id).FirstOrDefault();
-                CopyValues<TargetModel>(TargetModel_old, TargetModel);
-                TargetModel_old.updated_at = DateTime.Now;
+                CategoryModel_old = _context.CategoryModel.Where(d => d.id == CategoryModel.id).FirstOrDefault();
+                CopyValues<CategoryModel>(CategoryModel_old, CategoryModel);
+                CategoryModel_old.updated_at = DateTime.Now;
 
-                _context.Update(TargetModel_old);
+                _context.Update(CategoryModel_old);
                 _context.SaveChanges();
             }
 
-            return Json(new { success = true, data = TargetModel_old });
+
+
+            return Json(new { success = true, data = CategoryModel_old });
         }
+
         [HttpPost]
         public async Task<JsonResult> Table()
         {
@@ -76,22 +83,23 @@ namespace it_template.Areas.Trend.Controllers
             var length = Request.Form["length"].FirstOrDefault();
             int pageSize = length != null ? Convert.ToInt32(length) : 0;
             var name = Request.Form["filters[name]"].FirstOrDefault();
-            var id_text = Request.Form["filters[id]"].FirstOrDefault();
-            int id = id_text != null ? Convert.ToInt32(id_text) : 0;
+            var id = Request.Form["filters[id]"].FirstOrDefault();
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
-            var customerData = _context.TargetModel.Where(d => d.deleted_at == null);
+            var customerData = _context.CategoryModel.Where(d => d.deleted_at == null);
             int recordsTotal = customerData.Count();
             if (name != null && name != "")
             {
                 customerData = customerData.Where(d => d.name.Contains(name));
             }
-            if (id != 0)
+
+            if (id != null)
             {
                 customerData = customerData.Where(d => d.id == id);
             }
+
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderByDescending(d => d.id).Skip(skip).Take(pageSize).ToList();
+            var datapost = customerData.OrderByDescending(d => d.created_at).Skip(skip).Take(pageSize).ToList();
             //var data = new ArrayList();
             //foreach (var record in datapost)
             //{
@@ -118,16 +126,15 @@ namespace it_template.Areas.Trend.Controllers
             //	data.Add(data1);
             //}
             var jsonData = new { draw = draw, recordsFiltered = recordsFiltered, recordsTotal = recordsTotal, data = datapost };
-            return Json(jsonData);
+            return Json(jsonData, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
-        public JsonResult Get(int id)
+
+        public JsonResult Get(string id)
         {
-            var data = _context.TargetModel.Where(d => d.id == id).FirstOrDefault();
-            return Json(data);
-        }
-        public JsonResult GetList()
-        {
-            var data = _context.TargetModel.Where(d => d.deleted_at == null).ToList();
+            var data = _context.CategoryModel.Where(d => d.id == id).FirstOrDefault();
             return Json(data);
         }
         private void CopyValues<T>(T target, T source)

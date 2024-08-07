@@ -8,10 +8,6 @@ using System.Collections;
 using workflow.Models;
 using System.Text.Json.Serialization;
 using System.Data;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Org.BouncyCastle.Asn1.Mozilla;
-using System.Drawing;
-using System.Net.WebSockets;
 
 namespace it_template.Areas.Trend.Controllers
 {

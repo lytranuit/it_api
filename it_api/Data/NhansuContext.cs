@@ -22,6 +22,17 @@ namespace Vue.Data
 
 
         public DbSet<Info.Models.NewsModel> NewsModel { get; set; }
+        public DbSet<Info.Models.HotNewsModel> HotNewsModel { get; set; }
+        public DbSet<Info.Models.CategoryModel> CategoryModel { get; set; }
+        public DbSet<Info.Models.NewsCategoryModel> NewsCategoryModel { get; set; }
+        public DbSet<Info.Models.PersonnelModel> PersonnelModel { get; set; }
+        public DbSet<Info.Models.PositionModel> PositionModel { get; set; }
+        public DbSet<Info.Models.PhongModel> DepartmentModel { get; set; }
+        public DbSet<Info.Models.ChuyenmonModel> ChuyenmonModel { get; set; }
+        public DbSet<Info.Models.KhoiModel> KhoiModel { get; set; }
+        public DbSet<Info.Models.NganhangModel> NganhangModel { get; set; }
+        public DbSet<Info.Models.TrinhdoModel> TrinhdoModel { get; set; }
+        public DbSet<Info.Models.LoaiHDModel> LoaiHDModel { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

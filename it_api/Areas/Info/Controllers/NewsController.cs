@@ -1,6 +1,6 @@
 ﻿
 
-using elFinder.NetCore.Models;
+
 using Holdtime.Models;
 using Info.Models;
 using it_template.Areas.Trend.Controllers;
@@ -15,6 +15,7 @@ using System.Text.Json.Serialization;
 using Vue.Data;
 using Vue.Models;
 using Vue.Services;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -30,7 +31,7 @@ namespace it_template.Areas.Info.Controllers
         }
 
         [HttpPost]
-        public async Task<JsonResult> Delete(int id)
+        public async Task<JsonResult> Delete(string id)
         {
             var Model = _context.NewsModel.Where(d => d.id == id).FirstOrDefault();
             Model.deleted_at = DateTime.Now;
@@ -39,14 +40,24 @@ namespace it_template.Areas.Info.Controllers
             return Json(new { success = true, data = Model });
         }
         [HttpPost]
-        public async Task<JsonResult> Save(NewsModel NewsModel)
+        public async Task<JsonResult> saveTinnong(string message)
+        {
+            var Model = _context.HotNewsModel.Where(d => d.id == 1).FirstOrDefault();
+            Model.message = message;
+            _context.Update(Model);
+            _context.SaveChanges();
+            return Json(new { success = true, data = Model });
+        }
+        [HttpPost]
+        public async Task<JsonResult> Save(NewsModel NewsModel, List<string> list_category)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
             var user = await UserManager.GetUserAsync(currentUser);
             NewsModel? NewsModel_old;
-            if (NewsModel.id == 0)
+            if (NewsModel.id == null)
             {
+                NewsModel.id = Guid.NewGuid().ToString();
                 NewsModel.created_at = DateTime.Now;
                 NewsModel.created_by = user_id;
 
@@ -69,7 +80,19 @@ namespace it_template.Areas.Info.Controllers
                 _context.SaveChanges();
             }
 
+            var list_old = _context.NewsCategoryModel.Where(d => d.news_id == NewsModel_old.id).ToList();
+            _context.RemoveRange(list_old);
+            _context.SaveChanges();
 
+            foreach (var item in list_category)
+            {
+                _context.Add(new NewsCategoryModel()
+                {
+                    category_id = item,
+                    news_id = NewsModel_old.id
+                });
+            }
+            _context.SaveChanges();
 
             return Json(new { success = true, data = NewsModel_old });
         }
@@ -82,8 +105,7 @@ namespace it_template.Areas.Info.Controllers
             var length = Request.Form["length"].FirstOrDefault();
             int pageSize = length != null ? Convert.ToInt32(length) : 0;
             var title = Request.Form["filters[title]"].FirstOrDefault();
-            var id_text = Request.Form["filters[id]"].FirstOrDefault();
-            int id = id_text != null ? Convert.ToInt32(id_text) : 0;
+            var id = Request.Form["filters[id]"].FirstOrDefault();
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
             var customerData = _context.NewsModel.Where(d => d.deleted_at == null);
@@ -93,13 +115,13 @@ namespace it_template.Areas.Info.Controllers
                 customerData = customerData.Where(d => d.title.Contains(title));
             }
 
-            if (id != 0)
+            if (id != null)
             {
                 customerData = customerData.Where(d => d.id == id);
             }
 
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderByDescending(d => d.id).Skip(skip).Take(pageSize).Include(d => d.user_created_by).ToList();
+            var datapost = customerData.OrderByDescending(d => d.created_at).Skip(skip).Take(pageSize).Include(d => d.user_created_by).ToList();
             //var data = new ArrayList();
             //foreach (var record in datapost)
             //{
@@ -132,9 +154,19 @@ namespace it_template.Areas.Info.Controllers
             });
         }
 
-        public JsonResult Get(int id)
+        public JsonResult Get(string id)
         {
             var data = _context.NewsModel.Where(d => d.id == id).FirstOrDefault();
+            return Json(data);
+        }
+        public JsonResult GetCategory(string id)
+        {
+            var data = _context.NewsCategoryModel.Where(d => d.news_id == id).Select(d => d.category_id).ToList();
+            return Json(data);
+        }
+        public JsonResult GetHotNews()
+        {
+            var data = _context.HotNewsModel.Where(d => d.id == 1).FirstOrDefault();
             return Json(data);
         }
         private void CopyValues<T>(T target, T source)

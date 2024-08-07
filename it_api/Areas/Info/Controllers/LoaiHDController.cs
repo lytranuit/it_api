@@ -1,73 +1,76 @@
 ﻿
 
 
+using Info.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Spire.Xls;
-using System.Collections;
 using System.Data;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Vue.Data;
 using Vue.Models;
+using Vue.Services;
 
-namespace it_template.Areas.Trend.Controllers
+namespace it_template.Areas.Info.Controllers
 {
 
-    public class TargetController : BaseController
+    public class LoaiHDController : BaseController
     {
         private readonly IConfiguration _configuration;
         private UserManager<UserModel> UserManager;
-        public TargetController(ItContext context, IConfiguration configuration, UserManager<UserModel> UserMgr) : base(context)
+        public LoaiHDController(NhansuContext context, AesOperation aes, IConfiguration configuration, UserManager<UserModel> UserMgr) : base(context, aes)
         {
             _configuration = configuration;
             UserManager = UserMgr;
         }
 
         [HttpPost]
-        public async Task<JsonResult> Delete(int id)
+        public async Task<JsonResult> Delete(string id)
         {
-            var Model = _context.TargetModel.Where(d => d.id == id).FirstOrDefault();
-            Model.deleted_at = DateTime.Now;
-            _context.Update(Model);
+            var Model = _context.LoaiHDModel.Where(d => d.id == id).FirstOrDefault();
+            _context.Remove(Model);
             _context.SaveChanges();
             return Json(new { success = true, data = Model });
         }
         [HttpPost]
-        public async Task<JsonResult> Save(TargetModel TargetModel)
+        public async Task<JsonResult> Save(LoaiHDModel LoaiHDModel)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
             var user = await UserManager.GetUserAsync(currentUser);
-            TargetModel? TargetModel_old;
-            if (TargetModel.id == 0)
+            LoaiHDModel? LoaiHDModel_old;
+            if (LoaiHDModel.id == null)
             {
-                TargetModel.created_at = DateTime.Now;
+                LoaiHDModel.id = Guid.NewGuid().ToString();
+                //LoaiHDModel.created_at = DateTime.Now;
+                //LoaiHDModel.created_by = user_id;
 
 
-                _context.TargetModel.Add(TargetModel);
+                _context.LoaiHDModel.Add(LoaiHDModel);
 
                 _context.SaveChanges();
 
-                TargetModel_old = TargetModel;
+                LoaiHDModel_old = LoaiHDModel;
 
             }
             else
             {
 
-                TargetModel_old = _context.TargetModel.Where(d => d.id == TargetModel.id).FirstOrDefault();
-                CopyValues<TargetModel>(TargetModel_old, TargetModel);
-                TargetModel_old.updated_at = DateTime.Now;
+                LoaiHDModel_old = _context.LoaiHDModel.Where(d => d.id == LoaiHDModel.id).FirstOrDefault();
+                CopyValues<LoaiHDModel>(LoaiHDModel_old, LoaiHDModel);
+                //LoaiHDModel_old.updated_at = DateTime.Now;
 
-                _context.Update(TargetModel_old);
+                _context.Update(LoaiHDModel_old);
                 _context.SaveChanges();
             }
 
-            return Json(new { success = true, data = TargetModel_old });
+
+
+            return Json(new { success = true, data = LoaiHDModel_old });
         }
+
         [HttpPost]
         public async Task<JsonResult> Table()
         {
@@ -75,23 +78,28 @@ namespace it_template.Areas.Trend.Controllers
             var start = Request.Form["start"].FirstOrDefault();
             var length = Request.Form["length"].FirstOrDefault();
             int pageSize = length != null ? Convert.ToInt32(length) : 0;
-            var name = Request.Form["filters[name]"].FirstOrDefault();
-            var id_text = Request.Form["filters[id]"].FirstOrDefault();
-            int id = id_text != null ? Convert.ToInt32(id_text) : 0;
+            var MALOAIHD = Request.Form["filters[MALOAIHD]"].FirstOrDefault();
+            var TENLOAIHD = Request.Form["filters[TENLOAIHD]"].FirstOrDefault();
+            var id = Request.Form["filters[id]"].FirstOrDefault();
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
-            var customerData = _context.TargetModel.Where(d => d.deleted_at == null);
+            var customerData = _context.LoaiHDModel.Where(d => 1 == 1);
             int recordsTotal = customerData.Count();
-            if (name != null && name != "")
+            if (MALOAIHD != null && MALOAIHD != "")
             {
-                customerData = customerData.Where(d => d.name.Contains(name));
+                customerData = customerData.Where(d => d.MALOAIHD.Contains(MALOAIHD));
             }
-            if (id != 0)
+            if (TENLOAIHD != null && TENLOAIHD != "")
+            {
+                customerData = customerData.Where(d => d.TENLOAIHD.Contains(TENLOAIHD));
+            }
+            if (id != null)
             {
                 customerData = customerData.Where(d => d.id == id);
             }
+
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderByDescending(d => d.id).Skip(skip).Take(pageSize).ToList();
+            var datapost = customerData.OrderBy(d => d.MALOAIHD).Skip(skip).Take(pageSize).ToList();
             //var data = new ArrayList();
             //foreach (var record in datapost)
             //{
@@ -118,17 +126,19 @@ namespace it_template.Areas.Trend.Controllers
             //	data.Add(data1);
             //}
             var jsonData = new { draw = draw, recordsFiltered = recordsFiltered, recordsTotal = recordsTotal, data = datapost };
-            return Json(jsonData);
+            return Json(jsonData, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
-        public JsonResult Get(int id)
+
+        public JsonResult Get(string id)
         {
-            var data = _context.TargetModel.Where(d => d.id == id).FirstOrDefault();
-            return Json(data);
-        }
-        public JsonResult GetList()
-        {
-            var data = _context.TargetModel.Where(d => d.deleted_at == null).ToList();
-            return Json(data);
+            var data = _context.LoaiHDModel.Where(d => d.id == id).FirstOrDefault();
+            return Json(data, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
         private void CopyValues<T>(T target, T source)
         {

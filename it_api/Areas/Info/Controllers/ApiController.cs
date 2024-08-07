@@ -26,6 +26,72 @@ namespace it_template.Areas.Info.Controllers
         {
             UserManager = UserMgr;
         }
+
+        public async Task<JsonResult> category()
+        {
+            var All = _context.CategoryModel.Where(d => d.deleted_at == null).ToList();
+            //var jsonData = new { data = ProcessModel };
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+
+        public async Task<JsonResult> Trinhdo()
+        {
+            var All = _context.TrinhdoModel.ToList();
+            //var jsonData = new { data = ProcessModel };
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> Chuyenmon()
+        {
+            var All = _context.ChuyenmonModel.ToList();
+            //var jsonData = new { data = ProcessModel };
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> Area()
+        {
+            var All = _context.KhoiModel.ToList();
+            //var jsonData = new { data = ProcessModel };
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> Department()
+        {
+            var All = _context.DepartmentModel.ToList();
+            //var jsonData = new { data = ProcessModel };
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> Loaihd()
+        {
+            var All = _context.LoaiHDModel.ToList();
+            //var jsonData = new { data = ProcessModel };
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> Chucvu()
+        {
+            var All = _context.PositionModel.ToList();
+            //var jsonData = new { data = ProcessModel };
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+
     }
 
 

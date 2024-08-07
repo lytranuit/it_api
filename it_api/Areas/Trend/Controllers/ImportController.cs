@@ -1,9 +1,5 @@
 ﻿
 
-using CertificateManager.Models;
-using CertificateManager;
-using elFinder.NetCore.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -23,7 +19,6 @@ using Microsoft.CodeAnalysis;
 using System.Drawing;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Http;
 
 namespace it_template.Areas.Trend.Controllers
 {
@@ -1034,6 +1029,212 @@ namespace it_template.Areas.Trend.Controllers
             }
             //_context.AddRange(list_Result);
             //_context.SaveChanges();
+
+            return Ok(list_Result);
+        }
+
+        public async Task<IActionResult> importVitriDungngoai()
+        {
+            return Ok();
+            // Khởi tạo workbook để đọc
+            Spire.Xls.Workbook book = new Spire.Xls.Workbook();
+            book.LoadFromFile("./wwwroot/data/trend/visinh/EM XUONG DUNG NGOAI (Thường quy).xlsx", ExcelVersion.Version2013);
+            var worksheets = book.Worksheets.Count();
+            var list_Result = new List<ResultModel>();
+            for (var worksheetsIndex = 0; worksheetsIndex < worksheets; worksheetsIndex++)
+            {
+                Spire.Xls.Worksheet sheet = book.Worksheets[worksheetsIndex];
+                var lastrow = sheet.LastDataRow;
+                var lastcol = sheet.LastDataColumn;
+                // nếu vẫn chưa gặp end thì vẫn lấy data
+                Console.WriteLine(lastrow);
+                var location_id = 1;
+                var location = "";
+                var stt = 0;
+                for (int rowIndex = 1; rowIndex < lastrow; rowIndex++)
+                {
+                    // lấy row hiện tại
+                    Console.WriteLine("rowIndex: {0} ", rowIndex);
+                    var nowRow = sheet.Rows[rowIndex];
+                    if (nowRow == null)
+                        continue;
+
+                    string? code = nowRow.Cells[4] != null && nowRow.Cells[4].Value != "" ? nowRow.Cells[4].Value : null;
+                    if (code == null)
+                        continue;
+                    Console.WriteLine("date: {0} ", code);
+                    int? target_id = 7;
+                    if (code.Contains('A'))
+                    {
+                        target_id = 7;
+                    }
+                    else if (code.Contains('P'))
+                    {
+                        target_id = 8;
+                    }
+                    else if (code.Contains('R'))
+                    {
+                        target_id = 15;
+
+                    }
+                    if (nowRow.Cells[1] != null && nowRow.Cells[1].Value != "")
+                    {
+                        location = nowRow.Cells[1].Value;
+                        var list_location = location.Split("\r\n", StringSplitOptions.None);
+                        var location_vi = list_location[0];
+                        var location_en = list_location.Length > 1 ? list_location[1] : null;
+                        var code_location = nowRow.Cells[2].Value;
+                        var findLocation = _context.LocationModel.Where(d => d.name == location_vi && d.parent == 1444).FirstOrDefault();
+
+                        if (findLocation == null)
+                        {
+                            findLocation = new LocationModel()
+                            {
+                                name = location_vi,
+                                name_en = location_en,
+                                code = code_location,
+                                parent = 1444,
+                                stt = stt++,
+                                count_child = 0,
+                                created_at = DateTime.Now,
+                            };
+                            _context.Add(findLocation);
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            findLocation.code = code_location;
+                            findLocation.name_en = location_en;
+                            _context.Update(findLocation);
+                            _context.SaveChanges();
+                        }
+                        location_id = findLocation.id;
+                    }
+
+                    string? name = nowRow.Cells[3] != null && nowRow.Cells[3].Value != "" ? nowRow.Cells[3].Value : null;
+
+                    var findPoint = _context.PointModel.Where(d => d.code == code).FirstOrDefault();
+                    if (findPoint == null)
+                    {
+                        findPoint = new PointModel()
+                        {
+                            color = ColorTranslator.ToHtml(GenerateRandomColor(code)),
+                            code = code,
+                            name = name,
+                            frequency_id = 3,
+                            object_id = 2,
+                            location_id = location_id,
+                            target_id = target_id,
+                            created_at = DateTime.Now,
+                        };
+                        _context.Add(findPoint);
+                        _context.SaveChanges();
+                    }
+
+                }
+            }
+
+
+            return Ok(list_Result);
+        }
+        public async Task<IActionResult> importVitriNON()
+        {
+            return Ok();
+            // Khởi tạo workbook để đọc
+            Spire.Xls.Workbook book = new Spire.Xls.Workbook();
+            book.LoadFromFile("./wwwroot/data/trend/visinh/EM XUONG NON.xlsx", ExcelVersion.Version2013);
+            var worksheets = book.Worksheets.Count();
+            var list_Result = new List<ResultModel>();
+            for (var worksheetsIndex = 0; worksheetsIndex < worksheets; worksheetsIndex++)
+            {
+                Spire.Xls.Worksheet sheet = book.Worksheets[worksheetsIndex];
+                var lastrow = sheet.LastDataRow;
+                var lastcol = sheet.LastDataColumn;
+                // nếu vẫn chưa gặp end thì vẫn lấy data
+                Console.WriteLine(lastrow);
+                var location_id = 1;
+                var location = "";
+                var stt = 0;
+                for (int rowIndex = 2; rowIndex < lastrow; rowIndex++)
+                {
+                    // lấy row hiện tại
+                    Console.WriteLine("rowIndex: {0} ", rowIndex);
+                    var nowRow = sheet.Rows[rowIndex];
+                    if (nowRow == null)
+                        continue;
+
+                    string? code = nowRow.Cells[2] != null && nowRow.Cells[2].Value != "" ? nowRow.Cells[2].Value : null;
+                    if (code == null)
+                        continue;
+                    Console.WriteLine("date: {0} ", code);
+                    int? target_id = 7;
+                    if (code.Contains('A'))
+                    {
+                        target_id = 7;
+                    }
+                    else if (code.Contains('P'))
+                    {
+                        target_id = 8;
+                    }
+                    else if (code.Contains('R'))
+                    {
+                        target_id = 15;
+
+                    }
+                    if (nowRow.Cells[0] != null && nowRow.Cells[0].Value != "")
+                    {
+                        location = nowRow.Cells[0].Value;
+                        var list_location = location.Split("\r\n", StringSplitOptions.None);
+                        var location_vi = list_location[0];
+                        var location_en = list_location.Length > 1 ? list_location[1] : null;
+                        var findLocation = _context.LocationModel.Where(d => d.name == location_vi && d.parent == 1443).FirstOrDefault();
+
+                        if (findLocation == null)
+                        {
+                            findLocation = new LocationModel()
+                            {
+                                name = location_vi,
+                                name_en = location_en,
+                                parent = 1443,
+                                stt = stt++,
+                                count_child = 0,
+                                created_at = DateTime.Now,
+                            };
+                            _context.Add(findLocation);
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            findLocation.name_en = location_en;
+                            _context.Update(findLocation);
+                            _context.SaveChanges();
+                        }
+                        location_id = findLocation.id;
+                    }
+
+                    string? name = nowRow.Cells[1] != null && nowRow.Cells[1].Value != "" ? nowRow.Cells[1].Value : null;
+
+                    var findPoint = _context.PointModel.Where(d => d.code == code).FirstOrDefault();
+                    if (findPoint == null)
+                    {
+                        findPoint = new PointModel()
+                        {
+                            color = ColorTranslator.ToHtml(GenerateRandomColor(code)),
+                            code = code,
+                            name = name,
+                            frequency_id = 3,
+                            object_id = 2,
+                            location_id = location_id,
+                            target_id = target_id,
+                            created_at = DateTime.Now,
+                        };
+                        _context.Add(findPoint);
+                        _context.SaveChanges();
+                    }
+
+                }
+            }
+
 
             return Ok(list_Result);
         }

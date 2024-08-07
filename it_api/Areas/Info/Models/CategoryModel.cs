@@ -6,27 +6,27 @@ using Vue.Models;
 
 namespace Info.Models
 {
-    [Table("a_news")]
-    public class NewsModel
+    [Table("a_category")]
+    public class CategoryModel
     {
         [Key]
         public string id { get; set; }
-        public string title { get; set; }
-        public string? description { get; set; }
-        public string content { get; set; }
+        public string name { get; set; }
 
-        public bool? is_publish { get; set; }
-        public bool? is_highlight { get; set; }
-        public bool? is_hot { get; set; }
-        public string? image_url { get; set; }
         public string? created_by { get; set; }
 
 
         [ForeignKey("created_by")]
         public virtual UserModel? user_created_by { get; set; }
 
+        //public virtual List<NewsCategoryModel> list_news { get; set; }
+
         public DateTime? deleted_at { get; set; }
         public DateTime? updated_at { get; set; }
         public DateTime? created_at { get; set; }
+
+
+        [NotMapped]
+        public virtual List<NewsModel> list_news { get; set; }
     }
 }
