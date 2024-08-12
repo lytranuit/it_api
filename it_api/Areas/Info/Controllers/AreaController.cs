@@ -3,8 +3,6 @@
 
 using Holdtime.Models;
 using Info.Models;
-using it_template.Areas.Trend.Controllers;
-using iText.Commons.Actions.Contexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

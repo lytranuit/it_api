@@ -23,5 +23,18 @@ namespace it_template.Areas.Info.Controllers
             var listener = _context.GetService<DiagnosticSource>();
             (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
         }
+        protected void CopyValues<T>(T target, T source)
+        {
+            Type t = typeof(T);
+
+            var properties = t.GetProperties().Where(prop => prop.CanRead && prop.CanWrite);
+
+            foreach (var prop in properties)
+            {
+                var value = prop.GetValue(source, null);
+                //if (value != null)
+                prop.SetValue(target, value, null);
+            }
+        }
     }
 }

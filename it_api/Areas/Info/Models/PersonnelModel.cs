@@ -52,5 +52,7 @@ namespace Info.Models
         public string? NGUOIPHANCONG { get; set; }
         public string? DIADIEM { get; set; }
         public string? CONGVIEC { get; set; }
+        public string? MACC { get; set; }
+
     }
 }

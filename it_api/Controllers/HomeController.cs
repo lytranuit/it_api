@@ -8,6 +8,8 @@ using System.Net.Mime;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using PH.WorkingDaysAndTimeUtility.Configuration;
+using PH.WorkingDaysAndTimeUtility;
 
 namespace Vue.Controllers
 {
@@ -32,7 +34,58 @@ namespace Vue.Controllers
 
         public JsonResult Index()
         {
-            return Json(new { test = 1, message = DateTime.Now });
+            var wts = new List<WorkTimeSpan>() { new WorkTimeSpan()
+                { Start = new TimeSpan(7, 30, 0), End = new TimeSpan(17, 0, 0) } };
+
+            var week = new WeekDaySpan()
+            {
+                WorkDays = new Dictionary<DayOfWeek, WorkDaySpan>()
+                {
+                    {DayOfWeek.Monday, new WorkDaySpan() {TimeSpans = wts}}
+                    ,
+                    {DayOfWeek.Tuesday, new WorkDaySpan() {TimeSpans = wts}}
+                    ,
+                    {DayOfWeek.Wednesday, new WorkDaySpan() {TimeSpans = wts}}
+                    ,
+                    {DayOfWeek.Thursday, new WorkDaySpan() {TimeSpans = wts}}
+                    ,
+                    {DayOfWeek.Friday, new WorkDaySpan() {TimeSpans = wts}}
+                }
+            };
+
+            //this is the configuration for holidays: 
+            //in Italy we have this list of Holidays plus 1 day different on each province,
+            //for mine is 1 Dec (see last element of the List<AHolyDay>).
+            var italiansHoliDays = new List<AHolyDay>()
+            {
+                new HoliDay(1, 1),new HoliDay(6, 1),
+                new HoliDay(25, 4),new HoliDay(1, 5),new HoliDay(2, 6),
+                new HoliDay(15, 8),new HoliDay(1, 11),new HoliDay(8, 12),
+                new HoliDay(25, 12),new HoliDay(26, 12)
+                , new HoliDay(1, 12)
+            };
+
+            //instantiate with configuration
+            var utility = new WorkingDaysAndTimeUtility(week, italiansHoliDays);
+
+            //lets-go: add 3 working-days to Jun 1, 2015
+            var result = utility.AddWorkingDays(new DateTime(2015, 6, 1), 100);
+            var start = new DateTime(2015, 12, 31, 9, 0, 0);
+            var end = new DateTime(2016, 1, 7, 9, 0, 0);
+            var r = utility.GetWorkingDaysBetweenTwoWorkingDateTimes(start, end);
+            TimeSpan workedTime = TimeSpan.FromSeconds(0);
+
+            while (start < end)
+            {
+                var day = new DateTime(2021, 1, 1);
+                var check0 = utility.IsAWorkDay(day);
+                workedTime += TimeSpan.FromMinutes(1);
+            }
+
+            //result is Jun 5, 2015 (see holidays list) 
+            //utility.c
+            //var u = new PH.WorkingDaysAndTimeUtility.WorkingDateTimeExtension();
+            return Json(new { test = 1, message = DateTime.Now, result,r, workedTime, workedTime.TotalDays });
 
         }
 

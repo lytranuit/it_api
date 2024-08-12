@@ -39,6 +39,7 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.3" />
 		<PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="3.1.32" />
+		<PackageReference Include="PH.WorkingDaysAndTime" Version="2.0.13" />
 		<PackageReference Include="ShiftSharp" Version="2.0.1" />
 	</ItemGroup>
 	<ItemGroup>

@@ -54,7 +54,7 @@ namespace Vue
               );
 
             builder.Services.AddDbContext<NhansuContext>(options =>
-              options.UseSqlServer(Nhansu)
+              options.UseSqlServer(Nhansu, o => o.UseCompatibilityLevel(150))
               );
 
             builder.Services.AddDbContext<ItContext>(options =>

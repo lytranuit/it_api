@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Newtonsoft.Json;
 using Holdtime.Models;
 using Vue.Models;
+using Info.Models;
 
 namespace Vue.Data
 {
@@ -33,8 +34,18 @@ namespace Vue.Data
         public DbSet<Info.Models.NganhangModel> NganhangModel { get; set; }
         public DbSet<Info.Models.TrinhdoModel> TrinhdoModel { get; set; }
         public DbSet<Info.Models.LoaiHDModel> LoaiHDModel { get; set; }
+
+        public DbSet<Info.Models.CalendarModel> CalendarModel { get; set; }
+        public DbSet<Info.Models.CalendarHolidayModel> CalendarHolidayModel { get; set; }
+        public DbSet<Info.Models.ChamanModel> ChamanModel { get; set; }
+        public DbSet<Info.Models.HikModel> HikModel { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Info.Models.HikModel>().HasKey(table => new {
+                table.id,
+                table.device,
+                table.datetime
+            });
 
         }
         protected override void ConfigureConventions(ModelConfigurationBuilder builder)
