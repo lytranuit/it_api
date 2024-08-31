@@ -9,7 +9,7 @@ using Vue.Services;
 namespace it_template.Areas.Info.Controllers
 {
     [Area("Info")]
-    //[Authorize(Roles = "Administrator,Manager Holdtime,User")]
+    //[Authorize(Roles = "Administrator,Manager HR,HR,User")]
     [Authorize]
     public class BaseController : Controller
     {

@@ -6,16 +6,14 @@ using Vue.Models;
 
 namespace Info.Models
 {
-    [Table("nsMAPHONG")]
-    public class PhongModel
+    [Table("a_holiday")]
+    public class HolidayModel
     {
         [Key]
         public string id { get; set; }
-        public string? MAPHONG { get; set; }
+        public string? name { get; set; }
 
-        public string? TENPHONG { get; set; }
-        public string? MAKHUVUC { get; set; }
-
+        public DateTime? date { get; set; }
 
     }
 }

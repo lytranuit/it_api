@@ -1,6 +1,7 @@
 ﻿
 
 
+
 using Holdtime.Models;
 using Info.Models;
 using it_template.Areas.Trend.Controllers;
@@ -21,11 +22,11 @@ namespace it_template.Areas.Info.Controllers
 {
 
     [Authorize(Roles = "Administrator,HR")]
-    public class CategoryController : BaseController
+    public class ShiftController : BaseController
     {
         private readonly IConfiguration _configuration;
         private UserManager<UserModel> UserManager;
-        public CategoryController(NhansuContext context, AesOperation aes, IConfiguration configuration, UserManager<UserModel> UserMgr) : base(context, aes)
+        public ShiftController(NhansuContext context, AesOperation aes, IConfiguration configuration, UserManager<UserModel> UserMgr) : base(context, aes)
         {
             _configuration = configuration;
             UserManager = UserMgr;
@@ -34,47 +35,94 @@ namespace it_template.Areas.Info.Controllers
         [HttpPost]
         public async Task<JsonResult> Delete(string id)
         {
-            var Model = _context.CategoryModel.Where(d => d.id == id).FirstOrDefault();
+            var Model = _context.ShiftModel.Where(d => d.id == id).FirstOrDefault();
             Model.deleted_at = DateTime.Now;
             _context.Update(Model);
             _context.SaveChanges();
             return Json(new { success = true, data = Model });
         }
         [HttpPost]
-        public async Task<JsonResult> Save(CategoryModel CategoryModel)
+        public async Task<JsonResult> Save(ShiftModel ShiftModel, List<ShiftHolidayModel> list_add, List<string> list_remove, List<string> list_user)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
             var user = await UserManager.GetUserAsync(currentUser);
-            CategoryModel? CategoryModel_old;
-            if (CategoryModel.id == null)
+            ShiftModel? ShiftModel_old;
+            if (ShiftModel.id == null)
             {
-                CategoryModel.id = Guid.NewGuid().ToString();
-                CategoryModel.created_at = DateTime.Now;
-                CategoryModel.created_by = user_id;
+                ShiftModel.id = Guid.NewGuid().ToString();
+                ShiftModel.created_at = DateTime.Now;
+
+                //ShiftModel.created_by = user_id;
 
 
-                _context.CategoryModel.Add(CategoryModel);
+                _context.ShiftModel.Add(ShiftModel);
 
                 _context.SaveChanges();
 
-                CategoryModel_old = CategoryModel;
+                ShiftModel_old = ShiftModel;
 
             }
             else
             {
 
-                CategoryModel_old = _context.CategoryModel.Where(d => d.id == CategoryModel.id).FirstOrDefault();
-                CopyValues<CategoryModel>(CategoryModel_old, CategoryModel);
-                CategoryModel_old.updated_at = DateTime.Now;
+                ShiftModel_old = _context.ShiftModel.Where(d => d.id == ShiftModel.id).FirstOrDefault();
+                CopyValues<ShiftModel>(ShiftModel_old, ShiftModel);
+                ShiftModel_old.updated_at = DateTime.Now;
 
-                _context.Update(CategoryModel_old);
+                _context.Update(ShiftModel_old);
                 _context.SaveChanges();
             }
+            /////
+            if (list_remove != null && list_remove.Count() > 0)
+            {
+                var list = _context.ShiftHolidayModel.Where(d => list_remove.Contains(d.id)).ToList();
+                _context.RemoveRange(list);
+                _context.SaveChanges();
+            }
+            if (list_add != null && list_add.Count() > 0)
+            {
+                foreach (var item in list_add)
+                {
+                    item.id = Guid.NewGuid().ToString();
+                    item.shift_id = ShiftModel_old.id;
 
+                }
+                _context.AddRange(list_add);
+                _context.SaveChanges();
+            }
+            /////
+            //////
+            var list_user_old = _context.ShiftUserModel.Where(d => d.shift_id == ShiftModel_old.id).Select(d => d.person_id).ToList();
+            IEnumerable<string> list_delete_user = list_user_old.Except(list_user);
+            IEnumerable<string> list_add_user = list_user.Except(list_user_old);
 
+            if (list_add_user != null)
+            {
+                foreach (string key in list_add_user)
+                {
+                    var Model = _context.PersonnelModel.Where(d => d.id == key).FirstOrDefault();
+                    _context.Add(new ShiftUserModel()
+                    {
+                        shift_id = ShiftModel_old.id,
+                        person_id = key,
+                        email = Model.EMAIL
+                    });
+                }
+                //_context.SaveChanges();
+            }
+            if (list_delete_user != null)
+            {
+                foreach (string key in list_delete_user)
+                {
+                    ShiftUserModel ShiftUserModel = _context.ShiftUserModel.Where(d => d.shift_id == ShiftModel_old.id && d.person_id == key).First();
+                    _context.Remove(ShiftUserModel);
+                }
+                //_context.SaveChanges();
+            }
+            _context.SaveChanges();
 
-            return Json(new { success = true, data = CategoryModel_old });
+            return Json(new { success = true, data = ShiftModel_old });
         }
 
         [HttpPost]
@@ -84,17 +132,21 @@ namespace it_template.Areas.Info.Controllers
             var start = Request.Form["start"].FirstOrDefault();
             var length = Request.Form["length"].FirstOrDefault();
             int pageSize = length != null ? Convert.ToInt32(length) : 0;
+            var code = Request.Form["filters[code]"].FirstOrDefault();
             var name = Request.Form["filters[name]"].FirstOrDefault();
             var id = Request.Form["filters[id]"].FirstOrDefault();
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
-            var customerData = _context.CategoryModel.Where(d => d.deleted_at == null);
+            var customerData = _context.ShiftModel.Where(d => d.deleted_at == null);
             int recordsTotal = customerData.Count();
+            if (code != null && code != "")
+            {
+                customerData = customerData.Where(d => d.code.Contains(code));
+            }
             if (name != null && name != "")
             {
                 customerData = customerData.Where(d => d.name.Contains(name));
             }
-
             if (id != null)
             {
                 customerData = customerData.Where(d => d.id == id);
@@ -136,8 +188,27 @@ namespace it_template.Areas.Info.Controllers
 
         public JsonResult Get(string id)
         {
-            var data = _context.CategoryModel.Where(d => d.id == id).FirstOrDefault();
-            return Json(data);
+            var data = _context.ShiftModel.Where(d => d.id == id).FirstOrDefault();
+            return Json(data, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> GetUser(string id)
+        {
+            var data = _context.ShiftUserModel.Where(d => d.shift_id == id).Select(d => d.person_id).ToList();
+            return Json(data, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> holidays(int year, string id)
+        {
+            var data = _context.ShiftHolidayModel.Where(d => d.shift_id == id && d.date.Value.Year == year).ToList();
+            return Json(data, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
         private void CopyValues<T>(T target, T source)
         {

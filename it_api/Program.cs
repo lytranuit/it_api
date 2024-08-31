@@ -63,6 +63,7 @@ namespace Vue
 
             builder.Services.AddScoped<AesOperation, AesOperation>();
             builder.Services.AddScoped<ViewRender, ViewRender>();
+            builder.Services.AddScoped<TinhCong, TinhCong>();
 
             builder.Services.AddScoped<LoginMailPyme, LoginMailPyme>();
 

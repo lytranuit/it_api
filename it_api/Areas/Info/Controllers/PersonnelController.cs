@@ -5,19 +5,24 @@ using Holdtime.Models;
 using Info.Models;
 using it_template.Areas.Trend.Controllers;
 using iText.Commons.Actions.Contexts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NodaTime.TimeZones.Cldr;
+using Spire.Xls;
 using System.Data;
+using System.Drawing;
 using System.Text.Json.Serialization;
 using Vue.Data;
 using Vue.Models;
 using Vue.Services;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace it_template.Areas.Info.Controllers
 {
 
+    [Authorize(Roles = "Administrator,HR")]
     public class PersonnelController : BaseController
     {
         private readonly IConfiguration _configuration;
@@ -37,7 +42,7 @@ namespace it_template.Areas.Info.Controllers
             return Json(new { success = true, data = Model });
         }
         [HttpPost]
-        public async Task<JsonResult> Save(PersonnelModel PersonnelModel, List<string> list_category)
+        public async Task<JsonResult> Save(PersonnelModel PersonnelModel, List<string> list_shift)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
@@ -75,9 +80,60 @@ namespace it_template.Areas.Info.Controllers
                 _context.Update(PersonnelModel_old);
                 _context.SaveChanges();
             }
+            ///// 
+            //////
+            var list_shift_old = _context.ShiftUserModel.Where(d => d.person_id == PersonnelModel_old.id).Select(d => d.shift_id).ToList();
+            IEnumerable<string> list_delete = list_shift_old.Except(list_shift);
+            IEnumerable<string> list_add = list_shift.Except(list_shift_old);
 
+            if (list_add != null)
+            {
+                foreach (string key in list_add)
+                {
 
+                    _context.Add(new ShiftUserModel()
+                    {
+                        shift_id = key,
+                        person_id = PersonnelModel_old.id,
+                        email = PersonnelModel_old.EMAIL,
+
+                    });
+                }
+                //_context.SaveChanges();
+            }
+            if (list_delete != null)
+            {
+                foreach (string key in list_delete)
+                {
+                    ShiftUserModel ShiftUserModel = _context.ShiftUserModel.Where(d => d.person_id == PersonnelModel_old.id && d.shift_id == key).First();
+                    _context.Remove(ShiftUserModel);
+                }
+                //_context.SaveChanges();
+            }
+            _context.SaveChanges();
             return Json(new { success = true, data = PersonnelModel_old });
+        }
+        [HttpPost]
+        public async Task<JsonResult> SaveAutoEat(bool auto)
+        {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user_id = UserManager.GetUserId(currentUser);
+            var user = await UserManager.GetUserAsync(currentUser);
+            var email = user.Email;
+
+            var person = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
+            if (person != null)
+            {
+                person.autoeat = auto;
+                _context.Update(person);
+                _context.SaveChanges();
+                return Json(new { success = true });
+            }
+            else
+            {
+                return Json(new { success = false, message = "Không tìm thấy nhân viên" });
+            }
+
         }
 
         [HttpPost]
@@ -89,6 +145,10 @@ namespace it_template.Areas.Info.Controllers
             int pageSize = length != null ? Convert.ToInt32(length) : 0;
             var MANV = Request.Form["filters[MANV]"].FirstOrDefault();
             var HOVATEN = Request.Form["filters[HOVATEN]"].FirstOrDefault();
+            var tinhtrang = Request.Form["filters[tinhtrang]"].FirstOrDefault();
+            var MAPHONG = Request.Form["filters[MAPHONG]"].FirstOrDefault();
+            var MATRINHDO = Request.Form["filters[MATRINHDO]"].FirstOrDefault();
+            var CHUYENMON = Request.Form["filters[CHUYENMON]"].FirstOrDefault();
             var id = Request.Form["filters[id]"].FirstOrDefault();
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
@@ -102,6 +162,26 @@ namespace it_template.Areas.Info.Controllers
             {
                 customerData = customerData.Where(d => d.HOVATEN.Contains(HOVATEN));
             }
+
+            if (tinhtrang != null && tinhtrang != "")
+            {
+                customerData = customerData.Where(d => d.tinhtrang == tinhtrang);
+            }
+
+            if (MAPHONG != null && MAPHONG != "")
+            {
+                customerData = customerData.Where(d => d.MAPHONG == MAPHONG);
+            }
+
+            if (MATRINHDO != null && MATRINHDO != "")
+            {
+                customerData = customerData.Where(d => d.MATRINHDO == MATRINHDO);
+            }
+
+            if (CHUYENMON != null && CHUYENMON != "")
+            {
+                customerData = customerData.Where(d => d.CHUYENMON == CHUYENMON);
+            }
             if (id != null)
             {
                 customerData = customerData.Where(d => d.id == id);
@@ -110,37 +190,83 @@ namespace it_template.Areas.Info.Controllers
             int recordsFiltered = customerData.Count();
             var datapost = customerData.OrderBy(d => d.MANV).Skip(skip).Take(pageSize).ToList();
             //var data = new ArrayList();
-            //foreach (var record in datapost)
-            //{
-            //	var ngaythietke = record.ngaythietke != null ? record.ngaythietke.Value.ToString("yyyy-MM-dd") : null;
-            //	var ngaysodk = record.ngaysodk != null ? record.ngaysodk.Value.ToString("yyyy-MM-dd") : null;
-            //	var ngayhethanthietke = record.ngayhethanthietke != null ? record.ngayhethanthietke.Value.ToString("yyyy-MM-dd") : null;
-            //	var data1 = new
-            //	{
-            //		mahh = record.mahh,
-            //		tenhh = record.tenhh,
-            //		dvt = record.dvt,
-            //		mansx = record.mansx,
-            //		mancc = record.mancc,
-            //		tennvlgoc = record.tennvlgoc,
-            //		masothietke = record.masothietke,
-            //		ghichu_thietke = record.ghichu_thietke,
-            //		masodk = record.masodk,
-            //		ghichu_sodk = record.ghichu_sodk,
-            //		nhuongquyen = record.nhuongquyen,
-            //		ngaythietke = ngaythietke,
-            //		ngaysodk = ngaysodk,
-            //		ngayhethanthietke = ngayhethanthietke
-            //	};
-            //	data.Add(data1);
-            //}
+            foreach (var record in datapost)
+            {
+                record.list_shift = _context.ShiftUserModel.Where(d => d.person_id == record.id).Select(d => d.shift_id).ToList();
+            }
+
+
             var jsonData = new { draw = draw, recordsFiltered = recordsFiltered, recordsTotal = recordsTotal, data = datapost };
             return Json(jsonData, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
+        public async Task<JsonResult> sync()
+        {
+            //return Ok();
+            // Khởi tạo workbook để đọc
+            Spire.Xls.Workbook book = new Spire.Xls.Workbook();
+            book.LoadFromFile("./wwwroot/report/excel/Personnel File.xlsx", ExcelVersion.Version2013);
 
+            Spire.Xls.Worksheet sheet = book.Worksheets[0];
+            var lastrow = sheet.LastDataRow;
+            // nếu vẫn chưa gặp end thì vẫn lấy data    
+            Console.WriteLine(lastrow);
+            var list_Result = new List<ResultModel>();
+            var location_id = 1;
+            var location = "";
+            var stt = 0;
+            var list_person = _context.PersonnelModel.ToList();
+            for (int rowIndex = 1; rowIndex < lastrow; rowIndex++)
+            {
+                // lấy row hiện tại
+                var nowRow = sheet.Rows[rowIndex];
+                if (nowRow == null)
+                    continue;
+                // vì ta dùng 3 cột A, B, C => data của ta sẽ như sau
+                //int numcount = nowRow.Cells.Count;
+                //for(int y = 0;y<numcount - 1 ;y++)
+                var macc = nowRow.Cells[0] != null ? nowRow.Cells[0].Value : null;
+                // Xuất ra thông tin lên màn hình
+                Console.WriteLine("MS: {0} ", macc);
+                Console.WriteLine("rowIndex: {0} ", rowIndex);
+
+                if (macc == null)
+                    continue;
+
+                var name = nowRow.Cells[2] != null ? nowRow.Cells[2].Value : null;
+                name = name.ToLower().Trim();
+                PersonnelModel? findP = null;
+                //DateTime? date = nowRow.Cells[2] != null ? nowRow.Cells[2].DateTimeValue : null;
+                foreach (var p in list_person)
+                {
+                    var hoten = RemoveUnicode(p.HOVATEN).ToLower().Trim();
+                    if (hoten == name)
+                    {
+                        findP = p;
+                        break;
+                    }
+                }
+
+                if (findP != null)
+                {
+                    findP.MACC = macc;
+                    _context.Update(findP);
+                    _context.SaveChanges();
+                }
+
+
+
+                //EquipmentModel EquipmentModel = new EquipmentModel { code = code, name = name_vn, name_en = name_en, created_at = DateTime.Now };
+                //_context.Add(EquipmentModel);
+                //_context.SaveChanges();
+            }
+            //_context.AddRange(list_Result);
+            //_context.SaveChanges();
+
+            return Json(new { success = true });
+        }
         public JsonResult Get(string id)
         {
             var data = _context.PersonnelModel.Where(d => d.id == id).FirstOrDefault();
@@ -158,6 +284,32 @@ namespace it_template.Areas.Info.Controllers
                 //if (value != null)
                 prop.SetValue(target, value, null);
             }
+        }
+
+
+
+        private string RemoveUnicode(string text)
+        {
+            string[] arr1 = new string[] { "á", "à", "ả", "ã", "ạ", "â", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ă", "ắ", "ằ", "ẳ", "ẵ", "ặ",
+    "đ",
+    "é","è","ẻ","ẽ","ẹ","ê","ế","ề","ể","ễ","ệ",
+    "í","ì","ỉ","ĩ","ị",
+    "ó","ò","ỏ","õ","ọ","ô","ố","ồ","ổ","ỗ","ộ","ơ","ớ","ờ","ở","ỡ","ợ",
+    "ú","ù","ủ","ũ","ụ","ư","ứ","ừ","ử","ữ","ự",
+    "ý","ỳ","ỷ","ỹ","ỵ",};
+            string[] arr2 = new string[] { "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a", "a",
+    "d",
+    "e","e","e","e","e","e","e","e","e","e","e",
+    "i","i","i","i","i",
+    "o","o","o","o","o","o","o","o","o","o","o","o","o","o","o","o","o",
+    "u","u","u","u","u","u","u","u","u","u","u",
+    "y","y","y","y","y",};
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                text = text.Replace(arr1[i], arr2[i]);
+                text = text.Replace(arr1[i].ToUpper(), arr2[i].ToUpper());
+            }
+            return text;
         }
     }
 

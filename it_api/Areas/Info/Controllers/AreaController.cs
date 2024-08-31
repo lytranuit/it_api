@@ -3,6 +3,7 @@
 
 using Holdtime.Models;
 using Info.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ using Vue.Services;
 namespace it_template.Areas.Info.Controllers
 {
 
+    [Authorize(Roles = "Administrator,HR")]
     public class AreaController : BaseController
     {
         private readonly IConfiguration _configuration;

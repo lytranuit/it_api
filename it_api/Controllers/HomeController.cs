@@ -10,6 +10,8 @@ using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using PH.WorkingDaysAndTimeUtility.Configuration;
 using PH.WorkingDaysAndTimeUtility;
+using Info.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Vue.Controllers
 {
@@ -19,14 +21,16 @@ namespace Vue.Controllers
         protected readonly ItContext _context;
         private readonly ViewRender _view;
         protected readonly HoldTimeContext _holdtimecontext;
+        protected readonly NhansuContext _nhansuContext;
 
         private readonly IConfiguration _configuration;
 
-        public HomeController(ItContext context, HoldTimeContext holdtimecontext, IConfiguration configuration, ViewRender view)
+        public HomeController(ItContext context, HoldTimeContext holdtimecontext, NhansuContext nhansucontext, IConfiguration configuration, ViewRender view)
         {
             _configuration = configuration;
             _context = context;
             _holdtimecontext = holdtimecontext;
+            _nhansuContext = nhansucontext;
             _view = view;
             var listener = _context.GetService<DiagnosticSource>();
             (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
@@ -85,7 +89,7 @@ namespace Vue.Controllers
             //result is Jun 5, 2015 (see holidays list) 
             //utility.c
             //var u = new PH.WorkingDaysAndTimeUtility.WorkingDateTimeExtension();
-            return Json(new { test = 1, message = DateTime.Now, result,r, workedTime, workedTime.TotalDays });
+            return Json(new { test = 1, message = DateTime.Now, result, r, workedTime, workedTime.TotalDays });
 
         }
 
@@ -185,6 +189,36 @@ namespace Vue.Controllers
 
             }
             _context.SaveChanges();
+            return Json(new { success = true });
+        }
+        public async Task<JsonResult> cronjobDangkyantrua()
+        {
+            var date = DateTime.Now.AddDays(1);
+            var is_holiday = _nhansuContext.CalendarHolidayModel.Where(d => d.calendar_id == "Buổi trưa" && d.date.Value.Date == date.Date).Count();
+            if (is_holiday > 0)
+            {
+
+                return Json(new { success = true });
+            }
+            var person = _nhansuContext.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null && d.autoeat == true).ToList();
+            foreach (var record in person)
+            {
+                var find = _nhansuContext.ChamanModel.Where(d => d.MANV == record.MANV && d.date.Value.Date == date.Date && d.calendar_id == "Buổi trưa").FirstOrDefault();
+                if (find == null)
+                {
+                    var chaman = new ChamanModel()
+                    {
+                        id = Guid.NewGuid().ToString(),
+                        date = date,
+                        MANV = record.MANV,
+                        NV_id = record.id,
+                        calendar_id = "Buổi trưa"
+                    };
+                    _nhansuContext.Add(chaman);
+                }
+
+            }
+            _nhansuContext.SaveChanges();
             return Json(new { success = true });
         }
 

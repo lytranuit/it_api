@@ -6,20 +6,18 @@ using Vue.Models;
 
 namespace Info.Models
 {
-    [Table("a_chaman")]
-    public class ChamanModel
+    [Table("a_chamcong")]
+    public class ChamcongModel
     {
         [Key]
-        public string id { get; set; }
+        public int id { get; set; }
         public string MANV { get; set; }
         public string NV_id { get; set; }
-        public bool? value { get; set; }
+        public string shift_id { get; set; }
+        public string? value { get; set; }
 
         public DateTime? date { get; set; }
-        public string calendar_id { get; set; }
 
-        [NotMapped]
-        public HikModel first_hik { get; set; }
 
     }
 }

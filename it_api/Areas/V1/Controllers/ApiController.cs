@@ -113,9 +113,21 @@ namespace it_template.Areas.V1.Controllers
         }
         public async Task<JsonResult> departments()
         {
+
             var All = GetChild(0);
+            var res = new List<SelectDepartmentResponse>(){
+                new SelectDepartmentResponse
+                {
+
+                    id = "Asta",
+                    label = "Asta",
+                    name = "Asta",
+                    is_department = true,
+                    children = All
+                }
+            };
             //var jsonData = new { data = ProcessModel };
-            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            return Json(res, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
@@ -163,6 +175,22 @@ namespace it_template.Areas.V1.Controllers
 
 
 
+                }
+            }
+            if (parent == 0)
+            {
+                var user_department = _context.UserDepartmentModel.GroupBy(d => d.user_id).Select(d => d.Key).ToList();
+                var list_user_notin_department = _context.UserModel.Where(d => !user_department.Contains(d.Id) && d.deleted_at == null).ToList();
+                foreach (var user in list_user_notin_department)
+                {
+                    //var user = item.user;
+                    list.Add(new SelectDepartmentResponse
+                    {
+
+                        id = user.Id.ToString(),
+                        label = user.FullName + "<" + user.Email + ">",
+                        name = user.FullName,
+                    });
                 }
             }
             return list;

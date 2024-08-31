@@ -105,11 +105,45 @@ namespace it_template.Areas.Info.Controllers
                                            System.Globalization.CultureInfo.InvariantCulture) : date_from = DateTime.Now;
             DateTime date_to = date_to_string != null ? date_to = DateTime.ParseExact(date_to_string, "yyyy-MM-dd",
                                            System.Globalization.CultureInfo.InvariantCulture) : date_to = DateTime.Now;
-            TimeSpan start_time = new TimeSpan(10, 30, 0);
-            TimeSpan end_time = new TimeSpan(14, 0, 0);
+            var calendar = _context.CalendarModel.Where(d => d.id == type).FirstOrDefault();
+            TimeSpan start_time = calendar.time_from.Value;
+            TimeSpan end_time = calendar.time_to.Value;
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
-            var customerData = _context.PersonnelModel.Where(d => 1 == 1);
+            var customerData = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null);
+
+
+            /// CHECK PHAN QUYEN
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await UserManager.GetUserAsync(currentUser);
+            var user_id = user.Id;
+            var email = user.Email;
+            var is_admin = await UserManager.IsInRoleAsync(user, "Administrator");
+            var is_manager = await UserManager.IsInRoleAsync(user, "Manager HR");
+            var is_hr = await UserManager.IsInRoleAsync(user, "HR");
+
+            if (is_manager)
+            {
+                var person = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
+                if (person != null)
+                {
+                    var maphong = person.MAPHONG;
+                    customerData = customerData.Where(d => d.MAPHONG == maphong);
+                }
+                else
+                {
+                    customerData = customerData.Where(d => 0 == 1);
+                }
+            }
+            else if (!is_admin && !is_hr)
+            {
+                customerData = customerData.Where(d => d.EMAIL == email);
+            }
+
+            ////
+
+
+
             int recordsTotal = customerData.Count();
 
             if (search != null && search != "")
@@ -135,8 +169,8 @@ namespace it_template.Areas.Info.Controllers
             if (utility.IsAWorkDay(date_to))
                 date_working.Add(date_to);
             var list_nv = datapost.Select(d => d.MANV).ToList();
-            var list_chaman = _context.ChamanModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && list_nv.Contains(d.MANV)).ToList();
-            var list_hik = _context.HikModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && d.time >= start_time && d.time <= end_time && d.device == "A.CT.1").ToList();
+            var list_chaman = _context.ChamanModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && list_nv.Contains(d.MANV) && d.calendar_id == type).ToList();
+            var list_hik = _context.HikModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && d.time >= start_time && d.time <= end_time && d.device == "A.CT.1").OrderBy(d => d.date).ThenBy(d => d.time).ToList();
 
             foreach (var record in datapost)
             {
@@ -156,14 +190,16 @@ namespace it_template.Areas.Info.Controllers
                             date = date,
                             MANV = record.MANV,
                             NV_id = record.id,
-
+                            calendar_id = type
                         };
                     }
                     else
                     {
                         tong++;
                     }
-                    chaman.list_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date.Date).ToList();
+
+
+                    chaman.first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date.Date && d.time.Value >= new TimeSpan(10, 30, 0) && d.time.Value <= new TimeSpan(14, 0, 0)).FirstOrDefault();
 
                     d.Add(date.ToString("yyyyMMdd"), chaman);
                 }
@@ -178,7 +214,13 @@ namespace it_template.Areas.Info.Controllers
                 tong_date.Add(date.ToString("yyyyMMdd"), tong);
             }
             var deadline = DateTime.Now.Date;
-            var jsonData = new { draw = draw, recordsFiltered = recordsFiltered, recordsTotal = recordsTotal, data = data, tong_date, list_chaman, deadline };
+            var person1 = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
+            bool? autoeat = false;
+            if (person1 != null)
+            {
+                autoeat = person1.autoeat;
+            }
+            var jsonData = new { draw = draw, recordsFiltered = recordsFiltered, recordsTotal = recordsTotal, data = data, tong_date, list_chaman, deadline, auto = autoeat };
             return Json(jsonData, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
@@ -207,7 +249,35 @@ namespace it_template.Areas.Info.Controllers
                                            System.Globalization.CultureInfo.InvariantCulture) : date_to = DateTime.Now;
             TimeSpan start_time = new TimeSpan(10, 30, 0);
             TimeSpan end_time = new TimeSpan(14, 0, 0);
-            var customerData = _context.PersonnelModel.Where(d => 1 == 1);
+            var customerData = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null);
+            /// CHECK PHAN QUYEN
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await UserManager.GetUserAsync(currentUser);
+            var user_id = user.Id;
+            var email = user.Email;
+            var is_admin = await UserManager.IsInRoleAsync(user, "Administrator");
+            var is_manager = await UserManager.IsInRoleAsync(user, "Manager HR");
+            var is_hr = await UserManager.IsInRoleAsync(user, "HR");
+
+            if (is_manager)
+            {
+                var person = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
+                if (person != null)
+                {
+                    var maphong = person.MAPHONG;
+                    customerData = customerData.Where(d => d.MAPHONG == maphong);
+                }
+                else
+                {
+                    customerData = customerData.Where(d => 0 == 1);
+                }
+            }
+            else if (!is_admin && !is_hr)
+            {
+                customerData = customerData.Where(d => d.EMAIL == email);
+            }
+
+
 
 
             int recordsFiltered = customerData.Count();

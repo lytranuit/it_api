@@ -5,6 +5,7 @@ using Holdtime.Models;
 using Info.Models;
 using it_template.Areas.Trend.Controllers;
 using iText.Commons.Actions.Contexts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ using Vue.Services;
 
 namespace it_template.Areas.Info.Controllers
 {
+    [Authorize(Roles = "Administrator,HR")]
 
     public class NganhangController : BaseController
     {

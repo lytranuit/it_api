@@ -54,5 +54,42 @@ namespace Info.Models
         public string? CONGVIEC { get; set; }
         public string? MACC { get; set; }
 
+        public bool? autoeat { get; set; }
+
+        public double? tien_luong { get; set; }
+
+        public double? tien_luong_dot1 { get; set; }
+
+        public double? tien_luong_kpi { get; set; }
+
+        public double? tong_thunhap { get; set; }
+        public int? nguoiphuthuoc { get; set; }
+
+        public double? tyle_bhxh { get; set; }
+
+        public double? tyle_bhyt { get; set; }
+
+        public double? tyle_dpcd { get; set; }
+
+        public double? tyle_bhtn { get; set; }
+
+        public double? cty_bhxh { get; set; }
+
+        public double? cty_bhyt { get; set; }
+
+        public double? cty_dpcd { get; set; }
+
+        public double? cty_bhtn { get; set; }
+
+
+        public double? pc_thamnien { get; set; }
+        public double? pc_khuvuc { get; set; }
+        public double? pc_thuhut { get; set; }
+        public double? pc_thuebang { get; set; }
+        public double? pc_trachnhiem { get; set; }
+        public double? pc_khac { get; set; }
+
+        [NotMapped]
+        public List<string>? list_shift { get; set; }
     }
 }
