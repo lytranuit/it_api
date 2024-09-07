@@ -27,6 +27,7 @@ namespace Vue.Models
         public string image_url { get; set; }
         public string image_sign { get; set; }
         public string key_private { get; set; }
+        public string? report_for { get; set; }
         public bool is_sign
         {
             get

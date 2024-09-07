@@ -212,7 +212,8 @@ namespace Vue.Controllers
                         date = date,
                         MANV = record.MANV,
                         NV_id = record.id,
-                        calendar_id = "Buổi trưa"
+                        calendar_id = "Buổi trưa",
+                        value = true
                     };
                     _nhansuContext.Add(chaman);
                 }

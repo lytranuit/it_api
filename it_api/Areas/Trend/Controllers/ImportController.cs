@@ -38,7 +38,7 @@ namespace it_template.Areas.Trend.Controllers
 
         public async Task<IActionResult> import1T()
         {
-            return Ok();
+            //return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
             book.LoadFromFile("./wwwroot/data/trend/nuoc/Raw data of 1T.xlsx", ExcelVersion.Version2013);
@@ -83,7 +83,7 @@ namespace it_template.Areas.Trend.Controllers
                 decimal? chitieu_11 = nowRow.Cells[5] != null && nowRow.Cells[5].Value != "NA" && nowRow.Cells[5].Value != "" ? (decimal)nowRow.Cells[5].NumberValue : null;
                 decimal? chitieu_12 = nowRow.Cells[6] != null && nowRow.Cells[6].Value != "NA" && nowRow.Cells[6].Value != "" ? (decimal)nowRow.Cells[6].NumberValue : null;
                 decimal? chitieu_13 = nowRow.Cells[7] != null && nowRow.Cells[7].Value != "NA" && nowRow.Cells[7].Value != "" ? (decimal)nowRow.Cells[7].NumberValue : null;
-                var chitieu_14 = nowRow.Cells[8] != null && nowRow.Cells[8].Value != "NA" && nowRow.Cells[8].Value != "" ? nowRow.Cells[8].Value : null;
+                var chitieu_14 = nowRow.Cells[8] != null && nowRow.Cells[8].Value.Trim() != "NA" && nowRow.Cells[8].Value != "" ? nowRow.Cells[8].Value : null;
 
                 var findPoint = _context.PointModel.Where(d => d.code == code_vitri).FirstOrDefault();
                 if (findPoint == null)
@@ -101,7 +101,10 @@ namespace it_template.Areas.Trend.Controllers
                     _context.SaveChanges();
                 }
 
-
+                //if(date == DateTime.Parse("03/04/2024"))
+                //{
+                //    Console.WriteLine(1);
+                //}
                 if (chitieu_9 != null)
                 {
                     var chitieu_9_int = chitieu_9 == "ĐẠT" ? 1 : 0;
@@ -127,7 +130,34 @@ namespace it_template.Areas.Trend.Controllers
                         //_context.SaveChanges();
                     }
 
-                    //_context.SaveChanges();
+                    _context.SaveChanges();
+                }
+                if (chitieu_14 != null)
+                {
+                    var chitieu_14_int = chitieu_14 == "ĐẠT" ? 1 : 0;
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 14 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
+                    {
+                        var result_14 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_14_int,
+                            target_id = 14,
+                            date = date,
+                            object_id = 3,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_14);
+                        _context.Add(result_14);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_14_int;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
+
+                    _context.SaveChanges();
                 }
                 if (chitieu_10 != null)
                 {
@@ -141,6 +171,7 @@ namespace it_template.Areas.Trend.Controllers
                             value = chitieu_10_int,
                             target_id = 10,
                             date = date,
+                            object_id = 3,
                             created_at = DateTime.Now
                         };
                         list_Result.Add(result_10);
@@ -152,7 +183,7 @@ namespace it_template.Areas.Trend.Controllers
                         _context.Update(find_result);
                         //_context.SaveChanges();
                     }
-                    //_context.SaveChanges();
+                    _context.SaveChanges();
                 }
 
                 if (chitieu_11 != null)
@@ -166,6 +197,7 @@ namespace it_template.Areas.Trend.Controllers
                             value = chitieu_11,
                             target_id = 11,
                             date = date,
+                            object_id = 3,
                             created_at = DateTime.Now
                         };
                         list_Result.Add(result_11);
@@ -177,7 +209,7 @@ namespace it_template.Areas.Trend.Controllers
                         _context.Update(find_result);
                         //_context.SaveChanges();
                     }
-                    //_context.SaveChanges();
+                    _context.SaveChanges();
                 }
                 if (chitieu_12 != null)
                 {
@@ -190,6 +222,7 @@ namespace it_template.Areas.Trend.Controllers
                             value = chitieu_12,
                             target_id = 12,
                             date = date,
+                            object_id = 3,
                             created_at = DateTime.Now
                         };
                         list_Result.Add(result_12);
@@ -201,7 +234,7 @@ namespace it_template.Areas.Trend.Controllers
                         _context.Update(find_result);
                         //_context.SaveChanges();
                     }
-                    //_context.SaveChanges();
+                    _context.SaveChanges();
                 }
 
                 if (chitieu_13 != null)
@@ -215,6 +248,7 @@ namespace it_template.Areas.Trend.Controllers
                             value = chitieu_13,
                             target_id = 13,
                             date = date,
+                            object_id = 3,
                             created_at = DateTime.Now
                         };
                         list_Result.Add(result_13);
@@ -226,7 +260,7 @@ namespace it_template.Areas.Trend.Controllers
                         _context.Update(find_result);
                         //_context.SaveChanges();
                     }
-                    //_context.SaveChanges();
+                    _context.SaveChanges();
                 }
                 //EquipmentModel EquipmentModel = new EquipmentModel { code = code, name = name_vn, name_en = name_en, created_at = DateTime.Now };
                 //_context.Add(EquipmentModel);
@@ -241,7 +275,7 @@ namespace it_template.Areas.Trend.Controllers
 
         public async Task<IActionResult> import4T()
         {
-            return Ok();
+            //return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
             book.LoadFromFile("./wwwroot/data/trend/nuoc/Raw data of 4T.xlsx", ExcelVersion.Version2013);
@@ -286,7 +320,7 @@ namespace it_template.Areas.Trend.Controllers
                 decimal? chitieu_11 = nowRow.Cells[5] != null && nowRow.Cells[5].Value != "NA" && nowRow.Cells[5].Value != "" ? (decimal)nowRow.Cells[5].NumberValue : null;
                 decimal? chitieu_12 = nowRow.Cells[6] != null && nowRow.Cells[6].Value != "NA" && nowRow.Cells[6].Value != "" ? (decimal)nowRow.Cells[6].NumberValue : null;
                 decimal? chitieu_13 = nowRow.Cells[7] != null && nowRow.Cells[7].Value != "NA" && nowRow.Cells[7].Value != "" ? (decimal)nowRow.Cells[7].NumberValue : null;
-                var chitieu_14 = nowRow.Cells[8] != null && nowRow.Cells[8].Value != "NA" && nowRow.Cells[8].Value != "" ? nowRow.Cells[8].Value : null;
+                var chitieu_14 = nowRow.Cells[8] != null && nowRow.Cells[8].Value.Trim() != "NA" && nowRow.Cells[8].Value != "" ? nowRow.Cells[8].Value : null;
 
                 var findPoint = _context.PointModel.Where(d => d.code == code_vitri).FirstOrDefault();
                 if (findPoint == null)
@@ -332,6 +366,33 @@ namespace it_template.Areas.Trend.Controllers
 
                     //_context.SaveChanges();
                 }
+                if (chitieu_14 != null)
+                {
+                    var chitieu_14_int = chitieu_14 == "ĐẠT" ? 1 : 0;
+                    var find_result = _context.ResultModel.Where(d => d.target_id == 14 && d.date == date && d.point_id == findPoint.id).FirstOrDefault();
+                    if (find_result == null)
+                    {
+                        var result_14 = new ResultModel()
+                        {
+                            point_id = findPoint.id,
+                            value = chitieu_14_int,
+                            target_id = 14,
+                            date = date,
+                            object_id = 3,
+                            created_at = DateTime.Now
+                        };
+                        list_Result.Add(result_14);
+                        _context.Add(result_14);
+                    }
+                    else
+                    {
+                        find_result.value = chitieu_14_int;
+                        _context.Update(find_result);
+                        //_context.SaveChanges();
+                    }
+
+                    _context.SaveChanges();
+                }
                 if (chitieu_10 != null)
                 {
                     var chitieu_10_int = chitieu_10 == "ĐẠT" ? 1 : 0;
@@ -344,6 +405,7 @@ namespace it_template.Areas.Trend.Controllers
                             value = chitieu_10_int,
                             target_id = 10,
                             date = date,
+                            object_id = 3,
                             created_at = DateTime.Now
                         };
                         list_Result.Add(result_10);
@@ -369,6 +431,7 @@ namespace it_template.Areas.Trend.Controllers
                             value = chitieu_11,
                             target_id = 11,
                             date = date,
+                            object_id = 3,
                             created_at = DateTime.Now
                         };
                         list_Result.Add(result_11);
@@ -393,6 +456,7 @@ namespace it_template.Areas.Trend.Controllers
                             value = chitieu_12,
                             target_id = 12,
                             date = date,
+                            object_id = 3,
                             created_at = DateTime.Now
                         };
                         list_Result.Add(result_12);
@@ -418,6 +482,7 @@ namespace it_template.Areas.Trend.Controllers
                             value = chitieu_13,
                             target_id = 13,
                             date = date,
+                            object_id = 3,
                             created_at = DateTime.Now
                         };
                         list_Result.Add(result_13);

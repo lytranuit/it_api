@@ -50,6 +50,7 @@ namespace Info.Models
         public string? LOAIHD { get; set; }
 
         public string? NGUOIPHANCONG { get; set; }
+        public string? MAQUANLYTRUCTIEP { get; set; }
         public string? DIADIEM { get; set; }
         public string? CONGVIEC { get; set; }
         public string? MACC { get; set; }

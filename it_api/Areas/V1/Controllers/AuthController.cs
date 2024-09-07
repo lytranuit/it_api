@@ -22,6 +22,7 @@ namespace it_template.Areas.V1.Controllers
     public class AuthController : Controller
     {
         private readonly ItContext _context;
+        private readonly NhansuContext _nhansucontext;
         private readonly UserManager<UserModel> UserManager;
 
         private readonly IConfiguration _configuration;
@@ -29,7 +30,7 @@ namespace it_template.Areas.V1.Controllers
         private readonly LoginMailPyme _LoginMailPyme;
         private AuthManager _authManager;
 
-        public AuthController(ItContext context, UserManager<UserModel> UserMgr, SignInManager<UserModel> signInManager, IConfiguration configuration, LoginMailPyme LoginMailPyme, AuthManager auth)
+        public AuthController(ItContext context, NhansuContext nhansucontext, UserManager<UserModel> UserMgr, SignInManager<UserModel> signInManager, IConfiguration configuration, LoginMailPyme LoginMailPyme, AuthManager auth)
         {
             _context = context;
             _configuration = configuration;
@@ -37,6 +38,7 @@ namespace it_template.Areas.V1.Controllers
             _LoginMailPyme = LoginMailPyme;
             _signInManager = signInManager;
             _authManager = auth;
+            _nhansucontext = nhansucontext;
 
             var listener = _context.GetService<DiagnosticSource>();
             (listener as DiagnosticListener).SubscribeWithAdapter(new CommandInterceptor());
@@ -116,6 +118,17 @@ namespace it_template.Areas.V1.Controllers
                     responseJson.authed = true;
                     responseJson.token = await _authManager.CreateToken(user);
                     var roles = await UserManager.GetRolesAsync(user);
+                    var person = _nhansucontext.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault();
+                    string? report_for = null;
+                    if (person != null)
+                    {
+                        var report_for_person = _nhansucontext.PersonnelModel.Where(d => d.id == person.MAQUANLYTRUCTIEP).FirstOrDefault();
+                        if (report_for_person != null)
+                        {
+                            var report_for_user = _context.UserModel.Where(d => d.Email.ToLower() == report_for_person.EMAIL.ToLower()).FirstOrDefault();
+                            report_for = report_for_user != null ? report_for_user.Id : null;
+                        }
+                    }
                     responseJson.user = new UserInfo()
                     {
                         roles = roles,
@@ -124,6 +137,7 @@ namespace it_template.Areas.V1.Controllers
                         FullName = user.FullName,
                         image_url = user.image_url,
                         image_sign = user.image_sign,
+                        report_for = report_for,
                         key_private = _configuration["Key_Access"]
                     };
                     ////
@@ -159,6 +173,17 @@ namespace it_template.Areas.V1.Controllers
                 responseJson.authed = true;
                 responseJson.token = await _authManager.CreateToken(user);
                 var roles = await UserManager.GetRolesAsync(user);
+                var person = _nhansucontext.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault();
+                string? report_for = null;
+                if (person != null)
+                {
+                    var report_for_person = _nhansucontext.PersonnelModel.Where(d => d.id == person.id).FirstOrDefault();
+                    if (report_for_person != null)
+                    {
+                        var report_for_user = _context.UserModel.Where(d => d.Email.ToLower() == report_for_person.EMAIL.ToLower()).FirstOrDefault();
+                        report_for = report_for_user != null ? report_for_user.Id : null;
+                    }
+                }
                 responseJson.user = new UserInfo()
                 {
                     roles = roles,
@@ -167,6 +192,7 @@ namespace it_template.Areas.V1.Controllers
                     FullName = user.FullName,
                     image_url = user.image_url,
                     image_sign = user.image_sign,
+                    report_for = report_for,
                     key_private = _configuration["Key_Access"]
                 };
                 ////

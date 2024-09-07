@@ -48,6 +48,7 @@ namespace Vue.Data
         public DbSet<Info.Models.HikModel> HikModel { get; set; }
         public DbSet<Info.Models.HolidayModel> HolidayModel { get; set; }
         public DbSet<Info.Models.OptionModel> OptionModel { get; set; }
+        public DbSet<Info.Models.OrderletterModel> OrderletterModel { get; set; }
         public DbSet<UserModel> UserModel { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

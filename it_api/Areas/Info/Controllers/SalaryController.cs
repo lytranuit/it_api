@@ -184,6 +184,7 @@ namespace it_template.Areas.Info.Controllers
                 if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[30].FormulaNumberValue)
                 {
                     nRow.Cells[31].NumberValue = (double)tamungdot1;
+                    sheet.CalculateAllValue();
                 }
 
                 ////Cập nhật database
@@ -213,7 +214,7 @@ namespace it_template.Areas.Info.Controllers
                 person.thue_tncn = (decimal)Convert.ToSingle(nRow.Cells[28].FormulaValue);
                 person.dpcd = (decimal)Convert.ToSingle(nRow.Cells[29].FormulaValue);
                 person.thuclanh = (decimal)Convert.ToSingle(nRow.Cells[30].FormulaValue);
-                person.tamungdot1 = (decimal)Convert.ToSingle(nRow.Cells[31].FormulaValue);
+                person.tamungdot1 = (decimal)Convert.ToSingle(nRow.Cells[31].EnvalutedValue);
                 person.conlai = (decimal)Convert.ToSingle(nRow.Cells[32].FormulaValue);
 
                 _context.Update(person);

@@ -66,9 +66,9 @@ namespace it_template.Areas.Info.Controllers
                 tong = (decimal)data_cong["tongcong"];
             }
 
-
+            var tongthunhap = record.FirstOrDefault().tong_thunhap;
             //var noibat = _context.
-            return Json(new { message = data.message, tin_moi, highlight, cate, phep, tong, conglam }, new System.Text.Json.JsonSerializerOptions()
+            return Json(new { message = data.message, tin_moi, highlight, cate, phep, tong, conglam, tongthunhap }, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });

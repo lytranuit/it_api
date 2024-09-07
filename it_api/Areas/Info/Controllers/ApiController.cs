@@ -126,8 +126,7 @@ namespace it_template.Areas.Info.Controllers
             {
                 var children = _context.PersonnelModel.Where(d => d.MAPHONG == item.name).Select(d => new SelectDepartmentResponse()
                 {
-                    is_department = false
-                    ,
+                    is_department = false,
                     id = d.id,
                     label = d.HOVATEN,
                     name = d.HOVATEN

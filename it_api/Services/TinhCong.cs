@@ -138,18 +138,21 @@ namespace Vue.Services
                                 NV_id = record.id,
                                 shift_id = shift.ShiftModel.id,
                                 value = "",
+                                value_new = "",
+                                is_duyet = true,
                             };
                             if (shift.first_hik != null)
                             {
                                 congModel.value = "X";
+                                congModel.value_new = "X";
                             }
                             if (list_holidays.Contains(c.date))
                             {
                                 congModel.value = "NL";
+                                congModel.value_new = "NL";
                             }
                             if (addCongMoi)
                             {
-
                                 CongMoi.Add(congModel);
                             }
                         }

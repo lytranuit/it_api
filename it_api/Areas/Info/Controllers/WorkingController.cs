@@ -1,29 +1,17 @@
 ﻿
 
 
-using Holdtime.Models;
 using Info.Models;
-using it_template.Areas.Trend.Controllers;
-using iText.Commons.Actions.Contexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using PH.WorkingDaysAndTimeUtility.Configuration;
-using PH.WorkingDaysAndTimeUtility;
 using System.Collections;
 using System.Data;
 using System.Text.Json.Serialization;
 using Vue.Data;
 using Vue.Models;
 using Vue.Services;
-using System.Dynamic;
 using Spire.Xls;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Point85.ShiftSharp.Schedule;
-using NodaTime.TimeZones.Cldr;
 
 namespace it_template.Areas.Info.Controllers
 {
