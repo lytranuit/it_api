@@ -38,7 +38,7 @@ namespace it_template.Areas.Trend.Controllers
 
         public async Task<IActionResult> import1T()
         {
-            //return Ok();
+            return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
             book.LoadFromFile("./wwwroot/data/trend/nuoc/Raw data of 1T.xlsx", ExcelVersion.Version2013);
@@ -275,7 +275,7 @@ namespace it_template.Areas.Trend.Controllers
 
         public async Task<IActionResult> import4T()
         {
-            //return Ok();
+            return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
             book.LoadFromFile("./wwwroot/data/trend/nuoc/Raw data of 4T.xlsx", ExcelVersion.Version2013);
