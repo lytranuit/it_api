@@ -76,6 +76,10 @@ namespace it_template.Areas.V1.Controllers
         [HttpPost]
         public async Task<JsonResult> login(string email, string password)
         {
+            if (!email.Contains("@"))
+            {
+                email = email + "@astahealthcare.com";
+            }
             var pass = password;
             var user = _context.UserModel.Where(x => x.Email.ToLower() == email.ToLower() && x.deleted_at == null).FirstOrDefault();
             LoginResponse responseJson = new LoginResponse()
@@ -177,7 +181,7 @@ namespace it_template.Areas.V1.Controllers
                 string? report_for = null;
                 if (person != null)
                 {
-                    var report_for_person = _nhansucontext.PersonnelModel.Where(d => d.id == person.id).FirstOrDefault();
+                    var report_for_person = _nhansucontext.PersonnelModel.Where(d => d.id == person.MAQUANLYTRUCTIEP).FirstOrDefault();
                     if (report_for_person != null)
                     {
                         var report_for_user = _context.UserModel.Where(d => d.Email.ToLower() == report_for_person.EMAIL.ToLower()).FirstOrDefault();

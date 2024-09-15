@@ -29,7 +29,6 @@ using System.Diagnostics;
 namespace it_template.Areas.Info.Controllers
 {
 
-    [Authorize(Roles = "Administrator,HR")]
     public class SalaryController : BaseController
     {
         private readonly IConfiguration _configuration;
@@ -50,6 +49,7 @@ namespace it_template.Areas.Info.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrator,HR Lương")]
         public async Task<JsonResult> Delete(string id)
         {
             var Model = _context.SalaryModel.Where(d => d.id == id).FirstOrDefault();
@@ -60,6 +60,7 @@ namespace it_template.Areas.Info.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Administrator,HR Lương")]
         public async Task<JsonResult> tinhluong(string id)
         {
             var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
@@ -240,6 +241,7 @@ namespace it_template.Areas.Info.Controllers
 
         }
         [HttpPost]
+        [Authorize(Roles = "Administrator,HR Lương")]
         public async Task<JsonResult> sendphieuluong(string id)
         {
             var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
@@ -288,6 +290,7 @@ namespace it_template.Areas.Info.Controllers
 
         }
         [HttpPost]
+        [Authorize(Roles = "Administrator,HR Lương")]
         public async Task<JsonResult> Save(SalaryModel SalaryModel, List<string> list_person)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
@@ -449,11 +452,11 @@ namespace it_template.Areas.Info.Controllers
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
             var user = await UserManager.GetUserAsync(currentUser);
-            var person = _context.PersonnelModel.Where(d => d.EMAIL == user.Email).FirstOrDefault();
+            var person = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault();
             var MANV = person.MANV;
 
             var data = _context.SalaryUserModel.Where(d => d.MANV == MANV).Include(d => d.salary).Select(d => d.salary).ToList();
-            data = data.Where(d => d.deleted_at == null).ToList();
+            data = data.Where(d => d.deleted_at == null && d.status == "Đã khóa").ToList();
             return Json(data, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
