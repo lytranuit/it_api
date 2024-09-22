@@ -14,7 +14,8 @@ namespace Vue.Models
         public string? name_en { get; set; }
         public string? unit { get; set; }
         public string? value_type { get; set; }
-        public string? text_yes { get; set; }
+		public string? type { get; set; }
+		public string? text_yes { get; set; }
         public string? text_no { get; set; }
         public string? text_yes_en { get; set; }
         public string? text_no_en { get; set; }
