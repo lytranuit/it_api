@@ -191,7 +191,7 @@ namespace it_template.Areas.Info.Controllers
 			}
 
 			int recordsFiltered = customerData.Count();
-			var datapost = customerData.OrderBy(d => d.MANV).Skip(skip).Take(pageSize).ToList();
+			var datapost = customerData.OrderByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV).Skip(skip).Take(pageSize).ToList();
 			var data = new ArrayList();
 			var utility = GetSchedule(type);
 			var date_working = utility.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);

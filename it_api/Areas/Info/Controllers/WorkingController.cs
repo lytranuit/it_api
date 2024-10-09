@@ -12,6 +12,8 @@ using Vue.Data;
 using Vue.Models;
 using Vue.Services;
 using Spire.Xls;
+using Microsoft.EntityFrameworkCore;
+using Spire.Xls.Collections;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -135,7 +137,7 @@ namespace it_template.Areas.Info.Controllers
             //TimeSpan end_time = new TimeSpan(14, 0, 0);
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
-            var customerData = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null);
+            var customerData = _context.PersonnelModel.Where(d => (d.NGAYNGHIVIEC == null || d.NGAYNGHIVIEC > date_from));
 
 
             /// CHECK PHAN QUYEN
@@ -153,7 +155,14 @@ namespace it_template.Areas.Info.Controllers
                 if (person != null)
                 {
                     var maphong = person.MAPHONG;
-                    customerData = customerData.Where(d => d.MAPHONG == maphong);
+                    if (email == "thao.pdp@astahealthcare.com")
+                    {
+                        customerData = customerData.Where(d => d.MAPHONG == maphong || d.MAPHONG == "22");
+                    }
+                    else
+                    {
+                        customerData = customerData.Where(d => d.MAPHONG == maphong);
+                    }
                 }
                 else
                 {
@@ -184,7 +193,7 @@ namespace it_template.Areas.Info.Controllers
             }
 
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderBy(d => d.MANV).Skip(skip).Take(pageSize).ToList();
+            var datapost = customerData.OrderByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV).Skip(skip).Take(pageSize).ToList();
 
 
             var data = _tinhcong.cong(datapost, date_from, date_to);
@@ -224,7 +233,7 @@ namespace it_template.Areas.Info.Controllers
                                            System.Globalization.CultureInfo.InvariantCulture) : date_to = DateTime.Now;
             TimeSpan start_time = new TimeSpan(10, 30, 0);
             TimeSpan end_time = new TimeSpan(14, 0, 0);
-            var customerData = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null);
+            var customerData = _context.PersonnelModel.Where(d => (d.NGAYNGHIVIEC == null || d.NGAYNGHIVIEC > date_from));
 
             /// CHECK PHAN QUYEN
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
@@ -241,7 +250,14 @@ namespace it_template.Areas.Info.Controllers
                 if (person != null)
                 {
                     var maphong = person.MAPHONG;
-                    customerData = customerData.Where(d => d.MAPHONG == maphong);
+                    if (email == "thao.pdp@astahealthcare.com")
+                    {
+                        customerData = customerData.Where(d => d.MAPHONG == maphong || d.MAPHONG == "22");
+                    }
+                    else
+                    {
+                        customerData = customerData.Where(d => d.MAPHONG == maphong);
+                    }
                 }
                 else
                 {
@@ -253,24 +269,35 @@ namespace it_template.Areas.Info.Controllers
                 customerData = customerData.Where(d => d.EMAIL == email);
             }
 
-
-
+            if (department != null)
+            {
+                customerData = customerData.Where(d => d.MAPHONG == department);
+            }
+            if (search != null && search != "")
+            {
+                customerData = customerData.Where(d => d.MANV.Contains(search) || d.HOVATEN.Contains(search));
+            }
+            if (id != null)
+            {
+                customerData = customerData.Where(d => d.id == id);
+            }
 
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderBy(d => d.MANV).ToList();
+            var datapost_all = customerData.OrderBy(d => d.MANV).ToList();
             var data = new ArrayList();
 
-            var list_nv = datapost.Select(d => d.MANV).ToList();
+            var list_nv = datapost_all.Select(d => d.MANV).ToList();
             var ChamcongModel = _context.ChamcongModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && list_nv.Contains(d.MANV)).ToList();
             var list_hik = _context.HikModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && d.device != "A.CT.1").OrderBy(d => d.date).ThenBy(d => d.time).ToList();
             var list_holidays = _context.HolidayModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to).Select(d => d.date).ToList();
 
 
+            var user_shift_vs = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "S-VS" || d.shift.code == "C-VS")).Select(d => d.person_id).Distinct().ToList();
+            var user_shift_full = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "F")).Select(d => d.person_id).Distinct().ToList();
+            var user_shift = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "S" || d.shift.code == "C")).Select(d => d.person_id).Distinct().ToList();
 
-            var shift_s = _context.ShiftModel.Where(d => d.code == "S").FirstOrDefault();
-            var shift_c = _context.ShiftModel.Where(d => d.code == "C").FirstOrDefault();
-            var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
-            var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+
+
             ///EXCEL
             /// 
             var viewPath = "wwwroot/report/excel/Bảng chấm công.xlsx";
@@ -278,12 +305,25 @@ namespace it_template.Areas.Info.Controllers
             string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
             Workbook workbook = new Workbook();
             workbook.LoadFromFile(viewPath);
+
+
+            ////Nhân viên chính thức / thử việc / học việc
+
+            var datapost = datapost_all.Where(d => d.LOAIHD != "DV" && user_shift.Contains(d.id)).ToList();
             if (datapost.Count > 0)
             {
                 Worksheet sheet = workbook.Worksheets[0];
+                ////Bt
+                var shift_s = _context.ShiftModel.Where(d => d.code == "S").FirstOrDefault();
+                var shift_c = _context.ShiftModel.Where(d => d.code == "C").FirstOrDefault();
+                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
+                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
 
                 sheet.Range["C3"].DateTimeValue = date_from;
                 sheet.Range["U2"].DateTimeValue = date_to;
+                sheet.Range["BM10"].Value = $"Đông Hòa, ngày {date_to.ToString("dd")} tháng {date_to.ToString("MM")} năm {date_to.ToString("yy")}";
+
+
                 int stt = 0;
                 var start_r = 6;
                 DataTable dt = new DataTable();
@@ -304,15 +344,31 @@ namespace it_template.Areas.Info.Controllers
                     DataRow dr1 = dt.NewRow();
                     dr1["stt"] = (++stt);
                     dr1["HOVATEN"] = record.HOVATEN;
+                    var ngaynhanviec = record.NGAYNHANVIEC;
+                    var ngaynghiviec = record.NGAYNGHIVIEC;
                     //decimal tong = 0;
 
                     //dr1["tong"] = tong;
                     var start_c = 2;
                     date_check = date_from;
+
+                    var nRow = sheet.Rows[start_r];
+
+                    var phepdauky = _tinhcong.phepnam(record, date_from);
+
+                    nRow.Cells[74].NumberValue = phepdauky.Value;
                     while (date_check <= date_to)
                     {
                         CellRange originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
-                        if (utility_s.IsAWorkDay(date_check))
+                        if (ngaynhanviec != null && ngaynhanviec > date_check)
+                        {
+
+                        }
+                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        {
+
+                        }
+                        else if (utility_s.IsAWorkDay(date_check))
                         {
                             var cong_sModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_s.id).FirstOrDefault();
                             if (cong_sModel == null)
@@ -356,7 +412,7 @@ namespace it_template.Areas.Info.Controllers
                             }
                             dr1[date_check.ToString("yyyyMMdd") + "-S"] = cong_sModel.value;
                         }
-                        var nRow = sheet.Rows[start_r];
+
                         var cell = nRow.Cells[start_c++];
                         sheet.Copy(originDataRang, cell, true);
 
@@ -364,7 +420,15 @@ namespace it_template.Areas.Info.Controllers
 
 
                         originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
-                        if (utility_c.IsAWorkDay(date_check))
+                        if (ngaynhanviec != null && ngaynhanviec > date_check)
+                        {
+
+                        }
+                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        {
+
+                        }
+                        else if (utility_c.IsAWorkDay(date_check))
                         {
                             var cong_cModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_c.id).FirstOrDefault();
                             if (cong_cModel == null)
@@ -412,7 +476,6 @@ namespace it_template.Areas.Info.Controllers
 
 
 
-                        nRow = sheet.Rows[start_r];
                         cell = nRow.Cells[start_c++];
                         sheet.Copy(originDataRang, cell, CopyRangeOptions.All);
 
@@ -438,12 +501,629 @@ namespace it_template.Areas.Info.Controllers
                 if (utility_c.IsAWorkDay(date_to))
                     date_working_c.Add(date_to);
 
-                double tongcong = (date_working_s.Count() / 2) + (date_working_c.Count() / 2);
+                double tongcong = (date_working_s.Count() + date_working_c.Count()) / 2;
 
                 sheet.Range["BM3"].NumberValue = tongcong;
                 //sheet.Range["E145"].Value = start_r.ToString();
                 sheet.InsertDataTable(dt, false, 7, 1);
                 sheet.CalculateAllValue();
+            }
+
+            ////Nhân viên DV
+
+            datapost = datapost_all.Where(d => d.LOAIHD == "DV" && user_shift.Contains(d.id)).ToList();
+            if (datapost.Count > 0)
+            {
+                Worksheet sheet = workbook.Worksheets[1];
+                ////Bt
+                var shift_s = _context.ShiftModel.Where(d => d.code == "S").FirstOrDefault();
+                var shift_c = _context.ShiftModel.Where(d => d.code == "C").FirstOrDefault();
+                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
+                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+
+                sheet.Range["C3"].DateTimeValue = date_from;
+                sheet.Range["U2"].DateTimeValue = date_to;
+                sheet.Range["BM10"].Value = $"Đông Hòa, ngày {date_to.ToString("dd")} tháng {date_to.ToString("MM")} năm {date_to.ToString("yy")}";
+                int stt = 0;
+                var start_r = 6;
+                DataTable dt = new DataTable();
+                dt.Columns.Add("stt", typeof(int));
+                dt.Columns.Add("HOVATEN", typeof(string));
+                //dt.Columns.Add("tong", typeof(decimal));
+                var date_check = date_from;
+                while (date_check <= date_to)
+                {
+                    dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-S", typeof(string));
+                    dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-C", typeof(string));
+                    date_check = date_check.AddDays(1);
+                }
+                sheet.InsertRow(8, datapost.Count(), InsertOptionsType.FormatAsAfter);
+
+                foreach (var record in datapost)
+                {
+                    DataRow dr1 = dt.NewRow();
+                    dr1["stt"] = (++stt);
+                    dr1["HOVATEN"] = record.HOVATEN;
+                    var ngaynhanviec = record.NGAYNHANVIEC;
+                    var ngaynghiviec = record.NGAYNGHIVIEC;
+                    //decimal tong = 0;
+
+                    //dr1["tong"] = tong;
+                    var start_c = 2;
+                    date_check = date_from;
+                    var nRow = sheet.Rows[start_r];
+
+                    var phepdauky = _tinhcong.phepnam(record, date_from);
+
+                    nRow.Cells[74].NumberValue = phepdauky.Value;
+                    while (date_check <= date_to)
+                    {
+                        CellRange originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
+                        if (ngaynhanviec != null && ngaynhanviec > date_check)
+                        {
+
+                        }
+                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        {
+
+                        }
+                        else if (utility_s.IsAWorkDay(date_check))
+                        {
+                            var cong_sModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_s.id).FirstOrDefault();
+                            if (cong_sModel == null)
+                            {
+                                cong_sModel = new ChamcongModel()
+                                {
+                                    date = date_check,
+                                    MANV = record.MANV,
+                                    NV_id = record.id,
+                                    shift_id = shift_s.id,
+                                    value = "",
+                                };
+                                var first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date_check && d.time.Value >= shift_s.time_from && d.time.Value <= shift_s.time_to).FirstOrDefault();
+
+                                if (first_hik != null)
+                                {
+                                    cong_sModel.value = "X";
+                                }
+                                if (list_holidays.Contains(date_check))
+                                {
+                                    cong_sModel.value = "NL";
+                                }
+                            }
+                            switch (cong_sModel.value)
+                            {
+                                case "X":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 11).ToString()];
+                                    break;
+                                case "P":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 12).ToString()];
+                                    break;
+                                case "KL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 13).ToString()];
+                                    break;
+                                case "NL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 14).ToString()];
+                                    break;
+                                default:
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 16).ToString()];
+                                    break;
+                            }
+                            dr1[date_check.ToString("yyyyMMdd") + "-S"] = cong_sModel.value;
+                        }
+
+                        var cell = nRow.Cells[start_c++];
+                        sheet.Copy(originDataRang, cell, true);
+
+
+
+
+                        originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
+                        if (ngaynhanviec != null && ngaynhanviec > date_check)
+                        {
+
+                        }
+                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        {
+
+                        }
+                        else if (utility_c.IsAWorkDay(date_check))
+                        {
+                            var cong_cModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_c.id).FirstOrDefault();
+                            if (cong_cModel == null)
+                            {
+                                cong_cModel = new ChamcongModel()
+                                {
+                                    date = date_check,
+                                    MANV = record.MANV,
+                                    NV_id = record.id,
+                                    shift_id = shift_c.id,
+                                    value = "",
+                                };
+                                var first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date_check && d.time.Value >= shift_c.time_from && d.time.Value <= shift_c.time_to).FirstOrDefault();
+
+                                if (first_hik != null)
+                                {
+                                    cong_cModel.value = "X";
+                                }
+                                if (list_holidays.Contains(date_check))
+                                {
+                                    cong_cModel.value = "NL";
+                                }
+                            }
+
+                            switch (cong_cModel.value)
+                            {
+                                case "X":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 11).ToString()];
+                                    break;
+                                case "P":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 12).ToString()];
+                                    break;
+                                case "KL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 13).ToString()];
+                                    break;
+                                case "NL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 14).ToString()];
+                                    break;
+                                default:
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 16).ToString()];
+                                    break;
+                            }
+                            dr1[date_check.ToString("yyyyMMdd") + "-C"] = cong_cModel.value;
+                        }
+
+
+
+                        cell = nRow.Cells[start_c++];
+                        sheet.Copy(originDataRang, cell, CopyRangeOptions.All);
+
+                        date_check = date_check.AddDays(1);
+                    }
+                    dt.Rows.Add(dr1);
+                    start_r++;
+                    //CellRange originDataRang = sheet.Range["A7:BZ7"];
+                    //CellRange targetDataRang = sheet.Range["A" + start_r + ":BZ" + start_r];
+                    //sheet.Copy(originDataRang, targetDataRang, true);
+                }
+
+                ////// Tổng công trong tháng
+                var date_working_s = utility_s.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
+                if (utility_s.IsAWorkDay(date_from))
+                    date_working_s.Add(date_from);
+                if (utility_s.IsAWorkDay(date_to))
+                    date_working_s.Add(date_to);
+
+                var date_working_c = utility_c.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
+                if (utility_c.IsAWorkDay(date_from))
+                    date_working_c.Add(date_from);
+                if (utility_c.IsAWorkDay(date_to))
+                    date_working_c.Add(date_to);
+
+                double tongcong = (date_working_s.Count() + date_working_c.Count()) / 2;
+
+                sheet.Range["BM3"].NumberValue = tongcong;
+                //sheet.Range["E145"].Value = start_r.ToString();
+                sheet.InsertDataTable(dt, false, 7, 1);
+                sheet.CalculateAllValue();
+            }
+            else
+            {
+                WorksheetsCollection worksheets = workbook.Worksheets;
+
+                worksheets.Remove("Dịch vụ");
+
+            }
+
+            ////Nhân viên vệ sinh bảo vệ
+            datapost = datapost_all.Where(d => user_shift_vs.Contains(d.id)).ToList();
+            if (datapost.Count > 0)
+            {
+                Worksheet sheet = workbook.Worksheets["Vệ sinh-Bảo vệ-T7"];
+                ////Bt
+                var shift_s = _context.ShiftModel.Where(d => d.code == "S-VS").FirstOrDefault();
+                var shift_c = _context.ShiftModel.Where(d => d.code == "C-VS").FirstOrDefault();
+                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
+                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+
+                sheet.Range["C3"].DateTimeValue = date_from;
+                sheet.Range["U2"].DateTimeValue = date_to;
+                sheet.Range["BM10"].Value = $"Đông Hòa, ngày {date_to.ToString("dd")} tháng {date_to.ToString("MM")} năm {date_to.ToString("yy")}";
+                int stt = 0;
+                var start_r = 6;
+                DataTable dt = new DataTable();
+                dt.Columns.Add("stt", typeof(int));
+                dt.Columns.Add("HOVATEN", typeof(string));
+                //dt.Columns.Add("tong", typeof(decimal));
+                var date_check = date_from;
+                while (date_check <= date_to)
+                {
+                    dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-S", typeof(string));
+                    dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-C", typeof(string));
+                    date_check = date_check.AddDays(1);
+                }
+                sheet.InsertRow(8, datapost.Count(), InsertOptionsType.FormatAsAfter);
+
+                foreach (var record in datapost)
+                {
+                    DataRow dr1 = dt.NewRow();
+                    dr1["stt"] = (++stt);
+                    dr1["HOVATEN"] = record.HOVATEN;
+                    var ngaynhanviec = record.NGAYNHANVIEC;
+                    var ngaynghiviec = record.NGAYNGHIVIEC;
+                    //decimal tong = 0;
+
+                    //dr1["tong"] = tong;
+                    var start_c = 2;
+                    date_check = date_from;
+                    var nRow = sheet.Rows[start_r];
+
+                    var phepdauky = _tinhcong.phepnam(record, date_from);
+
+                    nRow.Cells[74].NumberValue = phepdauky.Value;
+                    while (date_check <= date_to)
+                    {
+                        CellRange originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
+                        if (ngaynhanviec != null && ngaynhanviec > date_check)
+                        {
+
+                        }
+                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        {
+
+                        }
+                        else if (utility_s.IsAWorkDay(date_check))
+                        {
+                            var cong_sModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_s.id).FirstOrDefault();
+                            if (cong_sModel == null)
+                            {
+                                cong_sModel = new ChamcongModel()
+                                {
+                                    date = date_check,
+                                    MANV = record.MANV,
+                                    NV_id = record.id,
+                                    shift_id = shift_s.id,
+                                    value = "",
+                                };
+                                var first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date_check && d.time.Value >= shift_s.time_from && d.time.Value <= shift_s.time_to).FirstOrDefault();
+
+                                if (first_hik != null)
+                                {
+                                    cong_sModel.value = "X";
+                                }
+                                if (list_holidays.Contains(date_check))
+                                {
+                                    cong_sModel.value = "NL";
+                                }
+                            }
+                            switch (cong_sModel.value)
+                            {
+                                case "X":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 11).ToString()];
+                                    break;
+                                case "P":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 12).ToString()];
+                                    break;
+                                case "KL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 13).ToString()];
+                                    break;
+                                case "NL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 14).ToString()];
+                                    break;
+                                default:
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 16).ToString()];
+                                    break;
+                            }
+                            dr1[date_check.ToString("yyyyMMdd") + "-S"] = cong_sModel.value;
+                        }
+
+                        var cell = nRow.Cells[start_c++];
+                        sheet.Copy(originDataRang, cell, true);
+
+
+
+
+                        originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
+                        if (ngaynhanviec != null && ngaynhanviec > date_check)
+                        {
+
+                        }
+                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        {
+
+                        }
+                        else if (utility_c.IsAWorkDay(date_check))
+                        {
+                            var cong_cModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_c.id).FirstOrDefault();
+                            if (cong_cModel == null)
+                            {
+                                cong_cModel = new ChamcongModel()
+                                {
+                                    date = date_check,
+                                    MANV = record.MANV,
+                                    NV_id = record.id,
+                                    shift_id = shift_c.id,
+                                    value = "",
+                                };
+                                var first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date_check && d.time.Value >= shift_c.time_from && d.time.Value <= shift_c.time_to).FirstOrDefault();
+
+                                if (first_hik != null)
+                                {
+                                    cong_cModel.value = "X";
+                                }
+                                if (list_holidays.Contains(date_check))
+                                {
+                                    cong_cModel.value = "NL";
+                                }
+                            }
+
+                            switch (cong_cModel.value)
+                            {
+                                case "X":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 11).ToString()];
+                                    break;
+                                case "P":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 12).ToString()];
+                                    break;
+                                case "KL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 13).ToString()];
+                                    break;
+                                case "NL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 14).ToString()];
+                                    break;
+                                default:
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 16).ToString()];
+                                    break;
+                            }
+                            dr1[date_check.ToString("yyyyMMdd") + "-C"] = cong_cModel.value;
+                        }
+
+
+
+                        cell = nRow.Cells[start_c++];
+                        sheet.Copy(originDataRang, cell, CopyRangeOptions.All);
+
+                        date_check = date_check.AddDays(1);
+                    }
+                    dt.Rows.Add(dr1);
+                    start_r++;
+                    //CellRange originDataRang = sheet.Range["A7:BZ7"];
+                    //CellRange targetDataRang = sheet.Range["A" + start_r + ":BZ" + start_r];
+                    //sheet.Copy(originDataRang, targetDataRang, true);
+                }
+
+                ////// Tổng công trong tháng
+                var date_working_s = utility_s.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
+                if (utility_s.IsAWorkDay(date_from))
+                    date_working_s.Add(date_from);
+                if (utility_s.IsAWorkDay(date_to))
+                    date_working_s.Add(date_to);
+
+                var date_working_c = utility_c.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
+                if (utility_c.IsAWorkDay(date_from))
+                    date_working_c.Add(date_from);
+                if (utility_c.IsAWorkDay(date_to))
+                    date_working_c.Add(date_to);
+
+                double tongcong = (date_working_s.Count() + date_working_c.Count()) / 2;
+
+                sheet.Range["BM3"].NumberValue = tongcong;
+                //sheet.Range["E145"].Value = start_r.ToString();
+                sheet.InsertDataTable(dt, false, 7, 1);
+                sheet.CalculateAllValue();
+            }
+            else
+            {
+                WorksheetsCollection worksheets = workbook.Worksheets;
+
+                worksheets.Remove("Vệ sinh-Bảo vệ-T7");
+
+
+            }
+            ////Nhân viên Full 
+            datapost = datapost_all.Where(d => user_shift_full.Contains(d.id)).ToList();
+            if (datapost.Count > 0)
+            {
+                Worksheet sheet = workbook.Worksheets["Full công"];
+                ////Bt
+                var shift_s = _context.ShiftModel.Where(d => d.code == "F").FirstOrDefault();
+                var shift_c = _context.ShiftModel.Where(d => d.code == "F").FirstOrDefault();
+                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
+                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+
+                sheet.Range["C3"].DateTimeValue = date_from;
+                sheet.Range["U2"].DateTimeValue = date_to;
+                sheet.Range["BM10"].Value = $"Đông Hòa, ngày {date_to.ToString("dd")} tháng {date_to.ToString("MM")} năm {date_to.ToString("yy")}";
+                int stt = 0;
+                var start_r = 6;
+                DataTable dt = new DataTable();
+                dt.Columns.Add("stt", typeof(int));
+                dt.Columns.Add("HOVATEN", typeof(string));
+                //dt.Columns.Add("tong", typeof(decimal));
+                var date_check = date_from;
+                while (date_check <= date_to)
+                {
+                    dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-S", typeof(string));
+                    dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-C", typeof(string));
+                    date_check = date_check.AddDays(1);
+                }
+                sheet.InsertRow(8, datapost.Count(), InsertOptionsType.FormatAsAfter);
+
+                foreach (var record in datapost)
+                {
+                    DataRow dr1 = dt.NewRow();
+                    dr1["stt"] = (++stt);
+                    dr1["HOVATEN"] = record.HOVATEN;
+                    var ngaynhanviec = record.NGAYNHANVIEC;
+                    var ngaynghiviec = record.NGAYNGHIVIEC;
+                    //decimal tong = 0;
+
+                    //dr1["tong"] = tong;
+                    var start_c = 2;
+                    date_check = date_from;
+                    var nRow = sheet.Rows[start_r];
+
+                    var phepdauky = _tinhcong.phepnam(record, date_from);
+
+                    nRow.Cells[74].NumberValue = phepdauky.Value;
+                    while (date_check <= date_to)
+                    {
+                        CellRange originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
+                        if (ngaynhanviec != null && ngaynhanviec > date_check)
+                        {
+
+                        }
+                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        {
+
+                        }
+                        else if (utility_s.IsAWorkDay(date_check))
+                        {
+                            var cong_sModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_s.id).FirstOrDefault();
+                            if (cong_sModel == null)
+                            {
+                                cong_sModel = new ChamcongModel()
+                                {
+                                    date = date_check,
+                                    MANV = record.MANV,
+                                    NV_id = record.id,
+                                    shift_id = shift_s.id,
+                                    value = "",
+                                };
+                                var first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date_check && d.time.Value >= shift_s.time_from && d.time.Value <= shift_s.time_to).FirstOrDefault();
+
+                                if (first_hik != null)
+                                {
+                                    cong_sModel.value = "X";
+                                }
+                                if (list_holidays.Contains(date_check))
+                                {
+                                    cong_sModel.value = "NL";
+                                }
+                            }
+                            switch (cong_sModel.value)
+                            {
+                                case "X":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 11).ToString()];
+                                    break;
+                                case "P":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 12).ToString()];
+                                    break;
+                                case "KL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 13).ToString()];
+                                    break;
+                                case "NL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 14).ToString()];
+                                    break;
+                                default:
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 16).ToString()];
+                                    break;
+                            }
+                            dr1[date_check.ToString("yyyyMMdd") + "-S"] = cong_sModel.value;
+                        }
+
+                        var cell = nRow.Cells[start_c++];
+                        sheet.Copy(originDataRang, cell, true);
+
+
+
+
+                        originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
+                        if (ngaynhanviec != null && ngaynhanviec > date_check)
+                        {
+
+                        }
+                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        {
+
+                        }
+                        else if (utility_c.IsAWorkDay(date_check))
+                        {
+                            var cong_cModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_c.id).FirstOrDefault();
+                            if (cong_cModel == null)
+                            {
+                                cong_cModel = new ChamcongModel()
+                                {
+                                    date = date_check,
+                                    MANV = record.MANV,
+                                    NV_id = record.id,
+                                    shift_id = shift_c.id,
+                                    value = "",
+                                };
+                                var first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date_check && d.time.Value >= shift_c.time_from && d.time.Value <= shift_c.time_to).FirstOrDefault();
+
+                                if (first_hik != null)
+                                {
+                                    cong_cModel.value = "X";
+                                }
+                                if (list_holidays.Contains(date_check))
+                                {
+                                    cong_cModel.value = "NL";
+                                }
+                            }
+
+                            switch (cong_cModel.value)
+                            {
+                                case "X":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 11).ToString()];
+                                    break;
+                                case "P":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 12).ToString()];
+                                    break;
+                                case "KL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 13).ToString()];
+                                    break;
+                                case "NL":
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 14).ToString()];
+                                    break;
+                                default:
+                                    originDataRang = sheet.Range["E" + (datapost.Count + 16).ToString()];
+                                    break;
+                            }
+                            dr1[date_check.ToString("yyyyMMdd") + "-C"] = cong_cModel.value;
+                        }
+
+
+
+                        cell = nRow.Cells[start_c++];
+                        sheet.Copy(originDataRang, cell, CopyRangeOptions.All);
+
+                        date_check = date_check.AddDays(1);
+                    }
+                    dt.Rows.Add(dr1);
+                    start_r++;
+                    //CellRange originDataRang = sheet.Range["A7:BZ7"];
+                    //CellRange targetDataRang = sheet.Range["A" + start_r + ":BZ" + start_r];
+                    //sheet.Copy(originDataRang, targetDataRang, true);
+                }
+
+                ////// Tổng công trong tháng
+                var date_working_s = utility_s.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
+                if (utility_s.IsAWorkDay(date_from))
+                    date_working_s.Add(date_from);
+                if (utility_s.IsAWorkDay(date_to))
+                    date_working_s.Add(date_to);
+
+                var date_working_c = utility_c.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
+                if (utility_c.IsAWorkDay(date_from))
+                    date_working_c.Add(date_from);
+                if (utility_c.IsAWorkDay(date_to))
+                    date_working_c.Add(date_to);
+
+                double tongcong = (date_working_s.Count() + date_working_c.Count()) / 2;
+
+                sheet.Range["BM3"].NumberValue = tongcong;
+                //sheet.Range["E145"].Value = start_r.ToString();
+                sheet.InsertDataTable(dt, false, 7, 1);
+                sheet.CalculateAllValue();
+            }
+            else
+            {
+                WorksheetsCollection worksheets = workbook.Worksheets;
+
+                worksheets.Remove("Full công");
+
+
             }
 
             workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);

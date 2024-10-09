@@ -132,6 +132,21 @@ namespace it_template.Areas.V1.Controllers
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
+        public async Task<JsonResult> Users()
+        {
+            var users = _context.UserModel.Where(d => d.deleted_at == null).Select(d => new
+            {
+                id = d.Id,
+                name = $"{d.FullName}<{d.Email}>",
+                email = d.Email,
+                fullName = d.FullName,
+            }).ToList();
+            return Json(users, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+
         private List<SelectDepartmentResponse> GetChild(int parent)
         {
             var DepartmentModel = _context.DepartmentModel.Where(d => d.deleted_at == null && d.parent == parent).OrderBy(d => d.stt).ToList();
@@ -258,7 +273,7 @@ namespace it_template.Areas.V1.Controllers
                         else if (filter_type_bc == 2)
                         {
 
-                            list_fre = new List<int> { 2 };
+                            list_fre = new List<int> { 1, 2 };
                         }
                         else if (filter_type_bc == 3)
                         {

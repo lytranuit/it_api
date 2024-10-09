@@ -44,13 +44,15 @@ namespace Vue.Data
         public DbSet<Info.Models.CalendarModel> CalendarModel { get; set; }
         public DbSet<Info.Models.CalendarHolidayModel> CalendarHolidayModel { get; set; }
         public DbSet<Info.Models.ChamanModel> ChamanModel { get; set; }
-		public DbSet<Info.Models.ChamanKhachModel> ChamanKhachModel { get; set; }
-		public DbSet<Info.Models.ChamcongModel> ChamcongModel { get; set; }
+        public DbSet<Info.Models.ChamanKhachModel> ChamanKhachModel { get; set; }
+        public DbSet<Info.Models.ChamcongModel> ChamcongModel { get; set; }
         public DbSet<Info.Models.HikModel> HikModel { get; set; }
         public DbSet<Info.Models.HolidayModel> HolidayModel { get; set; }
         public DbSet<Info.Models.OptionModel> OptionModel { get; set; }
         public DbSet<Info.Models.OrderletterModel> OrderletterModel { get; set; }
+        public DbSet<Info.Models.OrderletterDetailsModel> OrderletterDetailsModel { get; set; }
         public DbSet<UserModel> UserModel { get; set; }
+        public DbSet<EmailModel> EmailModel { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Info.Models.HikModel>().HasKey(table => new

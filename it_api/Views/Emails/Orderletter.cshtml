@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = null;
+}
+<center>
+    <table width="100%">
+        <tbody>
+            <tr>
+                <td>
+                    <div>
+
+                        <p style="text-align:center;margin-bottom:30px">
+                            <img style="border:0;height:auto;line-height:100%;outline:none;text-decoration:none;width:400px;" src="@Model.link_logo" />
+                        </p>
+                        <div style="box-sizing:border-box;margin:0;padding:0 40px">
+                            <h2 style="text-align:left">Xin chào,</h2>
+                            <p style="text-align:left">Có một đơn báo công/nghỉ phép của <b>@Model.user</b> cần bạn phê duyệt.</p>
+                            <p style="text-align:left"><b>Chi tiết:</b></p>
+                            <table style="width:100%">
+                                <thead style="background:#f1f5fa;">
+                                    <tr>
+                                        <td style="padding:10px;">Ngày</td>
+                                        <td style="padding:10px;">Ca</td>
+                                        <td style="padding:10px;">Báo công</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.data)
+                                    {
+                                        <tr>
+                                            <td style="padding:10px;">@item.date.ToString("yyyy-MM-dd")</td>
+                                            <td style="padding:10px;">@item.shift.name</td>
+                                            <td style="padding:10px;">@item.value_new</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <p>Hoặc bạn có thể xem chi tiết ở link dưới:</p>
+                            <p style="text-align:center;">
+                                <a href="@Model.link" style="padding: 10px 30px;
+                                    display:inline-block;
+                                    background: #ffb009;
+                                    color: white;
+                                    text-decoration: none;
+                                    font-size: 13px;
+                                    border-radius: 5px;">
+                                    Đi Đến
+                                </a>
+                            </p>
+                            <p style="text-align:left">Trân trọng.</p>
+                            <p style="text-align:left">ASTA</p>
+                            <br>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</center>

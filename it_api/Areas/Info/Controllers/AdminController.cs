@@ -47,6 +47,7 @@ namespace it_template.Areas.Info.Controllers
             decimal tong = 0;
             decimal phep = 0;
             decimal conglam = 0;
+            decimal phepconlai = 0;
             var record = _context.PersonnelModel.Where(d => d.EMAIL == email).ToList();
             if (record.Count() > 0)
             {
@@ -64,11 +65,13 @@ namespace it_template.Areas.Info.Controllers
                 conglam = (decimal)data_cong["tong"];
                 phep = (decimal)data_cong["tongphep"];
                 tong = (decimal)data_cong["tongcong"];
+                phepconlai = (decimal)data_cong["phepnamconlai"];
             }
+
 
             var tongthunhap = record.FirstOrDefault().tong_thunhap;
             //var noibat = _context.
-            return Json(new { message = data.message, tin_moi, highlight, cate, phep, tong, conglam, tongthunhap }, new System.Text.Json.JsonSerializerOptions()
+            return Json(new { message = data.message, tin_moi, highlight, cate, phep, tong, conglam, tongthunhap, phepconlai }, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });

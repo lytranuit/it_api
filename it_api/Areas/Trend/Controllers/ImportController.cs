@@ -19,6 +19,7 @@ using Microsoft.CodeAnalysis;
 using System.Drawing;
 using System.Security.Cryptography;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace it_template.Areas.Trend.Controllers
 {
@@ -1733,16 +1734,17 @@ namespace it_template.Areas.Trend.Controllers
 
         public async Task<IActionResult> dataVisinhKho()
         {
-            //return Ok();
+            return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
             //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw data for of microbial results of  equiment quality monitoring_Kho 2023.xlsx", ExcelVersion.Version2013);
             //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw data for of microbial results of  equiment quality monitoring_Kho 2024.xlsx", ExcelVersion.Version2013);
-            book.LoadFromFile("./wwwroot/data/trend/visinh/Raw/Raw data for of microbial results of  equiment quality monitoring_Kho 2024.xlsx", ExcelVersion.Version2013);
+            book.LoadFromFile("./wwwroot/data/trend/visinh/081024/Raw data for of microbial results of  equiment quality monitoring_Kho 2023.xlsx", ExcelVersion.Version2013);
             //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw/Raw data for of microbial results of room quality monitoring_  RD _2024.xlsx", ExcelVersion.Version2013);
 
             var worksheets = book.Worksheets.Count();
             var list_Result = new List<ResultModel>();
+            var error = new List<string>();
             for (var worksheetsIndex = 0; worksheetsIndex < worksheets; worksheetsIndex++)
             {
                 Spire.Xls.Worksheet sheet = book.Worksheets[worksheetsIndex];
@@ -1776,6 +1778,7 @@ namespace it_template.Areas.Trend.Controllers
                         var findPoint = _context.PointModel.Where(d => d.code == code_vitri).FirstOrDefault();
                         if (findPoint == null)
                         {
+                            error.Add("No VT: " + code_vitri);
                             continue;
                         }
 
@@ -1829,7 +1832,7 @@ namespace it_template.Areas.Trend.Controllers
             //_context.AddRange(list_Result);
             _context.SaveChanges();
 
-            return Ok(list_Result);
+            return Ok(error);
         }
         public async Task<IActionResult> dataVisinhTPCN()
         {
@@ -1931,7 +1934,7 @@ namespace it_template.Areas.Trend.Controllers
 
         public async Task<IActionResult> dataVisinhQC()
         {
-            //return Ok();
+            return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
             book.LoadFromFile("./wwwroot/data/trend/visinh/Raw/Raw data for of microbial results of room quality monitoring_QC- GRADE D.xlsx", ExcelVersion.Version2013);

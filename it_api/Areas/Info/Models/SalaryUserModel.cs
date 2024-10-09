@@ -28,9 +28,9 @@ namespace Info.Models
         public string? HOVATEN { get; set; }
         public string? CHUCVU { get; set; }
         public string? BOPHAN { get; set; }
-		public string? MABOPHAN { get; set; }
+        public string? MABOPHAN { get; set; }
 
-		public decimal? ngaycongchuan { get; set; }
+        public decimal? ngaycongchuan { get; set; }
         public decimal? ngaycongthucte { get; set; }
         public decimal? luongcb { get; set; }
         public decimal? luongdongbhxh { get; set; }
@@ -62,6 +62,19 @@ namespace Info.Models
         public decimal? thuclanh { get; set; }
         public decimal? tamungdot1 { get; set; }
         public decimal? conlai { get; set; }
+        public decimal? tongphep { get; set; }
+        public decimal? phepconlai { get; set; }
+        public decimal? phepdauky { get; set; }
+        public decimal? khoantru { get; set; }
+        public decimal? khoancong { get; set; }
+
+        public string? note_khoantru { get; set; }
+        public string? note_khoancong { get; set; }
+
+        public decimal? tyle_bhxh { get; set; }
+        public decimal? tyle_bhyt { get; set; }
+        public decimal? tyle_bhtn { get; set; }
+        public decimal? tyle_dpcd { get; set; }
 
     }
 }

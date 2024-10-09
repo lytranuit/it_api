@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = null;
+}
+<center>
+    <table width="100%">
+        <tbody>
+            <tr>
+                <td>
+                    <div>
+
+                        <p style="text-align:center;margin-bottom:30px">
+                            <img style="border:0;height:auto;line-height:100%;outline:none;text-decoration:none;width:400px;" src="@Model.link_logo" />
+                        </p>
+                        <div style="box-sizing:border-box;margin:0;padding:0 40px">
+                            <h2 style="text-align:left">Xin chào,</h2>
+                            <p style="text-align:left">Đơn báo của bạn đã được không được phê duyệt.</p>
+                            <p><b>Lý do: </b></p>
+                            <p style="background: #e3e3e3;
+                                        padding: 10px;">@Model.note</p>
+                            <p>Hoặc bạn có thể xem chi tiết ở link dưới:</p>
+                            <p style="text-align:center;">
+                                <a href="@Model.link" style="padding: 10px 30px;
+                                    display:inline-block;
+                                    background: red;
+                                    color: white;
+                                    text-decoration: none;
+                                    font-size: 13px;
+                                    border-radius: 5px;">
+                                    Đi Đến
+                                </a>
+                            </p>
+                            <p style="text-align:left">Trân trọng.</p>
+                            <p style="text-align:left">ASTA</p>
+                            <br>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</center>

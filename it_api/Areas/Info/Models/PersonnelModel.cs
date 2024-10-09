@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using System.Text;
 using Vue.Models;
 
 namespace Info.Models
@@ -56,6 +59,8 @@ namespace Info.Models
         public string? MACC { get; set; }
 
         public bool? autoeat { get; set; }
+        public double? ngayphep { get; set; }
+        public DateTime? ngayphep_date { get; set; }
 
         public double? tien_luong { get; set; }
 
@@ -90,7 +95,41 @@ namespace Info.Models
         public double? pc_trachnhiem { get; set; }
         public double? pc_khac { get; set; }
 
+        public bool? is_bhxh { get; set; }
+        public bool? is_thue { get; set; }
         [NotMapped]
         public List<string>? list_shift { get; set; }
+
+        public string NormalizeName
+        {
+            get
+            {
+                // Chuyển về chữ thường
+                string normalized = HOVATEN.ToLower();
+
+                // Loại bỏ dấu tiếng Việt
+                if (string.IsNullOrWhiteSpace(normalized))
+                    return normalized;
+                normalized = normalized.Replace('đ', 'd').Replace('Đ', 'D');
+                normalized = normalized.Normalize(NormalizationForm.FormD);
+                var chars = normalized.ToCharArray();
+                StringBuilder sb = new StringBuilder();
+
+                foreach (var c in chars)
+                {
+                    UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                    if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                    {
+                        sb.Append(c);
+                    }
+                }
+                normalized = sb.ToString().Normalize(NormalizationForm.FormC);
+                // Xóa khoảng trắng thừa
+                normalized = Regex.Replace(normalized, @"\s+", " ").Trim();
+
+                return normalized;
+            }
+        }
     }
+
 }

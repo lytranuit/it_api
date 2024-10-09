@@ -15,12 +15,35 @@
 
 	<ItemGroup>
 	  <None Remove="appsettings.Development.json~RF3ce72485.TMP" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\AudioRender.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCCore.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDK.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\AnalyzeData.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\AudioIntercom.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCAlarm.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCAlarm.lib" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCCoreDevCfg.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCDisplay.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCGeneralCfgMgr.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCGeneralCfgMgr.lib" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCIndustry.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCPlayBack.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCPreview.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCPreview.lib" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\HCVoiceTalk.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\libiconv2.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\OpenAL32.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\StreamTransClient.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDKCom\SystemTransform.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\PlayCtrl.dll" />
+	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\SuperRender.dll" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="FreeSpire.Office" Version="8.2.0" />
 		<PackageReference Include="CertificateManager" Version="1.0.8" />
 		<PackageReference Include="ColorHashSharp" Version="1.0.0" />
 		<PackageReference Include="FreeSpire.XLS" Version="14.2.0" />
+		<PackageReference Include="Hik.Api" Version="2.0.0" />
 		<PackageReference Include="itext7" Version="8.0.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.7" />
