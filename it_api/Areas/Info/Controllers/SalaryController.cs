@@ -177,7 +177,7 @@ namespace it_template.Areas.Info.Controllers
                     var tyle_bhtn = record.tyle_bhtn ?? 0;
                     var tyle_dpcd = record.tyle_dpcd ?? 0;
                     var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
-
+                    var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
 
                     var nRow = sheet.Rows[start_r];
 
@@ -237,6 +237,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[32].NumberValue = (double)tamungdot1;
                         sheet.CalculateAllValue();
                     }
+                    nRow.Cells[36].Value = stk;
                     //if (record.LOAIHD == "DV")
                     //{
                     //    ///Cthu
@@ -352,6 +353,7 @@ namespace it_template.Areas.Info.Controllers
                     var tyle_bhtn = record.tyle_bhtn ?? 0;
                     var tyle_dpcd = record.tyle_dpcd ?? 0;
                     var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
+                    var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
 
 
                     var nRow = sheet.Rows[start_r];
@@ -412,6 +414,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[32].NumberValue = (double)tamungdot1;
                         sheet.CalculateAllValue();
                     }
+                    nRow.Cells[36].Value = stk;
 
                     start_r++;
 
@@ -471,6 +474,7 @@ namespace it_template.Areas.Info.Controllers
                     var tyle_bhtn = record.tyle_bhtn ?? 0;
                     var tyle_dpcd = record.tyle_dpcd ?? 0;
                     var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
+                    var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
 
 
                     var nRow = sheet.Rows[start_r];
@@ -530,6 +534,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[32].NumberValue = (double)tamungdot1;
                         sheet.CalculateAllValue();
                     }
+                    nRow.Cells[36].Value = stk;
 
 
                     start_r++;
@@ -591,6 +596,7 @@ namespace it_template.Areas.Info.Controllers
                     var tyle_bhtn = record.tyle_bhtn ?? 0;
                     var tyle_dpcd = record.tyle_dpcd ?? 0;
                     var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
+                    var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
 
 
                     var nRow = sheet.Rows[start_r];
@@ -651,6 +657,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[32].NumberValue = (double)tamungdot1;
                         sheet.CalculateAllValue();
                     }
+                    nRow.Cells[36].Value = stk;
 
                     start_r++;
 
@@ -719,6 +726,7 @@ namespace it_template.Areas.Info.Controllers
                     var tyle_bhtn = record.tyle_bhtn ?? 0;
                     var tyle_dpcd = record.tyle_dpcd ?? 0;
                     var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
+                    var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
 
 
                     var nRow = sheet.Rows[start_r];
@@ -778,6 +786,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[32].NumberValue = (double)tamungdot1;
                         sheet.CalculateAllValue();
                     }
+                    nRow.Cells[36].Value = stk;
 
                     start_r++;
 

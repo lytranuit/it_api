@@ -237,6 +237,80 @@ namespace Vue.Controllers
             return Json(new { success = true });
         }
 
+        public async Task<JsonResult> syncTknganhang()
+        {
+            return Json(new { });
+            // Khởi tạo workbook để đọc
+            Spire.Xls.Workbook book = new Spire.Xls.Workbook();
+            book.LoadFromFile("./wwwroot/data/info/BANG LUONG T09.2024 (Finish).xlsx", ExcelVersion.Version2013);
+
+            Spire.Xls.Worksheet sheet = book.Worksheets[0];
+            var lastrow = sheet.LastDataRow;
+            // nếu vẫn chưa gặp end thì vẫn lấy data
+            Console.WriteLine(lastrow);
+            var list_Result = new List<ResultModel>();
+            for (int rowIndex = 12; rowIndex < lastrow; rowIndex++)
+            {
+                // lấy row hiện tại
+                var nowRow = sheet.Rows[rowIndex];
+                if (nowRow == null)
+                    continue;
+                // vì ta dùng 3 cột A, B, C => data của ta sẽ như sau
+                //int numcount = nowRow.Cells.Count;
+                //for(int y = 0;y<numcount - 1 ;y++)
+                var code = nowRow.Cells[2] != null ? nowRow.Cells[2].Value.Trim() : null;
+                // Xuất ra thông tin lên màn hình
+                Console.WriteLine("MS: {0} ", code);
+                Console.WriteLine("rowIndex: {0} ", rowIndex);
+
+                if (code == null || code == "")
+                    continue;
+                string? stk = nowRow.Cells[37] != null && nowRow.Cells[37].Value != "NA" && nowRow.Cells[37].Value != "" ? nowRow.Cells[37].Value.Trim() : null;
+                if (stk == null || stk == "")
+                    continue;
+                var split = stk.Split(" - ").ToList();
+                if (split.Count() < 2)
+                {
+                    continue;
+                }
+                var taikhoan = split[0].Trim();
+                var nganhang = split[1].Trim();
+
+                //double? luongcb = nowRow.Cells[6] != null && nowRow.Cells[6].Value != "NA" && nowRow.Cells[6].Value != "" ? nowRow.Cells[6].NumberValue : null;
+                //double? luongkpi = nowRow.Cells[16] != null && nowRow.Cells[16].Value != "NA" && nowRow.Cells[16].Value != "" ? (double)nowRow.Cells[16].FormulaValue : 0;
+                //double? tongtrocap = nowRow.Cells[15] != null && nowRow.Cells[15].Value != "NA" && nowRow.Cells[15].Value != "" ? (double)nowRow.Cells[15].FormulaValue : 0;
+                //double? khoancong = nowRow.Cells[18] != null && nowRow.Cells[18].Value != "NA" && nowRow.Cells[18].Value != "" ? (double)nowRow.Cells[18].NumberValue : 0;
+                //double? tongthunhap = nowRow.Cells[19] != null && nowRow.Cells[19].Value != "NA" && nowRow.Cells[19].Value != "" ? (double)nowRow.Cells[19].FormulaValue : null;
+                //int? nguoiphuthuoc = nowRow.Cells[24] != null && nowRow.Cells[24].Value != "NA" && nowRow.Cells[24].Value != "" ? (int)nowRow.Cells[24].NumberValue : null;
+                //double? pc_trachnhiem = nowRow.Cells[14] != null && nowRow.Cells[14].Value != "NA" && nowRow.Cells[14].Value != "" ? nowRow.Cells[14].NumberValue : 0;
+                //double? pc_xangxe = nowRow.Cells[10] != null && nowRow.Cells[10].Value != "NA" && nowRow.Cells[10].Value != "" ? nowRow.Cells[10].NumberValue : 0;
+                //double? tamungdot1 = 0;
+                //if (nowRow.Cells[34] != null && nowRow.Cells[34].Value != "NA" && nowRow.Cells[34].Value != "" && (double)nowRow.Cells[34].FormulaValue > 0)
+                //{
+                //    tamungdot1 = nowRow.Cells[33] != null && nowRow.Cells[33].Value != "NA" && nowRow.Cells[33].Value != "" ? nowRow.Cells[33].NumberValue : null;
+                //}
+                //string? stk = nowRow.Cells[35] != null && nowRow.Cells[35].Value != "NA" && nowRow.Cells[35].Value != "" ? nowRow.Cells[35].Value.Trim() : 0;
+
+
+                var findP = _nhansuContext.PersonnelModel.Where(d => d.MANV == code).FirstOrDefault();
+                if (findP == null)
+                {
+                    continue;
+                }
+                findP.sotk_icb = taikhoan;
+                findP.sotk_vba = nganhang;
+                //if (code == "NMK170962")
+                //{
+                //    Console.WriteLine("MS: {0} ", code);
+                //}
+                _nhansuContext.Update(findP);
+                _nhansuContext.SaveChanges();
+            }
+            //_context.AddRange(list_Result);
+            //_context.SaveChanges();
+
+            return Json(new { success = true });
+        }
         public async Task<JsonResult> syncLuong()
         {
             return Json(new { });
@@ -393,6 +467,10 @@ namespace Vue.Controllers
                     if (person == null)
                     {
                         failed.Add(name + " - " + Normalize + " - " + macc);
+                        continue;
+                    }
+                    if (person.MACC != null)
+                    {
                         continue;
                     }
                     person.MACC = macc;
