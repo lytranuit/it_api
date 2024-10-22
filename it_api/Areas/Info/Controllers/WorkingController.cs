@@ -331,11 +331,14 @@ namespace it_template.Areas.Info.Controllers
                 dt.Columns.Add("HOVATEN", typeof(string));
                 //dt.Columns.Add("tong", typeof(decimal));
                 var date_check = date_from;
+                var start_column = 2;
+                var end_column = 64;
                 while (date_check <= date_to)
                 {
                     dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-S", typeof(string));
                     dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-C", typeof(string));
                     date_check = date_check.AddDays(1);
+                    start_column += 2;
                 }
                 sheet.InsertRow(8, datapost.Count(), InsertOptionsType.FormatAsAfter);
 
@@ -507,6 +510,11 @@ namespace it_template.Areas.Info.Controllers
                 //sheet.Range["E145"].Value = start_r.ToString();
                 sheet.InsertDataTable(dt, false, 7, 1);
                 sheet.CalculateAllValue();
+                var delete_count = end_column - start_column;
+                if (delete_count > 0)
+                {
+                    sheet.DeleteColumn(start_column + 1, delete_count);
+                }
             }
 
             ////Nhân viên DV
@@ -531,11 +539,14 @@ namespace it_template.Areas.Info.Controllers
                 dt.Columns.Add("HOVATEN", typeof(string));
                 //dt.Columns.Add("tong", typeof(decimal));
                 var date_check = date_from;
+                var start_column = 2;
+                var end_column = 64;
                 while (date_check <= date_to)
                 {
                     dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-S", typeof(string));
                     dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-C", typeof(string));
                     date_check = date_check.AddDays(1);
+                    start_column += 2;
                 }
                 sheet.InsertRow(8, datapost.Count(), InsertOptionsType.FormatAsAfter);
 
@@ -706,6 +717,11 @@ namespace it_template.Areas.Info.Controllers
                 //sheet.Range["E145"].Value = start_r.ToString();
                 sheet.InsertDataTable(dt, false, 7, 1);
                 sheet.CalculateAllValue();
+                var delete_count = end_column - start_column;
+                if (delete_count > 0)
+                {
+                    sheet.DeleteColumn(start_column + 1, delete_count);
+                }
             }
             else
             {
@@ -736,11 +752,14 @@ namespace it_template.Areas.Info.Controllers
                 dt.Columns.Add("HOVATEN", typeof(string));
                 //dt.Columns.Add("tong", typeof(decimal));
                 var date_check = date_from;
+                var start_column = 2;
+                var end_column = 64;
                 while (date_check <= date_to)
                 {
                     dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-S", typeof(string));
                     dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-C", typeof(string));
                     date_check = date_check.AddDays(1);
+                    start_column += 2;
                 }
                 sheet.InsertRow(8, datapost.Count(), InsertOptionsType.FormatAsAfter);
 
@@ -910,7 +929,12 @@ namespace it_template.Areas.Info.Controllers
                 sheet.Range["BM3"].NumberValue = tongcong;
                 //sheet.Range["E145"].Value = start_r.ToString();
                 sheet.InsertDataTable(dt, false, 7, 1);
-                sheet.CalculateAllValue();
+                sheet.CalculateAllValue(); 
+                var delete_count = end_column - start_column;
+                if (delete_count > 0)
+                {
+                    sheet.DeleteColumn(start_column + 1, delete_count);
+                }
             }
             else
             {
@@ -941,11 +965,14 @@ namespace it_template.Areas.Info.Controllers
                 dt.Columns.Add("HOVATEN", typeof(string));
                 //dt.Columns.Add("tong", typeof(decimal));
                 var date_check = date_from;
+                var start_column = 2;
+                var end_column = 64;
                 while (date_check <= date_to)
                 {
                     dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-S", typeof(string));
                     dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-C", typeof(string));
                     date_check = date_check.AddDays(1);
+                    start_column += 2;
                 }
                 sheet.InsertRow(8, datapost.Count(), InsertOptionsType.FormatAsAfter);
 
@@ -1116,6 +1143,11 @@ namespace it_template.Areas.Info.Controllers
                 //sheet.Range["E145"].Value = start_r.ToString();
                 sheet.InsertDataTable(dt, false, 7, 1);
                 sheet.CalculateAllValue();
+                var delete_count = end_column - start_column;
+                if (delete_count > 0)
+                {
+                    sheet.DeleteColumn(start_column + 1, delete_count);
+                }
             }
             else
             {
