@@ -309,7 +309,7 @@ namespace it_template.Areas.Info.Controllers
 
             ////Nhân viên chính thức / thử việc / học việc
 
-            var datapost = datapost_all.Where(d => d.LOAIHD != "DV" && user_shift.Contains(d.id)).ToList();
+            var datapost = datapost_all.Where(d => d.LOAIHD != "DV" && user_shift.Contains(d.id)).OrderByDescending(d => d.NGAYNHANVIEC).ToList();
             if (datapost.Count > 0)
             {
                 Worksheet sheet = workbook.Worksheets[0];
@@ -519,7 +519,7 @@ namespace it_template.Areas.Info.Controllers
 
             ////Nhân viên DV
 
-            datapost = datapost_all.Where(d => d.LOAIHD == "DV" && user_shift.Contains(d.id)).ToList();
+            datapost = datapost_all.Where(d => d.LOAIHD == "DV" && user_shift.Contains(d.id)).OrderByDescending(d => d.NGAYNHANVIEC).ToList();
             if (datapost.Count > 0)
             {
                 Worksheet sheet = workbook.Worksheets[1];
@@ -732,7 +732,7 @@ namespace it_template.Areas.Info.Controllers
             }
 
             ////Nhân viên vệ sinh bảo vệ
-            datapost = datapost_all.Where(d => user_shift_vs.Contains(d.id)).ToList();
+            datapost = datapost_all.Where(d => user_shift_vs.Contains(d.id)).OrderByDescending(d => d.NGAYNHANVIEC).ToList();
             if (datapost.Count > 0)
             {
                 Worksheet sheet = workbook.Worksheets["Vệ sinh-Bảo vệ-T7"];
@@ -945,7 +945,7 @@ namespace it_template.Areas.Info.Controllers
 
             }
             ////Nhân viên Full 
-            datapost = datapost_all.Where(d => user_shift_full.Contains(d.id)).ToList();
+            datapost = datapost_all.Where(d => user_shift_full.Contains(d.id)).OrderByDescending(d => d.NGAYNHANVIEC).ToList();
             if (datapost.Count > 0)
             {
                 Worksheet sheet = workbook.Worksheets["Full công"];

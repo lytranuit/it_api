@@ -278,6 +278,8 @@ namespace it_template.Areas.Info.Controllers
             var user_accept_id = Request.Form["filters[user_accept_id]"].FirstOrDefault();
             var status = Request.Form["filters[status]"].FirstOrDefault();
             var status_id = status != null ? Convert.ToInt32(status) : 0;
+            var filter_phep = Request.Form["filters[filter_phep]"].FirstOrDefault();
+            //var filter_phep_bool = filter_phep != null ? Convert.ToBoolean(filter_phep) : false;
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
 
@@ -321,6 +323,11 @@ namespace it_template.Areas.Info.Controllers
             {
                 customerData = customerData.Where(d => d.user_accept_id == user_id && d.status_id == 1);
             }
+            else if (type == "2")
+            {
+                var orderletter = _context.OrderletterDetailsModel.Where(d => d.value_new != "X").Select(d => d.orderletter_id).ToList();
+                customerData = customerData.Where(d => orderletter.Contains(d.id));
+            }
             int recordsTotal = customerData.Count();
 
             if (name != null && name != "")
@@ -337,7 +344,7 @@ namespace it_template.Areas.Info.Controllers
             }
             if (user_id1 != null)
             {
-                customerData = customerData.Where(d => d.user_id == user_id);
+                customerData = customerData.Where(d => d.user_id == user_id1);
             }
             if (user_accept_id != null)
             {
@@ -348,6 +355,11 @@ namespace it_template.Areas.Info.Controllers
             {
                 customerData = customerData.Where(d => d.status_id == status_id);
             }
+            //if (filter_phep_bool)
+            //{
+            //    var orderletter = _context.OrderletterDetailsModel.Where(d => d.value_new != "X").Select(d => d.orderletter_id).ToList();
+            //    customerData = customerData.Where(d => orderletter.Contains(d.id));
+            //}
             int recordsFiltered = customerData.Count();
             var datapost = customerData.OrderByDescending(d => d.created_at).Skip(skip).Take(pageSize).Include(d => d.user_created_by).Include(d => d.user).Include(d => d.user_accept).ToList();
             //var data = new ArrayList();
