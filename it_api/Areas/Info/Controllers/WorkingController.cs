@@ -292,7 +292,7 @@ namespace it_template.Areas.Info.Controllers
             var list_holidays = _context.HolidayModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to).Select(d => d.date).ToList();
 
 
-            var user_shift_vs = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "S-VS" || d.shift.code == "C-VS")).Select(d => d.person_id).Distinct().ToList();
+            var user_shift_vs = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "S-T7" || d.shift.code == "C-T7")).Select(d => d.person_id).Distinct().ToList();
             var user_shift_full = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "F")).Select(d => d.person_id).Distinct().ToList();
             var user_shift = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "S" || d.shift.code == "C")).Select(d => d.person_id).Distinct().ToList();
 
@@ -737,8 +737,8 @@ namespace it_template.Areas.Info.Controllers
             {
                 Worksheet sheet = workbook.Worksheets["Vệ sinh-Bảo vệ-T7"];
                 ////Bt
-                var shift_s = _context.ShiftModel.Where(d => d.code == "S-VS").FirstOrDefault();
-                var shift_c = _context.ShiftModel.Where(d => d.code == "C-VS").FirstOrDefault();
+                var shift_s = _context.ShiftModel.Where(d => d.code == "S-T7").FirstOrDefault();
+                var shift_c = _context.ShiftModel.Where(d => d.code == "C-T7").FirstOrDefault();
                 var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
                 var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
 

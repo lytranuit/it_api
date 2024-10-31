@@ -81,35 +81,39 @@ namespace it_template.Areas.Info.Controllers
             }
             ///// 
             //////
-            var list_shift_old = _context.ShiftUserModel.Where(d => d.person_id == PersonnelModel_old.id).Select(d => d.shift_id).ToList();
-            IEnumerable<string> list_delete = list_shift_old.Except(list_shift);
-            IEnumerable<string> list_add = list_shift.Except(list_shift_old);
-
-            if (list_add != null)
+            if (list_shift != null && list_shift.Count() > 0)
             {
-                foreach (string key in list_add)
-                {
+                var list_shift_old = _context.ShiftUserModel.Where(d => d.person_id == PersonnelModel_old.id).Select(d => d.shift_id).ToList();
+                IEnumerable<string> list_delete = list_shift_old.Except(list_shift);
+                IEnumerable<string> list_add = list_shift.Except(list_shift_old);
 
-                    _context.Add(new ShiftUserModel()
+                if (list_add != null)
+                {
+                    foreach (string key in list_add)
                     {
-                        shift_id = key,
-                        person_id = PersonnelModel_old.id,
-                        email = PersonnelModel_old.EMAIL,
 
-                    });
+                        _context.Add(new ShiftUserModel()
+                        {
+                            shift_id = key,
+                            person_id = PersonnelModel_old.id,
+                            email = PersonnelModel_old.EMAIL,
+
+                        });
+                    }
+                    //_context.SaveChanges();
                 }
-                //_context.SaveChanges();
-            }
-            if (list_delete != null)
-            {
-                foreach (string key in list_delete)
+                if (list_delete != null)
                 {
-                    ShiftUserModel ShiftUserModel = _context.ShiftUserModel.Where(d => d.person_id == PersonnelModel_old.id && d.shift_id == key).First();
-                    _context.Remove(ShiftUserModel);
+                    foreach (string key in list_delete)
+                    {
+                        ShiftUserModel ShiftUserModel = _context.ShiftUserModel.Where(d => d.person_id == PersonnelModel_old.id && d.shift_id == key).First();
+                        _context.Remove(ShiftUserModel);
+                    }
+                    //_context.SaveChanges();
                 }
-                //_context.SaveChanges();
+                _context.SaveChanges();
             }
-            _context.SaveChanges();
+
             return Json(new { success = true, data = PersonnelModel_old });
         }
         [HttpPost]
@@ -279,7 +283,11 @@ namespace it_template.Areas.Info.Controllers
         public JsonResult Get(string id)
         {
             var data = _context.PersonnelModel.Where(d => d.id == id).FirstOrDefault();
-            return Json(data);
+            data.list_shift = _context.ShiftUserModel.Where(d => d.person_id == data.id).Select(d => d.shift_id).ToList();
+            return Json(data, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
         private void CopyValues<T>(T target, T source)
         {

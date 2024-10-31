@@ -51,9 +51,10 @@ namespace Vue.Services
             sheet.Range["C8"].Value = chucdanh;
             sheet.Range["C10"].NumberValue = (double)(SalaryUserModel.luongcb ?? 0);
             sheet.Range["C12"].NumberValue = (double)(SalaryUserModel.tc_xangxe ?? 0);
-            sheet.Range["C13"].NumberValue = (double)(SalaryUserModel.tc_anca ?? 0);
+            sheet.Range["C13"].NumberValue = (double)(SalaryUserModel.tc_hieusuat ?? 0);
             sheet.Range["C14"].NumberValue = (double)(SalaryUserModel.tc_chucvu ?? 0);
-            sheet.Range["C15"].NumberValue = (double)(SalaryUserModel.luongkpi ?? 0);
+            sheet.Range["C15"].NumberValue = (double)((SalaryUserModel.tc_khac ?? 0) + (SalaryUserModel.tc_thuhut ?? 0) + (SalaryUserModel.tc_khuvuc ?? 0) + (SalaryUserModel.tc_thamnien ?? 0) + (SalaryUserModel.tc_thuebang ?? 0));
+            sheet.Range["C16"].NumberValue = (double)(SalaryUserModel.luongkpi ?? 0);
             sheet.Range["C17"].NumberValue = (double)(SalaryUserModel.khoancong ?? 0);
             //sheet.Range["C18"].NumberValue = (double)(SalaryUserModel.tongthunhap ?? 0);
 

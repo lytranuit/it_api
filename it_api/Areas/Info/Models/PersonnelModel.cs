@@ -94,6 +94,8 @@ namespace Info.Models
         public double? pc_thuebang { get; set; }
         public double? pc_trachnhiem { get; set; }
         public double? pc_khac { get; set; }
+        public double? pc { get; set; }
+        public double? pc_hieusuat { get; set; }
 
         public bool? is_bhxh { get; set; }
         public bool? is_thue { get; set; }

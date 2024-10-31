@@ -36,13 +36,14 @@ namespace Info.Models
         public decimal? luongdongbhxh { get; set; }
 
 
-        public decimal? tc_trangphuc { get; set; }
-        public decimal? tc_dienthoai { get; set; }
+        public decimal? tc_hieusuat { get; set; }
+        public decimal? tc_thuebang { get; set; }
         public decimal? tc_xangxe { get; set; }
-        public decimal? tc_antrua { get; set; }
-        public decimal? tc_chuyencan { get; set; }
-        public decimal? tc_anca { get; set; }
+        public decimal? tc_thamnien { get; set; }
+        public decimal? tc_thuhut { get; set; }
+        public decimal? tc_khuvuc { get; set; }
         public decimal? tc_chucvu { get; set; }
+        public decimal? tc_khac { get; set; }
         public decimal? tong_tc { get; set; }
 
 
