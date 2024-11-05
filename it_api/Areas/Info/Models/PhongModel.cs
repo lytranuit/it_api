@@ -15,6 +15,9 @@ namespace Info.Models
 
         public string? TENPHONG { get; set; }
         public string? MAKHUVUC { get; set; }
+        public string? truongbophan_id { get; set; }
+        public string? quanlycong_id { get; set; }
+        
 
 
     }

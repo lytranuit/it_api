@@ -61,54 +61,108 @@ namespace it_template.Areas.Info.Controllers
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
             var Model = _context.OrderletterModel.Where(d => d.id == id).FirstOrDefault();
-            Model.date_accept = DateTime.Now;
-            Model.user_accept_id = user_id;
-            Model.status_id = (int)OrderletterStatus.Duyet;
-            _context.Update(Model);
 
-            ///UPDATE CHẤM CÔNG
-            var list_chamcong = _context.ChamcongModel.Where(d => d.orderletter_id == id).ToList();
-            foreach (var d in list_chamcong)
+
+
+            if (user_id == Model.user_accept_id)
             {
-                ///Copy
-                var details = new OrderletterDetailsModel()
+
+                Model.date_accept = DateTime.Now;
+                Model.user_accept_id = user_id;
+                Model.status_id = (int)OrderletterStatus.Duyet;
+                _context.Update(Model);
+                ///UPDATE CHẤM CÔNG
+                var list_chamcong = _context.ChamcongModel.Where(d => d.orderletter_id == id).ToList();
+                foreach (var d in list_chamcong)
+                {
+                    ///Copy
+                    var details = new OrderletterDetailsModel()
+                    {
+                        id = d.id,
+                        MANV = d.MANV,
+                        NV_id = d.NV_id,
+                        date = d.date,
+                        shift_id = d.shift_id,
+                        orderletter_id = d.orderletter_id,
+                        value = d.value,
+                        value_new = d.value_new,
+                    };
+                    _context.Add(details);
+
+                    d.value = d.value_new;
+                    d.orderletter_id = null;
+                }
+                _context.UpdateRange(list_chamcong);
+                _context.SaveChanges();
+
+
+                var user_created = _context.UserModel.Where(d => d.Id == Model.created_by).FirstOrDefault();
+                var user_apply = _context.UserModel.Where(d => d.Id == Model.user_id).FirstOrDefault();
+                var user_related = new List<string>() { user_created.Email, user_apply.Email };
+                user_related = user_related.Distinct().ToList();
+                var mail_string = string.Join(",", user_related);
+                string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+                var body = _view.Render("Emails/Orderletter_Success", new
+                {
+                    link_logo = Domain + "/images/clientlogo_astahealthcare.com_f1800.png",
+                    link = _configuration["Application:Info:link"] + "OrderLetter/edit/" + Model.id,
+                });
+                var email = new EmailModel
+                {
+                    email_to = mail_string,
+                    subject = "[Thành công] " + Model.name,
+                    body = body,
+                    email_type = "Orderletter_Success",
+                    status = 1
+                };
+                _context.Add(email);
+                _context.SaveChanges();
+            }
+            else if (user_id == Model.user1_accept_id)
+            {
+                Model.date1_accept = DateTime.Now;
+                Model.user1_accept_id = user_id;
+                _context.Update(Model);
+
+                ///Send mail thông báo đên người phê duyệt
+
+
+
+
+                var details = _context.ChamcongModel.Where(d => d.orderletter_id != null && d.orderletter_id == Model.id).Include(d => d.shift).Select(d => new
                 {
                     id = d.id,
-                    MANV = d.MANV,
-                    NV_id = d.NV_id,
+                    shift = d.shift,
                     date = d.date,
-                    shift_id = d.shift_id,
-                    orderletter_id = d.orderletter_id,
                     value = d.value,
-                    value_new = d.value_new,
+                    value_new = d.value_new
+                }).OrderBy(d => d.date).ThenBy(d => d.shift).ToList();
+                var user_accept_id = Model.user_accept_id;
+
+                var user_pheduyet = _context.UserModel.Where(d => d.Id == user_accept_id).FirstOrDefault();
+                var mail_string = user_pheduyet.Email;
+
+                var user_apply = _context.UserModel.Where(d => d.Id == Model.user_id).FirstOrDefault();
+                string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+                var body = _view.Render("Emails/Orderletter", new
+                {
+                    link_logo = Domain + "/images/clientlogo_astahealthcare.com_f1800.png",
+                    link = _configuration["Application:Info:link"] + "OrderLetter/edit/" + Model.id,
+                    data = details,
+                    user = user_apply.FullName
+                });
+                var email = new EmailModel
+                {
+                    email_to = mail_string,
+                    subject = "[Đơn báo] " + Model.name,
+                    body = body,
+                    email_type = "Orderletter",
+                    status = 1
                 };
-                _context.Add(details);
+                _context.Add(email);
+                _context.SaveChanges();
 
-                d.value = d.value_new;
-                d.orderletter_id = null;
             }
-            _context.UpdateRange(list_chamcong);
-            _context.SaveChanges();
-
-            var user_created = _context.UserModel.Where(d => d.Id == Model.created_by).FirstOrDefault();
-            var user_apply = _context.UserModel.Where(d => d.Id == Model.user_id).FirstOrDefault();
-            var mail_string = user_created.Email + "," + user_apply.Email;
-            string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
-            var body = _view.Render("Emails/Orderletter_Success", new
-            {
-                link_logo = Domain + "/images/clientlogo_astahealthcare.com_f1800.png",
-                link = _configuration["Application:Info:link"] + "OrderLetter/edit/" + Model.id,
-            });
-            var email = new EmailModel
-            {
-                email_to = mail_string,
-                subject = "[Thành công] " + Model.name,
-                body = body,
-                email_type = "Orderletter_Success",
-                status = 1
-            };
-            _context.Add(email);
-            _context.SaveChanges();
             return Json(new { success = true, data = Model });
         }
         [HttpPost]
@@ -148,7 +202,10 @@ namespace it_template.Areas.Info.Controllers
 
             var user_created = _context.UserModel.Where(d => d.Id == Model.created_by).FirstOrDefault();
             var user_apply = _context.UserModel.Where(d => d.Id == Model.user_id).FirstOrDefault();
-            var mail_string = user_created.Email + "," + user_apply.Email;
+            var user_related = new List<string>() { user_created.Email, user_apply.Email };
+            user_related = user_related.Distinct().ToList();
+            var mail_string = string.Join(",", user_related);
+
             string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
             var body = _view.Render("Emails/Orderletter_Failed", new
             {
@@ -228,6 +285,10 @@ namespace it_template.Areas.Info.Controllers
             }
 
             ///Send mail thông báo đên người phê duyệt
+
+
+
+
             var details = _context.ChamcongModel.Where(d => d.orderletter_id != null && d.orderletter_id == OrderletterModel_old.id).Include(d => d.shift).Select(d => new
             {
                 id = d.id,
@@ -236,9 +297,15 @@ namespace it_template.Areas.Info.Controllers
                 value = d.value,
                 value_new = d.value_new
             }).OrderBy(d => d.date).ThenBy(d => d.shift).ToList();
-            var user_pheduyet = _context.UserModel.Where(d => d.Id == OrderletterModel_old.user_accept_id).FirstOrDefault();
-            var user_apply = _context.UserModel.Where(d => d.Id == OrderletterModel_old.user_id).FirstOrDefault();
+            var user_accept_id = OrderletterModel_old.user_accept_id;
+            if (OrderletterModel_old.user_accept_id != OrderletterModel_old.user1_accept_id)
+            {
+                user_accept_id = OrderletterModel_old.user1_accept_id;
+            }
+            var user_pheduyet = _context.UserModel.Where(d => d.Id == user_accept_id).FirstOrDefault();
             var mail_string = user_pheduyet.Email;
+
+            var user_apply = _context.UserModel.Where(d => d.Id == OrderletterModel_old.user_id).FirstOrDefault();
             string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
             var body = _view.Render("Emails/Orderletter", new
             {

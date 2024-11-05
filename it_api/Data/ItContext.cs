@@ -88,7 +88,7 @@ namespace Vue.Data
             var changes = ChangeTracker.Entries();
             foreach (var entry in changes)
             {
-                if (entry.Entity is AuditTrailsModel || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                if (entry.Entity is AuditTrailsModel || entry.Entity is EmailModel || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
                     continue;
 
                 var auditEntry = new AuditEntry(entry);

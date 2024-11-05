@@ -2515,7 +2515,7 @@ namespace it_template.Areas.Trend.Controllers
                                 backgroundColor = g.Key.color,
                                 results = g.ToList(),
                                 data = new List<decimal?>()
-                            }).ToList();
+                            }).OrderBy(d => d.label).ToList();
                             ///
                             datasets.Insert(0, new Dataset()
                             {
@@ -2790,7 +2790,7 @@ namespace it_template.Areas.Trend.Controllers
                             backgroundColor = g.Key.color,
                             results = g.ToList(),
                             data = new List<decimal?>()
-                        }).ToList();
+                        }).OrderBy(d => d.label).ToList();
                         ///
                         datasets.Insert(0, new Dataset()
                         {

@@ -25,6 +25,7 @@ using Spire.Xls;
 using System.Security.Policy;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics;
+using iText.StyledXmlParser.Jsoup.Nodes;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -178,6 +179,7 @@ namespace it_template.Areas.Info.Controllers
                     var khoancong = person.khoancong ?? 0;
                     var note_khoantru = person.note_khoantru;
                     var note_khoancong = person.note_khoancong;
+                    var note = person.note;
                     var is_bhxh = record.is_bhxh;
                     var is_thue = record.is_thue;
                     var tyle_bhxh = record.tyle_bhxh ?? 0;
@@ -195,21 +197,23 @@ namespace it_template.Areas.Info.Controllers
 
                         TNCN_banthan = 0; //// Không giảm trừ
                         TNCN_nguoiphuthuoc = 0; // Không giảm trừ
-                        tyle = 0;
-                        tyle_dpcd = 0;
+                        //tyle = 0;
+                        //tyle_dpcd = 0;
                         nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
 
                         //nRow.Cells[7].Value2 = "";
                     }
-                    if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc")
+                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
+                    //{
+                    //    tyle = 0;
+                    //    tyle_dpcd = 0;
+                    //}
+                    if (is_bhxh != true)
                     {
                         tyle = 0;
                         tyle_dpcd = 0;
+                        //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
                     }
-                    //if (is_bhxh != true)
-                    //{
-                    //    //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
-                    //}
                     if (is_thue != true)
                     {
                         nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
@@ -242,6 +246,8 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[19].AddComment().Text = note_khoancong;
                     if (note_khoantru != null)
                         nRow.Cells[31].AddComment().Text = note_khoantru;
+                    if (note != null)
+                        nRow.Cells[20].AddComment().Text = note;
 
 
                     nRow.Cells[27].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
@@ -254,10 +260,10 @@ namespace it_template.Areas.Info.Controllers
                         sheet.CalculateAllValue();
                     }
                     nRow.Cells[37].Value = stk;
-                    //if (record.LOAIHD == "DV")
-                    //{
-                    //    ///Cthu
-                    //}
+                    if (record.MANV == "NVH150384")
+                    {
+                        Console.Write(nRow);
+                    }
 
                     ////Cập nhật database
 
@@ -378,6 +384,7 @@ namespace it_template.Areas.Info.Controllers
                     var khoancong = person.khoancong ?? 0;
                     var note_khoantru = person.note_khoantru;
                     var note_khoancong = person.note_khoancong;
+                    var note = person.note;
                     var is_bhxh = record.is_bhxh;
                     var is_thue = record.is_thue;
                     var tyle_bhxh = record.tyle_bhxh ?? 0;
@@ -395,21 +402,23 @@ namespace it_template.Areas.Info.Controllers
 
                         TNCN_banthan = 0; //// Không giảm trừ
                         TNCN_nguoiphuthuoc = 0; // Không giảm trừ
-                        tyle = 0;
-                        tyle_dpcd = 0;
+                        //tyle = 0;
+                        //tyle_dpcd = 0;
                         nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
 
                         //nRow.Cells[7].Value2 = "";
                     }
-                    if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc")
+                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
+                    //{
+                    //    tyle = 0;
+                    //    tyle_dpcd = 0;
+                    //}
+                    if (is_bhxh != true)
                     {
                         tyle = 0;
                         tyle_dpcd = 0;
+                        //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
                     }
-                    //if (is_bhxh != true)
-                    //{
-                    //    //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
-                    //}
                     if (is_thue != true)
                     {
                         nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
@@ -442,6 +451,8 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[19].AddComment().Text = note_khoancong;
                     if (note_khoantru != null)
                         nRow.Cells[31].AddComment().Text = note_khoantru;
+                    if (note != null)
+                        nRow.Cells[20].AddComment().Text = note;
 
 
                     nRow.Cells[27].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
@@ -515,6 +526,7 @@ namespace it_template.Areas.Info.Controllers
                     var khoancong = person.khoancong ?? 0;
                     var note_khoantru = person.note_khoantru;
                     var note_khoancong = person.note_khoancong;
+                    var note = person.note;
                     var is_bhxh = record.is_bhxh;
                     var is_thue = record.is_thue;
                     var tyle_bhxh = record.tyle_bhxh ?? 0;
@@ -532,21 +544,23 @@ namespace it_template.Areas.Info.Controllers
 
                         TNCN_banthan = 0; //// Không giảm trừ
                         TNCN_nguoiphuthuoc = 0; // Không giảm trừ
-                        tyle = 0;
-                        tyle_dpcd = 0;
+                        //tyle = 0;
+                        //tyle_dpcd = 0;
                         nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
 
                         //nRow.Cells[7].Value2 = "";
                     }
-                    if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc")
+                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
+                    //{
+                    //    tyle = 0;
+                    //    tyle_dpcd = 0;
+                    //}
+                    if (is_bhxh != true)
                     {
                         tyle = 0;
                         tyle_dpcd = 0;
+                        //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
                     }
-                    //if (is_bhxh != true)
-                    //{
-                    //    //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
-                    //}
                     if (is_thue != true)
                     {
                         nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
@@ -579,6 +593,8 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[19].AddComment().Text = note_khoancong;
                     if (note_khoantru != null)
                         nRow.Cells[31].AddComment().Text = note_khoantru;
+                    if (note != null)
+                        nRow.Cells[20].AddComment().Text = note;
 
 
                     nRow.Cells[27].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
@@ -607,7 +623,7 @@ namespace it_template.Areas.Info.Controllers
             }
 
             ///Học việc thử việc
-            var list_hocviec_thuviec = data_post.Where(d => (d.tinhtrang == "Học việc" || d.tinhtrang == "Thử việc") && d.LOAIHD != "DV").Select(d => d.MANV).ToList();
+            var list_hocviec_thuviec = data_post.Where(d => (d.tinhtrang == "Học việc" || d.tinhtrang == "Thử việc" || d.tinhtrang == "Thử việc không bảo hiểm (BH)") && d.LOAIHD != "DV").Select(d => d.MANV).ToList();
             if (list_hocviec_thuviec.Count() > 0)
             {
                 var list_data_cong = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_hocviec_thuviec.Contains(d["MANV"])).OrderBy(d => d["bophan"]).ToList();
@@ -654,6 +670,7 @@ namespace it_template.Areas.Info.Controllers
                     var khoancong = person.khoancong ?? 0;
                     var note_khoantru = person.note_khoantru;
                     var note_khoancong = person.note_khoancong;
+                    var note = person.note;
                     var is_bhxh = record.is_bhxh;
                     var is_thue = record.is_thue;
                     var tyle_bhxh = record.tyle_bhxh ?? 0;
@@ -671,21 +688,23 @@ namespace it_template.Areas.Info.Controllers
 
                         TNCN_banthan = 0; //// Không giảm trừ
                         TNCN_nguoiphuthuoc = 0; // Không giảm trừ
-                        tyle = 0;
-                        tyle_dpcd = 0;
+                        //tyle = 0;
+                        //tyle_dpcd = 0;
                         nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
 
                         //nRow.Cells[7].Value2 = "";
                     }
-                    if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc")
+                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
+                    //{
+                    //    tyle = 0;
+                    //    tyle_dpcd = 0;
+                    //}
+                    if (is_bhxh != true)
                     {
                         tyle = 0;
                         tyle_dpcd = 0;
+                        //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
                     }
-                    //if (is_bhxh != true)
-                    //{
-                    //    //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
-                    //}
                     if (is_thue != true)
                     {
                         nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
@@ -718,6 +737,8 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[19].AddComment().Text = note_khoancong;
                     if (note_khoantru != null)
                         nRow.Cells[31].AddComment().Text = note_khoantru;
+                    if (note != null)
+                        nRow.Cells[20].AddComment().Text = note;
 
 
                     nRow.Cells[27].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
@@ -800,6 +821,7 @@ namespace it_template.Areas.Info.Controllers
                     var khoancong = person.khoancong ?? 0;
                     var note_khoantru = person.note_khoantru;
                     var note_khoancong = person.note_khoancong;
+                    var note = person.note;
                     var is_bhxh = record.is_bhxh;
                     var is_thue = record.is_thue;
                     var tyle_bhxh = record.tyle_bhxh ?? 0;
@@ -817,21 +839,23 @@ namespace it_template.Areas.Info.Controllers
 
                         TNCN_banthan = 0; //// Không giảm trừ
                         TNCN_nguoiphuthuoc = 0; // Không giảm trừ
-                        tyle = 0;
-                        tyle_dpcd = 0;
+                        //tyle = 0;
+                        //tyle_dpcd = 0;
                         nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
 
                         //nRow.Cells[7].Value2 = "";
                     }
-                    if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc")
+                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
+                    //{
+                    //    tyle = 0;
+                    //    tyle_dpcd = 0;
+                    //}
+                    if (is_bhxh != true)
                     {
                         tyle = 0;
                         tyle_dpcd = 0;
+                        //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
                     }
-                    //if (is_bhxh != true)
-                    //{
-                    //    //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
-                    //}
                     if (is_thue != true)
                     {
                         nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
@@ -864,6 +888,8 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[19].AddComment().Text = note_khoancong;
                     if (note_khoantru != null)
                         nRow.Cells[31].AddComment().Text = note_khoantru;
+                    if (note != null)
+                        nRow.Cells[20].AddComment().Text = note;
 
 
                     nRow.Cells[27].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
@@ -1097,7 +1123,10 @@ namespace it_template.Areas.Info.Controllers
             {
                 SalaryUserModel_old.note_khoantru = SalaryUserModel.note_khoantru;
             }
-
+            if (ModelState.ContainsKey("note"))
+            {
+                SalaryUserModel_old.note = SalaryUserModel.note;
+            }
             _context.Update(SalaryUserModel_old);
             _context.SaveChanges();
 

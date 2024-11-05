@@ -142,7 +142,120 @@ namespace it_template.Areas.Info.Controllers
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
+        public async Task<JsonResult> InfoUser(string user_id)
+        {
+            var user = _context.UserModel.SingleOrDefault(d => d.Id == user_id);
+
+            var info = new Info()
+            {
+                UserId = user_id,
+                quanlytructiep = new Info() { },
+                truongbophan = new Info() { },
+                quanlycong = new Info() { },
+                BGD = new Info() { }
+            };
+
+            var person = _context.PersonnelModel.SingleOrDefault(d => d.EMAIL.ToLower() == user.Email.ToLower());
+            if (person == null)
+            {
+                return Json(info, new System.Text.Json.JsonSerializerOptions()
+                {
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                });
+            }
+            info.Id = person.id;
+            info.Name = person.HOVATEN;
+            info.Email = person.EMAIL;
+            info.MANV = person.MANV;
+
+            var quanlytructiep_id = person.MAQUANLYTRUCTIEP;
+            var quanlytructiep = _context.PersonnelModel.SingleOrDefault(d => d.id == quanlytructiep_id);
+            if (quanlytructiep != null)
+            {
+                info.quanlytructiep.Id = quanlytructiep.id;
+                info.quanlytructiep.Name = quanlytructiep.HOVATEN;
+                info.quanlytructiep.Email = quanlytructiep.EMAIL;
+                info.quanlytructiep.MANV = quanlytructiep.MANV;
+
+                var quanlytructiep_user = _context.UserModel.SingleOrDefault(d => d.Email.ToLower() == quanlytructiep.EMAIL.ToLower());
+                if (quanlytructiep_user != null)
+                {
+                    info.quanlytructiep.UserId = quanlytructiep_user.Id;
+
+                }
+            }
+
+            var bophan = _context.DepartmentModel.SingleOrDefault(d => d.MAPHONG == person.MAPHONG);
+            if (bophan != null)
+            {
+                var truongbophan_id = bophan.truongbophan_id;
+                var truongbophan = _context.PersonnelModel.SingleOrDefault(d => d.id == truongbophan_id);
+                if (truongbophan != null)
+                {
+                    info.truongbophan.Id = truongbophan.id;
+                    info.truongbophan.Name = truongbophan.HOVATEN;
+                    info.truongbophan.Email = truongbophan.EMAIL;
+                    info.truongbophan.MANV = truongbophan.MANV;
+                    var truongbophan_user = _context.UserModel.SingleOrDefault(d => d.Email.ToLower() == truongbophan.EMAIL.ToLower());
+                    if (truongbophan_user != null)
+                    {
+                        info.truongbophan.UserId = truongbophan_user.Id;
+                    }
+                }
+
+                var quanlycong_id = bophan.quanlycong_id;
+                var quanlycong = _context.PersonnelModel.SingleOrDefault(d => d.id == quanlycong_id);
+                if (quanlycong != null)
+                {
+                    info.quanlycong.Id = quanlycong.id;
+                    info.quanlycong.Name = quanlycong.HOVATEN;
+                    info.quanlycong.Email = quanlycong.EMAIL;
+                    info.quanlycong.MANV = quanlycong.MANV;
+                    var quanlycong_user = _context.UserModel.SingleOrDefault(d => d.Email.ToLower() == quanlycong.EMAIL.ToLower());
+                    if (quanlycong_user != null)
+                    {
+                        info.quanlycong.UserId = quanlycong_user.Id;
+                    }
+                }
+
+            }
+
+            var email_BGD = "yen.tp@astahealthcare.com";
+            var BGD = _context.PersonnelModel.SingleOrDefault(d => d.EMAIL.ToLower() == email_BGD.ToLower());
+            var user_BGD = _context.UserModel.SingleOrDefault(d => d.Email.ToLower() == email_BGD.ToLower());
+            info.BGD.Id = BGD.id;
+            info.BGD.Name = BGD.HOVATEN;
+            info.BGD.Email = BGD.EMAIL;
+            info.BGD.MANV = BGD.MANV;
+            info.BGD.UserId = user_BGD.Id;
+
+            //var jsonData = new { data = ProcessModel };
+            return Json(info, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+
     }
 
+    public class Info
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
 
+        public string Email { get; set; }
+
+        public string UserId { get; set; }
+
+        public string MANV { get; set; }
+
+        public Info quanlytructiep { get; set; }
+
+        public Info truongbophan { get; set; }
+
+        public Info quanlycong { get; set; }
+
+        public Info BGD { get; set; }
+
+    }
 }

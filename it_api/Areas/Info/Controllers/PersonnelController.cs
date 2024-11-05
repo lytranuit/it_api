@@ -149,6 +149,7 @@ namespace it_template.Areas.Info.Controllers
             var ignore_nghi = Request.Form["filters[ignore_nghi]"].FirstOrDefault();
             var MANV = Request.Form["filters[MANV]"].FirstOrDefault();
             var HOVATEN = Request.Form["filters[HOVATEN]"].FirstOrDefault();
+            var GIOITINH = Request.Form["filters[GIOITINH]"].FirstOrDefault();
             var tinhtrang = Request.Form["filters[tinhtrang]"].FirstOrDefault();
             var MAPHONG = Request.Form["filters[MAPHONG]"].FirstOrDefault();
             var MATRINHDO = Request.Form["filters[MATRINHDO]"].FirstOrDefault();
@@ -170,6 +171,10 @@ namespace it_template.Areas.Info.Controllers
             if (HOVATEN != null && HOVATEN != "")
             {
                 customerData = customerData.Where(d => d.HOVATEN.Contains(HOVATEN));
+            }
+            if (GIOITINH != null && GIOITINH != "")
+            {
+                customerData = customerData.Where(d => d.GIOITINH == GIOITINH);
             }
 
             if (tinhtrang != null && tinhtrang != "")

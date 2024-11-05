@@ -71,6 +71,7 @@ namespace Info.Models
 
         public string? note_khoantru { get; set; }
         public string? note_khoancong { get; set; }
+        public string? note { get; set; }
 
         public decimal? tyle_bhxh { get; set; }
         public decimal? tyle_bhyt { get; set; }
