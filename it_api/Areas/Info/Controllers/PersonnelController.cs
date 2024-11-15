@@ -294,6 +294,42 @@ namespace it_template.Areas.Info.Controllers
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
+        public JsonResult Orgchart()
+        {
+            var data = Persons();
+            data = data.Where(d => d.children.Count() > 0).ToList();
+            return Json(data, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        private List<Personnel> Persons(string MAQUANLYTRUCTIEP = null)
+        {
+            var list = new List<Personnel>();
+
+            var data = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null && d.MAQUANLYTRUCTIEP == MAQUANLYTRUCTIEP).ToList();
+            foreach (var item in data)
+            {
+
+                var person = new Personnel()
+                {
+                    id = item.id,
+                    name = item.HOVATEN,
+                    MANV = item.MANV,
+                    HOVATEN = item.HOVATEN,
+                    email = item.EMAIL,
+                    image_url = item.image_url
+                };
+                person.children = Persons(item.id);
+                var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == item.MACHUCVU).FirstOrDefault();
+                if (chucvu != null)
+                {
+                    person.positionName = chucvu.TENCHUCVU;
+                }
+                list.Add(person);
+            }
+            return list;
+        }
         private void CopyValues<T>(T target, T source)
         {
             Type t = typeof(T);
@@ -334,5 +370,19 @@ namespace it_template.Areas.Info.Controllers
             return text;
         }
     }
+    public class Personnel
+    {
+        public string id { get; set; }
+        public string type { get; set; }
+        public string name { get; set; }
+        public string MANV { get; set; }
 
+        public string HOVATEN { get; set; }
+
+        public string positionName { get; set; }
+        public string image_url { get; set; }
+
+        public string email { get; set; }
+        public List<Personnel> children { get; set; }
+    }
 }

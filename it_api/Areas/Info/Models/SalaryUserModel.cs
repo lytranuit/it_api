@@ -78,5 +78,11 @@ namespace Info.Models
         public decimal? tyle_bhtn { get; set; }
         public decimal? tyle_dpcd { get; set; }
 
+
+        public decimal? tyle_bhxh_cty { get; set; }
+        public decimal? tyle_bhyt_cty { get; set; }
+        public decimal? tyle_bhtn_cty { get; set; }
+        public decimal? tyle_dpcd_cty { get; set; }
+
     }
 }

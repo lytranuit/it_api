@@ -68,8 +68,5 @@
 	<ItemGroup>
 		<_WebToolingArtifacts Remove="Properties\PublishProfiles\web.pubxml" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Areas\V1\Models\" />
-	</ItemGroup>
 	
 </Project>

@@ -98,8 +98,18 @@ namespace it_template.Areas.Info.Controllers
 
                 var user_created = _context.UserModel.Where(d => d.Id == Model.created_by).FirstOrDefault();
                 var user_apply = _context.UserModel.Where(d => d.Id == Model.user_id).FirstOrDefault();
+                var person_apply = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user_apply.Email.ToLower()).FirstOrDefault();
                 var user_related = new List<string>() { user_created.Email, user_apply.Email };
+                if (person_apply != null && person_apply.DIADIEM == "Hồ Chí Minh")
+                {
+                    user_related.Add("thu.ttn@astahealthcare.com");
+                }
+                else
+                {
+                    user_related.Add("hcns@astahealthcare.com");
+                }
                 user_related = user_related.Distinct().ToList();
+
                 var mail_string = string.Join(",", user_related);
                 string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
                 var body = _view.Render("Emails/Orderletter_Success", new

@@ -56,6 +56,15 @@ namespace it_template.Areas.Info.Controllers
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
+        public async Task<JsonResult> Tinh()
+        {
+            var All = _context.TinhModel.ToList();
+            //var jsonData = new { data = ProcessModel };
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
         public async Task<JsonResult> Area()
         {
             var All = _context.KhoiModel.ToList();

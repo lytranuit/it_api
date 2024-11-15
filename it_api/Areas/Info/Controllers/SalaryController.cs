@@ -103,6 +103,7 @@ namespace it_template.Areas.Info.Controllers
                     {
                         salary_id = salary_id,
                         person_id = key,
+                        MANV = PersonModel.MANV,
                         email = PersonModel.EMAIL,
 
                     });
@@ -137,205 +138,256 @@ namespace it_template.Areas.Info.Controllers
             {
                 //var list_data_cong = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_chinhthuc.Contains(d["MANV"])).ToList();
 
-                var list_data_cong = list_data_cong_all.OrderBy(d => d["bophan"]).ToList();
+                var list_bophan1 = list_data_cong_all.GroupBy(d => d["bophan"]).Select(d => new
+                {
+                    bophan = d.Key,
+                    data = d.ToList()
+                }).ToList();
                 Worksheet sheet = workbook.Worksheets[0];
                 var now = DateTime.Now;
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
                 sheet.Range["AB3"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
                 int stt = 0;
-                var start_r = 12;
-                sheet.InsertRow(start_r + 1, list_data_cong.Count(), InsertOptionsType.FormatAsAfter);
-                foreach (var item in list_data_cong)
+                int sourceRowIndex = 11; // Dòng gốc để sao chép định dạng
+                foreach (var bophan1 in list_bophan1)
                 {
-                    var person = SalaryUserModel.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
+                    int insertRowIndex = 15; // Dòng nơi bạn muốn chèn ba dòng mới
 
-                    var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
-                    var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == record.MACHUCVU).FirstOrDefault();
-                    var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == record.MAPHONG).FirstOrDefault();
+                    // Chèn ba dòng mới tại vị trí insertRowIndex
+                    sheet.InsertRow(insertRowIndex);
+                    sheet.InsertRow(insertRowIndex + 1);
+                    sheet.InsertRow(insertRowIndex + 2);
 
-                    var congtrongthang = item["tongcong"];
-                    var congthucte = item["tong"];
-                    var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
-                    var phanloai = bophan != null ? bophan.TENPHONG : "";
-                    var manv = record.MANV;
-                    var hovaten = record.HOVATEN;
-                    var email = record.EMAIL;
-                    var luongcb = record.tien_luong ?? 0;
+                    // Sao chép định dạng từ sourceRowIndex sang ba dòng mới
+                    sheet.Rows[sourceRowIndex].Copy(sheet.Rows[insertRowIndex], CopyRangeOptions.All);
+                    sheet.Rows[sourceRowIndex + 1].Copy(sheet.Rows[insertRowIndex + 1], CopyRangeOptions.All);
+                    sheet.Rows[sourceRowIndex + 2].Copy(sheet.Rows[insertRowIndex + 2], CopyRangeOptions.All);
 
-                    var pc_xangxe = record.pc_khac ?? 0;
-                    var pc_trachnhiem = record.pc_trachnhiem ?? 0;
-                    var pc_thuebang = record.pc_thuebang ?? 0;
-                    var pc_khuvuc = record.pc_khuvuc ?? 0;
-                    var pc_thamnien = record.pc_thamnien ?? 0;
-                    var pc_hieusuat = record.pc_hieusuat ?? 0;
-                    var pc_thuhut = record.pc_thuhut ?? 0;
-                    var pc_khac = record.pc ?? 0;
+                }
 
-                    var luongkpi = record.tien_luong_kpi ?? 0;
-                    var TNCN_banthan = 11000000;
-                    var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
-                    var tamungdot1 = record.tien_luong_dot1 ?? 0;
-                    var khoantru = person.khoantru ?? 0;
-                    var khoancong = person.khoancong ?? 0;
-                    var note_khoantru = person.note_khoantru;
-                    var note_khoancong = person.note_khoancong;
-                    var note = person.note;
-                    var is_bhxh = record.is_bhxh;
-                    var is_thue = record.is_thue;
-                    var tyle_bhxh = record.tyle_bhxh ?? 0;
-                    var tyle_bhyt = record.tyle_bhyt ?? 0;
-                    var tyle_bhtn = record.tyle_bhtn ?? 0;
-                    var tyle_dpcd = record.tyle_dpcd ?? 0;
-                    var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
-                    var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
-
-                    var nRow = sheet.Rows[start_r];
-
-                    if (record.LOAIHD == "DV")
-                    {
-                        //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
-
-                        TNCN_banthan = 0; //// Không giảm trừ
-                        TNCN_nguoiphuthuoc = 0; // Không giảm trừ
-                        //tyle = 0;
-                        //tyle_dpcd = 0;
-                        nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
-
-                        //nRow.Cells[7].Value2 = "";
-                    }
-                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
-                    //{
-                    //    tyle = 0;
-                    //    tyle_dpcd = 0;
-                    //}
-                    if (is_bhxh != true)
-                    {
-                        tyle = 0;
-                        tyle_dpcd = 0;
-                        //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
-                    }
-                    if (is_thue != true)
-                    {
-                        nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
-                    }
-
-                    nRow.Cells[0].NumberValue = ++stt;
-                    nRow.Cells[1].Value = manv;
-                    nRow.Cells[2].Value = hovaten;
-                    nRow.Cells[3].Value = tenchucvu;
-                    nRow.Cells[4].Value = phanloai;
-                    nRow.Cells[5].NumberValue = (double)congtrongthang;
-                    nRow.Cells[6].NumberValue = (double)luongcb;
-
-                    nRow.Cells[8].NumberValue = (double)pc_hieusuat;
-                    nRow.Cells[9].NumberValue = (double)pc_thuebang;
-                    nRow.Cells[10].NumberValue = (double)pc_xangxe;
-                    nRow.Cells[11].NumberValue = (double)pc_thamnien;
-                    nRow.Cells[12].NumberValue = (double)pc_thuhut;
-                    nRow.Cells[13].NumberValue = (double)pc_khuvuc;
-                    nRow.Cells[14].NumberValue = (double)pc_trachnhiem;
-                    nRow.Cells[15].NumberValue = (double)pc_khac;
-
-                    nRow.Cells[17].NumberValue = (double)luongkpi;
-                    nRow.Cells[18].NumberValue = (double)congthucte;
-                    nRow.Cells[19].NumberValue = (double)khoancong;
-                    nRow.Cells[24].NumberValue = (double)TNCN_banthan;
-                    nRow.Cells[25].NumberValue = (double)TNCN_nguoiphuthuoc;
-                    nRow.Cells[31].NumberValue = (double)khoantru;
-                    if (note_khoancong != null)
-                        nRow.Cells[19].AddComment().Text = note_khoancong;
-                    if (note_khoantru != null)
-                        nRow.Cells[31].AddComment().Text = note_khoantru;
-                    if (note != null)
-                        nRow.Cells[20].AddComment().Text = note;
-
-
-                    nRow.Cells[27].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                    nRow.Cells[30].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
-
-                    sheet.CalculateAllValue();
-                    if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[32].FormulaNumberValue)
-                    {
-                        nRow.Cells[33].NumberValue = (double)tamungdot1;
-                        sheet.CalculateAllValue();
-                    }
-                    nRow.Cells[37].Value = stk;
-                    if (record.MANV == "NVH150384")
-                    {
-                        Console.Write(nRow);
-                    }
-
-                    ////Cập nhật database
-
-
-                    person.MANV = manv;
-                    person.HOVATEN = hovaten;
-                    person.CHUCVU = tenchucvu;
-                    person.BOPHAN = phanloai;
-                    person.email = email;
-                    person.MABOPHAN = record.MAPHONG;
-                    person.ngaycongchuan = congtrongthang;
-                    person.ngaycongthucte = congthucte;
-
-                    person.tyle_bhxh = (decimal)tyle_bhxh;
-                    person.tyle_bhyt = (decimal)tyle_bhyt;
-                    person.tyle_bhtn = (decimal)tyle_bhtn;
-                    person.tyle_dpcd = (decimal)tyle_dpcd;
-
-                    person.tc_xangxe = (decimal)pc_xangxe;
-                    person.tc_chucvu = (decimal)pc_trachnhiem;
-                    person.tc_hieusuat = (decimal)pc_hieusuat;
-                    person.tc_thuebang = (decimal)pc_thuebang;
-                    person.tc_thamnien = (decimal)pc_thamnien;
-                    person.tc_thuhut = (decimal)pc_thuhut;
-                    person.tc_khuvuc = (decimal)pc_khuvuc;
-                    person.tc_khac = (decimal)pc_khac;
-
-                    person.tong_tc = (decimal)Convert.ToSingle(nRow.Cells[16].FormulaValue);
-
-                    person.luongcb = (decimal)luongcb;
-                    person.luongdongbhxh = (decimal)Convert.ToSingle(nRow.Cells[7].FormulaValue);
-
-                    person.luongkpi = (decimal)luongkpi;
-                    person.tongthunhap = (decimal)Convert.ToSingle(nRow.Cells[20].FormulaValue);
-
-                    person.thunhapchiuthue = (decimal)Convert.ToSingle(nRow.Cells[23].FormulaValue);
-
-
-                    person.tncn_banthan = (decimal)TNCN_banthan;
-                    person.tncn_songuoiphuthuoc = (int)TNCN_nguoiphuthuoc;
-                    person.tncn_nguoiphuthuoc = (decimal)Convert.ToSingle(nRow.Cells[26].FormulaValue);
-                    person.tncn_bhxh = (decimal)Convert.ToSingle(nRow.Cells[27].FormulaValue);
-                    person.thunhaptinhthue = (decimal)Convert.ToSingle(nRow.Cells[28].FormulaValue);
-                    person.thue_tncn = (decimal)Convert.ToSingle(nRow.Cells[29].FormulaValue);
-                    person.dpcd = (decimal)Convert.ToSingle(nRow.Cells[30].FormulaValue);
-                    person.thuclanh = (decimal)Convert.ToSingle(nRow.Cells[32].FormulaValue);
-                    person.tamungdot1 = (decimal)Convert.ToSingle(nRow.Cells[33].EnvalutedValue);
-                    person.conlai = (decimal)Convert.ToSingle(nRow.Cells[34].FormulaValue);
-                    person.tongphep = (decimal)item["tongphep"];
-
-                    decimal phepconlai = (decimal)_tinhcong.phepnam(record, date_to);
-                    person.phepconlai = phepconlai;
-                    person.phepdauky = phepconlai + person.tongphep;
-                    //if (person.MANV == "DLT021192")
-                    //{
-                    //    Console.Write(1);
-                    //}
-
-                    _context.Update(person);
-                    _context.SaveChanges();
+                sheet.DeleteRow(15, 1);
+                var start_r = 12;
+                foreach (var bophan1 in list_bophan1)
+                {
+                    string mabophan = bophan1.bophan;
+                    var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == mabophan).FirstOrDefault();
+                    sheet.Range["A" + start_r].Value = bophan.TENPHONG;
                     start_r++;
+                    var first_row = start_r;
+                    sheet.InsertRow(start_r + 1, bophan1.data.Count(), InsertOptionsType.FormatAsAfter);
+                    foreach (var item in bophan1.data)
+                    {
+                        var person = SalaryUserModel.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
+
+                        var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
+                        var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == record.MACHUCVU).FirstOrDefault();
+
+                        var congtrongthang = item["tongcong"];
+                        var congthucte = item["tong"];
+                        var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
+                        var phanloai = bophan != null ? bophan.TENPHONG : "";
+                        var manv = record.MANV;
+                        var hovaten = record.HOVATEN;
+                        var email = record.EMAIL;
+                        var luongcb = record.tien_luong ?? 0;
+
+                        var pc_xangxe = record.pc_khac ?? 0;
+                        var pc_trachnhiem = record.pc_trachnhiem ?? 0;
+                        var pc_thuebang = record.pc_thuebang ?? 0;
+                        var pc_khuvuc = record.pc_khuvuc ?? 0;
+                        var pc_thamnien = record.pc_thamnien ?? 0;
+                        var pc_hieusuat = record.pc_hieusuat ?? 0;
+                        var pc_thuhut = record.pc_thuhut ?? 0;
+                        var pc_khac = record.pc ?? 0;
+
+                        var luongkpi = record.tien_luong_kpi ?? 0;
+                        var TNCN_banthan = 11000000;
+                        var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
+                        var tamungdot1 = record.tien_luong_dot1 ?? 0;
+                        var khoantru = person.khoantru ?? 0;
+                        var khoancong = person.khoancong ?? 0;
+                        var note_khoantru = person.note_khoantru;
+                        var note_khoancong = person.note_khoancong;
+                        var note = person.note;
+                        var is_bhxh = record.is_bhxh;
+                        var is_thue = record.is_thue;
+                        var tyle_bhxh = record.tyle_bhxh ?? 0;
+                        var tyle_bhyt = record.tyle_bhyt ?? 0;
+                        var tyle_bhtn = record.tyle_bhtn ?? 0;
+                        var tyle_dpcd = record.tyle_dpcd ?? 0;
+
+
+                        var tyle_bhxh_cty = record.cty_bhxh ?? 0;
+                        var tyle_bhyt_cty = record.cty_bhyt ?? 0;
+                        var tyle_bhtn_cty = record.cty_bhtn ?? 0;
+                        var tyle_dpcd_cty = record.cty_dpcd ?? 0;
+
+                        var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
+                        var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
+
+                        var nRow = sheet.Rows[start_r];
+
+                        if (record.LOAIHD == "DV")
+                        {
+                            //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
+
+                            TNCN_banthan = 0; //// Không giảm trừ
+                            TNCN_nguoiphuthuoc = 0; // Không giảm trừ
+                                                    //tyle = 0;
+                                                    //tyle_dpcd = 0;
+                            nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
+
+                            //nRow.Cells[7].Value2 = "";
+                        }
+                        if (is_bhxh != true)
+                        {
+                            tyle_bhxh = 0;
+                            tyle_bhyt = 0;
+                            tyle_bhtn = 0;
+
+                            tyle_bhxh_cty = 0;
+                            tyle_bhyt_cty = 0;
+                            tyle_bhtn_cty = 0;
+
+                            tyle = 0;
+                            tyle_dpcd = 0;
+                            tyle_dpcd_cty = 0;
+                            //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
+                        }
+                        if (is_thue != true)
+                        {
+                            nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
+                        }
+
+                        nRow.Cells[0].NumberValue = ++stt;
+                        nRow.Cells[1].Value = manv;
+                        nRow.Cells[2].Value = hovaten;
+                        nRow.Cells[3].Value = tenchucvu;
+                        nRow.Cells[4].Value = phanloai;
+                        nRow.Cells[5].NumberValue = (double)congtrongthang;
+                        nRow.Cells[6].NumberValue = (double)luongcb;
+
+                        nRow.Cells[8].NumberValue = (double)pc_hieusuat;
+                        nRow.Cells[9].NumberValue = (double)pc_thuebang;
+                        nRow.Cells[10].NumberValue = (double)pc_xangxe;
+                        nRow.Cells[11].NumberValue = (double)pc_thamnien;
+                        nRow.Cells[12].NumberValue = (double)pc_thuhut;
+                        nRow.Cells[13].NumberValue = (double)pc_khuvuc;
+                        nRow.Cells[14].NumberValue = (double)pc_trachnhiem;
+                        nRow.Cells[15].NumberValue = (double)pc_khac;
+
+                        nRow.Cells[17].NumberValue = (double)luongkpi;
+                        nRow.Cells[18].NumberValue = (double)congthucte;
+                        nRow.Cells[19].NumberValue = (double)khoancong;
+                        nRow.Cells[24].NumberValue = (double)TNCN_banthan;
+                        nRow.Cells[25].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[31].NumberValue = (double)khoantru;
+                        if (note_khoancong != null)
+                            nRow.Cells[19].AddComment().Text = note_khoancong;
+                        if (note_khoantru != null)
+                            nRow.Cells[31].AddComment().Text = note_khoantru;
+                        if (note != null)
+                            nRow.Cells[20].AddComment().Text = note;
+
+
+                        nRow.Cells[27].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
+                        nRow.Cells[30].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
+
+                        sheet.CalculateAllValue();
+                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[32].FormulaNumberValue)
+                        {
+                            nRow.Cells[33].NumberValue = (double)tamungdot1;
+                            sheet.CalculateAllValue();
+                        }
+                        nRow.Cells[37].Value = stk;
+                        if (record.MANV == "NVH150384")
+                        {
+                            Console.Write(nRow);
+                        }
+
+                        ////Cập nhật database
+
+
+                        person.MANV = manv;
+                        person.HOVATEN = hovaten;
+                        person.CHUCVU = tenchucvu;
+                        person.BOPHAN = phanloai;
+                        person.email = email;
+                        person.MABOPHAN = record.MAPHONG;
+                        person.ngaycongchuan = congtrongthang;
+                        person.ngaycongthucte = congthucte;
+
+                        person.tyle_bhxh = (decimal)tyle_bhxh;
+                        person.tyle_bhyt = (decimal)tyle_bhyt;
+                        person.tyle_bhtn = (decimal)tyle_bhtn;
+                        person.tyle_dpcd = (decimal)tyle_dpcd;
+
+                        person.tyle_bhxh_cty = (decimal)tyle_bhxh_cty;
+                        person.tyle_bhyt_cty = (decimal)tyle_bhyt_cty;
+                        person.tyle_bhtn_cty = (decimal)tyle_bhtn_cty;
+                        person.tyle_dpcd_cty = (decimal)tyle_dpcd_cty;
+
+                        person.tc_xangxe = (decimal)pc_xangxe;
+                        person.tc_chucvu = (decimal)pc_trachnhiem;
+                        person.tc_hieusuat = (decimal)pc_hieusuat;
+                        person.tc_thuebang = (decimal)pc_thuebang;
+                        person.tc_thamnien = (decimal)pc_thamnien;
+                        person.tc_thuhut = (decimal)pc_thuhut;
+                        person.tc_khuvuc = (decimal)pc_khuvuc;
+                        person.tc_khac = (decimal)pc_khac;
+
+                        person.tong_tc = (decimal)Convert.ToSingle(nRow.Cells[16].FormulaValue);
+
+                        person.luongcb = (decimal)luongcb;
+                        person.luongdongbhxh = (decimal)Convert.ToSingle(nRow.Cells[7].FormulaValue);
+
+                        person.luongkpi = (decimal)luongkpi;
+                        person.tongthunhap = (decimal)Convert.ToSingle(nRow.Cells[20].FormulaValue);
+
+                        person.thunhapchiuthue = (decimal)Convert.ToSingle(nRow.Cells[23].FormulaValue);
+
+
+                        person.tncn_banthan = (decimal)TNCN_banthan;
+                        person.tncn_songuoiphuthuoc = (int)TNCN_nguoiphuthuoc;
+                        person.tncn_nguoiphuthuoc = (decimal)Convert.ToSingle(nRow.Cells[26].FormulaValue);
+                        person.tncn_bhxh = (decimal)Convert.ToSingle(nRow.Cells[27].FormulaValue);
+                        person.thunhaptinhthue = (decimal)Convert.ToSingle(nRow.Cells[28].FormulaValue);
+                        person.thue_tncn = (decimal)Convert.ToSingle(nRow.Cells[29].FormulaValue);
+                        person.dpcd = (decimal)Convert.ToSingle(nRow.Cells[30].FormulaValue);
+                        person.thuclanh = (decimal)Convert.ToSingle(nRow.Cells[32].FormulaValue);
+                        person.tamungdot1 = (decimal)Convert.ToSingle(nRow.Cells[33].EnvalutedValue);
+                        person.conlai = (decimal)Convert.ToSingle(nRow.Cells[34].FormulaValue);
+                        person.tongphep = (decimal)item["tongphep"];
+
+                        decimal phepconlai = (decimal)_tinhcong.phepnam(record, date_to);
+                        person.phepconlai = phepconlai;
+                        person.phepdauky = phepconlai + person.tongphep;
+                        //if (person.MANV == "DLT021192")
+                        //{
+                        //    Console.Write(1);
+                        //}
+
+                        _context.Update(person);
+                        _context.SaveChanges();
+                        start_r++;
+                    }
+
+                    sheet.DeleteRow(first_row, 1);
+                    sheet.DeleteRow(start_r, 1);
 
                     //CellRange originDataRang = sheet.Range[$"A{(list_data_cong.Count() + 12)}:AZ{(list_data_cong.Count() + 12)}"];
                     //CellRange targetDataRang = sheet.Range["A" + start_r + ":AZ" + start_r];
                     //sheet.Copy(originDataRang, targetDataRang, true);
 
                 }
+
                 //sheet.InsertDataTable(dt, false, 13, 1);
-                sheet.DeleteRow(12, 1);
-                sheet.DeleteRow(start_r, 1);
+                //sheet.DeleteRow(12, 1);
+                sheet.DeleteRow(start_r, 3);
                 sheet.CalculateAllValue();
             }
+
+
             //Chính thức
             var list_chinhthuc = data_post.Where(d => d.tinhtrang == "Chính thức" && d.LOAIHD != "DV").Select(d => d.MANV).ToList();
             if (list_chinhthuc.Count() > 0)
@@ -387,10 +439,17 @@ namespace it_template.Areas.Info.Controllers
                     var note = person.note;
                     var is_bhxh = record.is_bhxh;
                     var is_thue = record.is_thue;
+
                     var tyle_bhxh = record.tyle_bhxh ?? 0;
                     var tyle_bhyt = record.tyle_bhyt ?? 0;
                     var tyle_bhtn = record.tyle_bhtn ?? 0;
                     var tyle_dpcd = record.tyle_dpcd ?? 0;
+
+                    var tyle_bhxh_cty = record.cty_bhxh ?? 0;
+                    var tyle_bhyt_cty = record.cty_bhyt ?? 0;
+                    var tyle_bhtn_cty = record.cty_bhtn ?? 0;
+                    var tyle_dpcd_cty = record.cty_dpcd ?? 0;
+
                     var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
                     var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
 
@@ -408,15 +467,19 @@ namespace it_template.Areas.Info.Controllers
 
                         //nRow.Cells[7].Value2 = "";
                     }
-                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
-                    //{
-                    //    tyle = 0;
-                    //    tyle_dpcd = 0;
-                    //}
                     if (is_bhxh != true)
                     {
+                        tyle_bhxh = 0;
+                        tyle_bhyt = 0;
+                        tyle_bhtn = 0;
+
+                        tyle_bhxh_cty = 0;
+                        tyle_bhyt_cty = 0;
+                        tyle_bhtn_cty = 0;
+
                         tyle = 0;
                         tyle_dpcd = 0;
+                        tyle_dpcd_cty = 0;
                         //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
                     }
                     if (is_thue != true)
@@ -533,6 +596,12 @@ namespace it_template.Areas.Info.Controllers
                     var tyle_bhyt = record.tyle_bhyt ?? 0;
                     var tyle_bhtn = record.tyle_bhtn ?? 0;
                     var tyle_dpcd = record.tyle_dpcd ?? 0;
+
+                    var tyle_bhxh_cty = record.cty_bhxh ?? 0;
+                    var tyle_bhyt_cty = record.cty_bhyt ?? 0;
+                    var tyle_bhtn_cty = record.cty_bhtn ?? 0;
+                    var tyle_dpcd_cty = record.cty_dpcd ?? 0;
+
                     var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
                     var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
 
@@ -550,15 +619,19 @@ namespace it_template.Areas.Info.Controllers
 
                         //nRow.Cells[7].Value2 = "";
                     }
-                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
-                    //{
-                    //    tyle = 0;
-                    //    tyle_dpcd = 0;
-                    //}
                     if (is_bhxh != true)
                     {
+                        tyle_bhxh = 0;
+                        tyle_bhyt = 0;
+                        tyle_bhtn = 0;
+
+                        tyle_bhxh_cty = 0;
+                        tyle_bhyt_cty = 0;
+                        tyle_bhtn_cty = 0;
+
                         tyle = 0;
                         tyle_dpcd = 0;
+                        tyle_dpcd_cty = 0;
                         //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
                     }
                     if (is_thue != true)
@@ -623,7 +696,7 @@ namespace it_template.Areas.Info.Controllers
             }
 
             ///Học việc thử việc
-            var list_hocviec_thuviec = data_post.Where(d => (d.tinhtrang == "Học việc" || d.tinhtrang == "Thử việc" || d.tinhtrang == "Thử việc không bảo hiểm (BH)") && d.LOAIHD != "DV").Select(d => d.MANV).ToList();
+            var list_hocviec_thuviec = data_post.Where(d => (d.tinhtrang == "Học việc" || d.tinhtrang == "Thử việc" || d.tinhtrang == "Thử việc không bảo hiểm và không phép năm") && d.LOAIHD != "DV").Select(d => d.MANV).ToList();
             if (list_hocviec_thuviec.Count() > 0)
             {
                 var list_data_cong = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_hocviec_thuviec.Contains(d["MANV"])).OrderBy(d => d["bophan"]).ToList();
@@ -677,6 +750,12 @@ namespace it_template.Areas.Info.Controllers
                     var tyle_bhyt = record.tyle_bhyt ?? 0;
                     var tyle_bhtn = record.tyle_bhtn ?? 0;
                     var tyle_dpcd = record.tyle_dpcd ?? 0;
+
+                    var tyle_bhxh_cty = record.cty_bhxh ?? 0;
+                    var tyle_bhyt_cty = record.cty_bhyt ?? 0;
+                    var tyle_bhtn_cty = record.cty_bhtn ?? 0;
+                    var tyle_dpcd_cty = record.cty_dpcd ?? 0;
+
                     var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
                     var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
 
@@ -694,15 +773,19 @@ namespace it_template.Areas.Info.Controllers
 
                         //nRow.Cells[7].Value2 = "";
                     }
-                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
-                    //{
-                    //    tyle = 0;
-                    //    tyle_dpcd = 0;
-                    //}
                     if (is_bhxh != true)
                     {
+                        tyle_bhxh = 0;
+                        tyle_bhyt = 0;
+                        tyle_bhtn = 0;
+
+                        tyle_bhxh_cty = 0;
+                        tyle_bhyt_cty = 0;
+                        tyle_bhtn_cty = 0;
+
                         tyle = 0;
                         tyle_dpcd = 0;
+                        tyle_dpcd_cty = 0;
                         //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
                     }
                     if (is_thue != true)
@@ -765,157 +848,7 @@ namespace it_template.Areas.Info.Controllers
                 sheet.CalculateAllValue();
             }
 
-            //Từng bộ phận
-            var list_bophan = list_data_cong_all.GroupBy(d => d["bophan"]).Select(d => new
-            {
-                key = d.Key,
-                list = d.ToList(),
-            }).ToList();
-            foreach (var item1 in list_bophan)
-            {
-                string bp = item1.key;
-                var list_data_cong = item1.list;
-                var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == bp).FirstOrDefault();
-
-                Worksheet Osheet = workbook.Worksheets[4];
-                Worksheet sheet = workbook.CreateEmptySheet(bophan.TENPHONG);
-                sheet.CopyFrom(Osheet);
-
-                var now = DateTime.Now;
-                sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AB3"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
-                int stt = 0;
-                var start_r = 12;
-                sheet.InsertRow(start_r + 1, list_data_cong.Count(), InsertOptionsType.FormatAsAfter);
-                foreach (var item in list_data_cong)
-                {
-                    var person = SalaryUserModel.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
-
-                    var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
-                    var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == record.MACHUCVU).FirstOrDefault();
-                    //var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == record.MAPHONG).FirstOrDefault();
-
-                    var congtrongthang = item["tongcong"];
-                    var congthucte = item["tong"];
-                    var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
-                    var phanloai = bophan != null ? bophan.TENPHONG : "";
-                    var manv = record.MANV;
-                    var hovaten = record.HOVATEN;
-                    var email = record.EMAIL;
-                    var luongcb = record.tien_luong ?? 0;
-
-                    var pc_xangxe = record.pc_khac ?? 0;
-                    var pc_trachnhiem = record.pc_trachnhiem ?? 0;
-                    var pc_thuebang = record.pc_thuebang ?? 0;
-                    var pc_khuvuc = record.pc_khuvuc ?? 0;
-                    var pc_thamnien = record.pc_thamnien ?? 0;
-                    var pc_hieusuat = record.pc_hieusuat ?? 0;
-                    var pc_thuhut = record.pc_thuhut ?? 0;
-                    var pc_khac = record.pc ?? 0;
-
-                    var luongkpi = record.tien_luong_kpi ?? 0;
-                    var TNCN_banthan = 11000000;
-                    var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
-                    var tamungdot1 = record.tien_luong_dot1 ?? 0;
-                    var khoantru = person.khoantru ?? 0;
-                    var khoancong = person.khoancong ?? 0;
-                    var note_khoantru = person.note_khoantru;
-                    var note_khoancong = person.note_khoancong;
-                    var note = person.note;
-                    var is_bhxh = record.is_bhxh;
-                    var is_thue = record.is_thue;
-                    var tyle_bhxh = record.tyle_bhxh ?? 0;
-                    var tyle_bhyt = record.tyle_bhyt ?? 0;
-                    var tyle_bhtn = record.tyle_bhtn ?? 0;
-                    var tyle_dpcd = record.tyle_dpcd ?? 0;
-                    var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
-                    var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
-
-                    var nRow = sheet.Rows[start_r];
-
-                    if (record.LOAIHD == "DV")
-                    {
-                        //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
-
-                        TNCN_banthan = 0; //// Không giảm trừ
-                        TNCN_nguoiphuthuoc = 0; // Không giảm trừ
-                        //tyle = 0;
-                        //tyle_dpcd = 0;
-                        nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
-
-                        //nRow.Cells[7].Value2 = "";
-                    }
-                    //if (record.tinhtrang == "Học việc" || record.tinhtrang == "Thử việc" || record.tinhtrang == "Thử việc không phép")
-                    //{
-                    //    tyle = 0;
-                    //    tyle_dpcd = 0;
-                    //}
-                    if (is_bhxh != true)
-                    {
-                        tyle = 0;
-                        tyle_dpcd = 0;
-                        //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
-                    }
-                    if (is_thue != true)
-                    {
-                        nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
-                    }
-
-                    nRow.Cells[0].NumberValue = ++stt;
-                    nRow.Cells[1].Value = manv;
-                    nRow.Cells[2].Value = hovaten;
-                    nRow.Cells[3].Value = tenchucvu;
-                    nRow.Cells[4].Value = phanloai;
-                    nRow.Cells[5].NumberValue = (double)congtrongthang;
-                    nRow.Cells[6].NumberValue = (double)luongcb;
-
-                    nRow.Cells[8].NumberValue = (double)pc_hieusuat;
-                    nRow.Cells[9].NumberValue = (double)pc_thuebang;
-                    nRow.Cells[10].NumberValue = (double)pc_xangxe;
-                    nRow.Cells[11].NumberValue = (double)pc_thamnien;
-                    nRow.Cells[12].NumberValue = (double)pc_thuhut;
-                    nRow.Cells[13].NumberValue = (double)pc_khuvuc;
-                    nRow.Cells[14].NumberValue = (double)pc_trachnhiem;
-                    nRow.Cells[15].NumberValue = (double)pc_khac;
-
-                    nRow.Cells[17].NumberValue = (double)luongkpi;
-                    nRow.Cells[18].NumberValue = (double)congthucte;
-                    nRow.Cells[19].NumberValue = (double)khoancong;
-                    nRow.Cells[24].NumberValue = (double)TNCN_banthan;
-                    nRow.Cells[25].NumberValue = (double)TNCN_nguoiphuthuoc;
-                    nRow.Cells[31].NumberValue = (double)khoantru;
-                    if (note_khoancong != null)
-                        nRow.Cells[19].AddComment().Text = note_khoancong;
-                    if (note_khoantru != null)
-                        nRow.Cells[31].AddComment().Text = note_khoantru;
-                    if (note != null)
-                        nRow.Cells[20].AddComment().Text = note;
-
-
-                    nRow.Cells[27].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                    nRow.Cells[30].Formula = "=ROUND(H" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
-
-                    sheet.CalculateAllValue();
-                    if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[32].FormulaNumberValue)
-                    {
-                        nRow.Cells[33].NumberValue = (double)tamungdot1;
-                        sheet.CalculateAllValue();
-                    }
-                    nRow.Cells[37].Value = stk;
-
-                    start_r++;
-
-                    //CellRange originDataRang = sheet.Range[$"A{(list_data_cong.Count() + 12)}:AZ{(list_data_cong.Count() + 12)}"];
-                    //CellRange targetDataRang = sheet.Range["A" + start_r + ":AZ" + start_r];
-                    //sheet.Copy(originDataRang, targetDataRang, true);
-
-                }
-                //sheet.InsertDataTable(dt, false, 13, 1);
-                sheet.DeleteRow(12, 1);
-                sheet.DeleteRow(start_r, 1);
-                sheet.CalculateAllValue();
-            }
-            workbook.Worksheets.Remove("Clone");
+           
 
             workbook.SaveToFile(_configuration["Source:Path_Private"] + documentPath.Replace("/private", "").Replace("/", "\\"), ExcelVersion.Version2013);
 
@@ -927,6 +860,122 @@ namespace it_template.Areas.Info.Controllers
             return Json(jsonData);
 
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Administrator,HR Lương")]
+        public async Task<JsonResult> tinhBaohiem(string id)
+        {
+            var viewPath = "wwwroot/report/excel/Baohiem.xlsx";
+            var documentPath = "/private/info/data/" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
+
+            Workbook workbook = new Workbook();
+            workbook.LoadFromFile(viewPath);
+
+
+
+            var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
+            var Users = SalaryUserModel.Select(d => d.person_id).ToList();
+            var Model = _context.SalaryModel.Where(d => d.id == id).FirstOrDefault();
+            var date_from = Model.date_from.Value;
+            var date_to = Model.date_to.Value;
+            var data_post = _context.PersonnelModel.Where(d => Users.Contains(d.id) && d.is_bhxh == true).ToList();
+
+
+            if (data_post.Count() > 0)
+            {
+                //var list_data_cong = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_chinhthuc.Contains(d["MANV"])).ToList();
+
+                Worksheet sheet = workbook.Worksheets[0];
+                var now = DateTime.Now;
+                sheet.Range["A6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")}";
+                sheet.Range["N8"].Value = $"Nộp BHXH \n {date_to.ToString("MM")}/{date_to.ToString("yyyy")}";
+                sheet.Range["R8"].Value = $"Tổng CP công đoàn \n {date_to.ToString("MM")}/{date_to.ToString("yyyy")}";
+                int stt = 0;
+                var start_r = 10;
+                sheet.InsertRow(start_r + 1, data_post.Count(), InsertOptionsType.FormatAsAfter);
+                foreach (var record in data_post)
+                {
+
+                    var person = SalaryUserModel.Where(d => d.person_id == record.id).FirstOrDefault();
+                    //var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == record.MACHUCVU).FirstOrDefault();
+                    //var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == record.MAPHONG).FirstOrDefault();
+
+                    var tenchucvu = person.CHUCVU;
+                    //var phanloai = bophan != null ? bophan.TENPHONG : "";
+                    var manv = person.MANV;
+                    var hovaten = person.HOVATEN;
+
+                    var luongdongbhxh = person.luongdongbhxh.Value;
+
+                    var tyle_bhxh = person.tyle_bhxh ?? 0;
+                    var tyle_bhyt = person.tyle_bhyt ?? 0;
+                    var tyle_bhtn = person.tyle_bhtn ?? 0;
+                    var tyle_dpcd = person.tyle_dpcd ?? 0;
+                    var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
+
+
+                    var tyle_bhxh_cty = person.tyle_bhxh_cty ?? 0;
+                    var tyle_bhyt_cty = person.tyle_bhyt_cty ?? 0;
+                    var tyle_bhtn_cty = person.tyle_bhtn_cty ?? 0;
+                    var tyle_dpcd_cty = person.tyle_dpcd_cty ?? 0;
+                    var tyle_cty = tyle_bhxh_cty + tyle_bhtn_cty + tyle_bhyt_cty;
+
+                    var nRow = sheet.Rows[start_r];
+
+
+                    //if (is_bhxh != true)
+                    //{
+                    //    tyle = 0;
+                    //    tyle_dpcd = 0;
+                    //    //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
+                    //}
+
+
+                    nRow.Cells[0].NumberValue = ++stt;
+                    nRow.Cells[1].Value = manv;
+                    nRow.Cells[2].Value = hovaten;
+                    nRow.Cells[3].Value = tenchucvu;
+                    nRow.Cells[4].NumberValue = (double)luongdongbhxh;
+                    nRow.Cells[5].NumberValue = (double)Math.Round((luongdongbhxh * tyle_bhxh / 100), 0);
+                    nRow.Cells[6].NumberValue = (double)Math.Round((luongdongbhxh * tyle_bhyt / 100), 0);
+                    nRow.Cells[7].NumberValue = (double)Math.Round((luongdongbhxh * tyle_bhtn / 100), 0);
+                    nRow.Cells[8].NumberValue = (double)Math.Round(nRow.Cells[5].NumberValue + nRow.Cells[6].NumberValue + nRow.Cells[7].NumberValue, 0);
+
+
+
+                    nRow.Cells[9].NumberValue = (double)Math.Round(luongdongbhxh * tyle_bhxh_cty / 100, 0);
+                    nRow.Cells[10].NumberValue = (double)Math.Round(luongdongbhxh * tyle_bhyt_cty / 100, 0);
+                    nRow.Cells[11].NumberValue = (double)Math.Round(luongdongbhxh * tyle_bhtn_cty / 100, 0);
+                    nRow.Cells[12].NumberValue = (double)Math.Round(nRow.Cells[9].NumberValue + nRow.Cells[10].NumberValue + nRow.Cells[11].NumberValue, 0);
+
+                    nRow.Cells[13].NumberValue = (double)Math.Round(nRow.Cells[8].NumberValue + nRow.Cells[12].NumberValue, 0);
+
+
+
+                    nRow.Cells[14].NumberValue = (double)Math.Round(luongdongbhxh * tyle_dpcd / 100, 0);
+                    nRow.Cells[16].NumberValue = (double)Math.Round(luongdongbhxh * tyle_dpcd_cty / 100, 0);
+                    nRow.Cells[17].NumberValue = (double)Math.Round(nRow.Cells[14].NumberValue + nRow.Cells[16].NumberValue, 0);
+
+                    start_r++;
+
+                    //CellRange originDataRang = sheet.Range[$"A{(list_data_cong.Count() + 12)}:AZ{(list_data_cong.Count() + 12)}"];
+                    //CellRange targetDataRang = sheet.Range["A" + start_r + ":AZ" + start_r];
+                    //sheet.Copy(originDataRang, targetDataRang, true);
+
+                }
+                //sheet.InsertDataTable(dt, false, 13, 1);
+                sheet.DeleteRow(10, 1);
+                sheet.DeleteRow(start_r, 1);
+                sheet.CalculateAllValue();
+            }
+
+            workbook.SaveToFile(_configuration["Source:Path_Private"] + documentPath.Replace("/private", "").Replace("/", "\\"), ExcelVersion.Version2013);
+
+            var jsonData = new { success = true, link = documentPath };
+            return Json(jsonData);
+
+        }
+
         [HttpPost]
         [Authorize(Roles = "Administrator,HR Lương")]
         public async Task<JsonResult> capnhatphepnam(string id)
@@ -1071,6 +1120,7 @@ namespace it_template.Areas.Info.Controllers
                         {
                             salary_id = SalaryModel_old.id,
                             person_id = key,
+                            MANV = PersonModel.MANV,
                             email = PersonModel.EMAIL,
 
                         });

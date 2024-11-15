@@ -99,6 +99,7 @@ namespace Info.Models
 
         public bool? is_bhxh { get; set; }
         public bool? is_thue { get; set; }
+        public string? image_url { get; set; }
         [NotMapped]
         public List<string>? list_shift { get; set; }
 

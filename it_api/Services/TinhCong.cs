@@ -70,6 +70,7 @@ namespace Vue.Services
 
             sheet.Range["F16"].Formula = "=$F$6 *" + tyle_dpcd + "%";
 
+            sheet.Range["D19"].NumberValue = (double)((SalaryUserModel.thuclanh ?? 0) + (SalaryUserModel.khoantru ?? 0));
             sheet.Range["D20"].NumberValue = (double)(SalaryUserModel.khoantru ?? 0);
             //sheet.Range["D20"].NumberValue = (double)(SalaryUserModel.thuclanh ?? 0);
             sheet.Range["D22"].NumberValue = (double)(SalaryUserModel.tamungdot1 ?? 0);
@@ -184,6 +185,10 @@ namespace Vue.Services
                         {
                             cong += shift.ShiftModel.factor != null ? (decimal)shift.ShiftModel.factor : 1;
                         }
+                        if (congModel.value == "NX")
+                        {
+                            cong += shift.ShiftModel.factor != null ? (decimal)(shift.ShiftModel.factor) * 0.7m : 0.7m;
+                        }
                         if (congModel.value == "P")
                         {
                             phep += shift.ShiftModel.factor != null ? (decimal)shift.ShiftModel.factor : 1;
@@ -224,7 +229,7 @@ namespace Vue.Services
             var tungay = person.ngayphep_date;
             var phep = person.ngayphep;
             double? sophepnam = null;
-            if (person.tinhtrang != "Chính thức" && person.tinhtrang != "Thử việc")
+            if (person.tinhtrang != "Chính thức" && person.tinhtrang != "Thử việc" && person.tinhtrang != "Dịch vụ")
             {
                 return 0;
             }
