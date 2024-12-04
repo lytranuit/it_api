@@ -29,6 +29,7 @@ namespace Info.Models
         public string? CHUCVU { get; set; }
         public string? BOPHAN { get; set; }
         public string? MABOPHAN { get; set; }
+        public string? tinhtrangNV { get; set; }
 
         public decimal? ngaycongchuan { get; set; }
         public decimal? ngaycongthucte { get; set; }

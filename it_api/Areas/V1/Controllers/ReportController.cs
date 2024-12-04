@@ -1,5 +1,6 @@
 ﻿
 
+using iText.Commons.Bouncycastle.Asn1.X509;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;
@@ -161,9 +162,10 @@ namespace it_template.Areas.V1.Controllers
 
             var parent = list1.Where(d => d.id_parent == null).ToList();
 
+            var count_list2 = list1.Where(d => d.id_parent != null && (d.tieuchuan.Trim() == "" || d.tieuchuan == null)).Count();
             ///FIELD OTHER
             var first = list1.FirstOrDefault();
-         var raw = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            var raw = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
                     {"mahh",first.mahh },
                     {"tenhh",first.tenhh },
@@ -188,7 +190,7 @@ namespace it_template.Areas.V1.Controllers
             PreferredWidth width = new PreferredWidth(WidthType.Percentage, 100);
             table1.PreferredWidth = width;
             replacements_table.Add(text, table1);
-            table1.ResetCells(list1.Count() + 1, 4);
+            table1.ResetCells(list1.Count() + 1 - count_list2, 4);
             table1.SetColumnWidth(0, 30, CellWidthType.Point);
 
             var row_current = 0;
@@ -335,7 +337,183 @@ namespace it_template.Areas.V1.Controllers
                     ////
                     var child = list1.Where(d => d.id_parent == item.id).ToList();
 
-                    if (child.Count() > 0)
+                    if (child.Count() > 0 && (item.tieuchuan != null && item.tieuchuan.Trim() != ""))
+                    {
+                        //table1.ApplyHorizontalMerge(row_current, 1, 3);
+                        //table1.ApplyVerticalMerge(0, row_current, row_current + child.Count());
+
+                        FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p1 = FRow.Cells[i].AddParagraph();
+                        p1.Format.HorizontalAlignment = HorizontalAlignment.Justify;
+                        TR1 = p1.AppendText(item.chitieu);
+
+                        //TR1.CharacterFormat.FontName = "Arial";
+
+                        TR1.CharacterFormat.FontSize = 12;
+
+                        //TR1.CharacterFormat.Bold = true;
+
+                        if (item.chitieu_en != null && item.chitieu_en != "")
+                        {
+                            p1 = FRow.Cells[i].AddParagraph();
+                            p1.Format.HorizontalAlignment = HorizontalAlignment.Justify;
+                            TR1 = p1.AppendText(item.chitieu_en);
+
+                            //TR1.CharacterFormat.FontName = "Arial";
+
+                            TR1.CharacterFormat.FontSize = 12;
+
+                            TR1.CharacterFormat.Italic = true;
+                        }
+
+                        i++;
+                        ////
+                        FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                        p1 = FRow.Cells[i].AddParagraph();
+                        p1.Format.HorizontalAlignment = HorizontalAlignment.Justify;
+                        TR1 = p1.AppendText(item.tieuchuan.Replace("\t", " "));
+
+                        //TR1.CharacterFormat.FontName = "Arial";
+
+                        TR1.CharacterFormat.FontSize = 12;
+
+                        //TR1.CharacterFormat.Bold = true;
+                        if (item.tieuchuan_en != null && item.tieuchuan_en != "")
+                        {
+                            p1 = FRow.Cells[i].AddParagraph();
+                            p1.Format.HorizontalAlignment = HorizontalAlignment.Justify;
+                            TR1 = p1.AppendText(item.tieuchuan_en.Replace("\t", " "));
+
+                            //TR1.CharacterFormat.FontName = "Arial";
+
+                            TR1.CharacterFormat.FontSize = 12;
+
+                            TR1.CharacterFormat.Italic = true;
+                        }
+                        i++;
+
+                        /////
+                        if (item.type == "Text")
+                        {
+                            ////
+                            FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                            p1 = FRow.Cells[i].AddParagraph();
+                            p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                            TR1 = p1.AppendText(item.thucte_text);
+
+                            //TR1.CharacterFormat.FontName = "Arial";
+
+                            TR1.CharacterFormat.FontSize = 12;
+
+                            //TR1.CharacterFormat.Bold = true;
+                            if (item.thucte_text_en != null && item.thucte_text_en != "")
+                            {
+                                p1 = FRow.Cells[i].AddParagraph();
+                                p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                                TR1 = p1.AppendText(item.thucte_text_en);
+
+                                //TR1.CharacterFormat.FontName = "Arial";
+
+                                TR1.CharacterFormat.FontSize = 12;
+
+                                TR1.CharacterFormat.Italic = true;
+                            }
+                        }
+                        else if (item.type == "Number")
+                        {
+                            ////
+                            var text_dat = item.dat == true ? "Đạt" : "Không đạt";
+                            FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                            p1 = FRow.Cells[i].AddParagraph();
+                            p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                            TR1 = p1.AppendText(text_dat);
+
+                            //TR1.CharacterFormat.FontName = "Arial";
+
+                            TR1.CharacterFormat.FontSize = 12;
+
+                            ////
+                            var text_item1 = "";
+                            if (item.thucte != null)
+                            {
+                                text_item1 = item.thucte.Value.ToString("#,##0.#####").Replace(",", "*").Replace(".", ",").Replace("*", ".") + " " + item.mota;
+                            }
+                            if (item.thucte_text != null)
+                            {
+                                text_item1 += " " + item.thucte_text;
+                            }
+                            FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                            p1 = FRow.Cells[i].AddParagraph();
+                            p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                            TR1 = p1.AppendText(text_item1);
+
+                            //TR1.CharacterFormat.FontName = "Arial";
+
+                            TR1.CharacterFormat.FontSize = 12;
+
+                        }
+                        else if (item.type == "Boolean")
+                        {
+                            ////
+                            var text_item = item.dat == true ? "Đạt" : "Không đạt";
+                            if (item.thucte_text != null)
+                            {
+                                text_item += " " + item.thucte_text;
+                            }
+                            FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                            p1 = FRow.Cells[i].AddParagraph();
+                            p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                            TR1 = p1.AppendText(text_item);
+
+                            //TR1.CharacterFormat.FontName = "Arial";
+
+                            TR1.CharacterFormat.FontSize = 12;
+
+                        }
+
+                        foreach (var item1 in child)
+                        {
+                            var text_item = "";
+                            if (item1.type == "Text")
+                            {
+                                text_item = item1.thucte_text;
+                            }
+                            else if (item1.type == "Number")
+                            {
+                                text_item = "";
+                                if (item1.thucte != null)
+                                {
+                                    text_item = item1.thucte.Value.ToString("#,##0.#####").Replace(",", "*").Replace(".", ",").Replace("*", ".") + " " + item1.mota;
+                                }
+                                if (item1.thucte_text != null)
+                                {
+                                    text_item += " " + item1.thucte_text;
+                                }
+                            }
+                            else if (item.type == "Boolean")
+                            {
+                                text_item = item1.thucte == 1 ? "Đạt" : "Không đạt";
+                                if (item1.thucte_text != null)
+                                {
+                                    text_item += " " + item1.thucte_text;
+                                }
+                            }
+                            p1 = FRow.Cells[i].AddParagraph();
+                            p1.Format.HorizontalAlignment = HorizontalAlignment.Justify;
+                            TR1 = p1.AppendText(item1.chitieu + ": " + text_item);
+
+                            //TR1.CharacterFormat.FontName = "Arial";
+
+                            TR1.CharacterFormat.FontSize = 12;
+
+                            //TR1.CharacterFormat.Italic = true;
+                        }
+
+                        row_current++;
+
+
+                    }
+                    else if (child.Count() > 0 && (item.tieuchuan == null || item.tieuchuan.Trim() == ""))
                     {
                         table1.ApplyHorizontalMerge(row_current, 1, 3);
                         table1.ApplyVerticalMerge(0, row_current, row_current + child.Count());
@@ -421,6 +599,7 @@ namespace it_template.Areas.V1.Controllers
                             ///
                             if (item1.type == "Text")
                             {
+
                                 ////
                                 FRow.Cells[y].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
                                 p1 = FRow.Cells[y].AddParagraph();
@@ -432,7 +611,7 @@ namespace it_template.Areas.V1.Controllers
                                 TR1.CharacterFormat.FontSize = 12;
 
                                 //TR1.CharacterFormat.Bold = true;
-                                if (item1.thucte_text_en != null)
+                                if (item1.thucte_text_en != null && item1.thucte_text_en != "")
                                 {
                                     p1 = FRow.Cells[y].AddParagraph();
                                     p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
@@ -448,34 +627,26 @@ namespace it_template.Areas.V1.Controllers
                             else if (item1.type == "Number")
                             {
                                 ////
+                                var text_dat = item1.dat == true ? "Đạt" : "Không đạt";
                                 FRow.Cells[y].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
                                 p1 = FRow.Cells[y].AddParagraph();
                                 p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                                TR1 = p1.AppendText(item1.thucte.Value.ToString("#,##0").Replace(",", ".") + " " + item1.mota);
+                                TR1 = p1.AppendText(text_dat);
 
                                 //TR1.CharacterFormat.FontName = "Arial";
 
                                 TR1.CharacterFormat.FontSize = 12;
 
-                                //TR1.CharacterFormat.Bold = true;
-                                //if (item1.thucte_text_en != null)
-                                //{
-                                //    p1 = FRow.Cells[y].AddParagraph();
-                                //    p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                                //    TR1 = p1.AppendText(item1.thucte_text_en);
-
-                                //    //TR1.CharacterFormat.FontName = "Arial";
-
-                                //    TR1.CharacterFormat.FontSize = 12;
-
-                                //    TR1.CharacterFormat.Italic = true;
-                                //}
-                            }
-                            else if (item1.type == "Boolean")
-                            {
                                 ////
-                                var text_item1 = item1.thucte == 1 ? "Đạt" : "Không đạt";
-
+                                var text_item1 = "";
+                                if (item1.thucte != null)
+                                {
+                                    text_item1 = item1.thucte.Value.ToString("#,##0.#####").Replace(",", "*").Replace(".", ",").Replace("*", ".") + " " + item1.mota;
+                                }
+                                if (item1.thucte_text != null)
+                                {
+                                    text_item1 += " " + item1.thucte_text;
+                                }
                                 FRow.Cells[y].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
                                 p1 = FRow.Cells[y].AddParagraph();
                                 p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
@@ -485,21 +656,26 @@ namespace it_template.Areas.V1.Controllers
 
                                 TR1.CharacterFormat.FontSize = 12;
 
-                                //TR1.CharacterFormat.Bold = true;
-                                //if (item1.thucte_text_en != null)
-                                //{
-                                //    p1 = FRow.Cells[y].AddParagraph();
-                                //    p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                                //    TR1 = p1.AppendText(item1.thucte_text_en);
-
-                                //    //TR1.CharacterFormat.FontName = "Arial";
-
-                                //    TR1.CharacterFormat.FontSize = 12;
-
-                                //    TR1.CharacterFormat.Italic = true;
-                                //}
                             }
-                            
+                            else if (item1.type == "Boolean")
+                            {
+                                ////
+                                var text_item1 = item1.dat == true ? "Đạt" : "Không đạt";
+                                if (item1.thucte_text != null)
+                                {
+                                    text_item1 += " " + item1.thucte_text;
+                                }
+                                FRow.Cells[y].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                                p1 = FRow.Cells[y].AddParagraph();
+                                p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                                TR1 = p1.AppendText(text_item1);
+
+                                //TR1.CharacterFormat.FontName = "Arial";
+
+                                TR1.CharacterFormat.FontSize = 12;
+
+                            }
+
                             y++;
                             row_current++;
                         }
@@ -566,7 +742,7 @@ namespace it_template.Areas.V1.Controllers
                             TR1.CharacterFormat.FontSize = 12;
 
                             //TR1.CharacterFormat.Bold = true;
-                            if (item.thucte_text_en != null)
+                            if (item.thucte_text_en != null && item.thucte_text_en != "")
                             {
                                 p1 = FRow.Cells[i].AddParagraph();
                                 p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
@@ -582,34 +758,46 @@ namespace it_template.Areas.V1.Controllers
                         else if (item.type == "Number")
                         {
                             ////
+                            var text_dat = item.dat == true ? "Đạt" : "Không đạt";
+
                             FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
                             p1 = FRow.Cells[i].AddParagraph();
                             p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                            TR1 = p1.AppendText(item.thucte.Value.ToString("#,##0").Replace(",", ".") + " " + item.mota);
+                            TR1 = p1.AppendText(text_dat);
 
                             //TR1.CharacterFormat.FontName = "Arial";
 
                             TR1.CharacterFormat.FontSize = 12;
 
-                            //TR1.CharacterFormat.Bold = true;
-                            //if (item.thucte_text_en != null)
-                            //{
-                            //    p1 = FRow.Cells[i].AddParagraph();
-                            //    p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                            //    TR1 = p1.AppendText(item.thucte_text_en);
+                            ////
+                            ///
+                            var text_item1 = "";
+                            if (item.thucte != null)
+                            {
+                                text_item1 = item.thucte.Value.ToString("#,##0.#####").Replace(",", "*").Replace(".", ",").Replace("*", ".") + " " + item.mota;
+                            }
+                            if (item.thucte_text != null)
+                            {
+                                text_item1 += " " + item.thucte_text;
+                            }
+                            FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
+                            p1 = FRow.Cells[i].AddParagraph();
+                            p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                            TR1 = p1.AppendText(text_item1);
 
-                            //    //TR1.CharacterFormat.FontName = "Arial";
+                            //TR1.CharacterFormat.FontName = "Arial";
 
-                            //    TR1.CharacterFormat.FontSize = 12;
+                            TR1.CharacterFormat.FontSize = 12;
 
-                            //    TR1.CharacterFormat.Italic = true;
-                            //}
                         }
                         else if (item.type == "Boolean")
                         {
                             ////
-                            var text_item = item.thucte == 1 ? "Đạt" : "Không đạt";
-
+                            var text_item = item.dat == true ? "Đạt" : "Không đạt";
+                            if (item.thucte_text != null)
+                            {
+                                text_item += " " + item.thucte_text;
+                            }
                             FRow.Cells[i].CellFormat.VerticalAlignment = VerticalAlignment.Middle;
                             p1 = FRow.Cells[i].AddParagraph();
                             p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
@@ -619,19 +807,7 @@ namespace it_template.Areas.V1.Controllers
 
                             TR1.CharacterFormat.FontSize = 12;
 
-                            //TR1.CharacterFormat.Bold = true;
-                            //if (item.thucte_text_en != null)
-                            //{
-                            //    p1 = FRow.Cells[i].AddParagraph();
-                            //    p1.Format.HorizontalAlignment = HorizontalAlignment.Center;
-                            //    TR1 = p1.AppendText(item.thucte_text_en);
 
-                            //    //TR1.CharacterFormat.FontName = "Arial";
-
-                            //    TR1.CharacterFormat.FontSize = 12;
-
-                            //    TR1.CharacterFormat.Italic = true;
-                            //}
                         }
 
                         i++;

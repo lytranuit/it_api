@@ -26,6 +26,8 @@ using System.Security.Policy;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System.Diagnostics;
 using iText.StyledXmlParser.Jsoup.Nodes;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -124,13 +126,21 @@ namespace it_template.Areas.Info.Controllers
             workbook.LoadFromFile(viewPath);
 
 
-
             var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
             var Users = SalaryUserModel.Select(d => d.person_id).ToList();
             var Model = _context.SalaryModel.Where(d => d.id == id).FirstOrDefault();
             var date_from = Model.date_from.Value;
             var date_to = Model.date_to.Value;
             var data_post = _context.PersonnelModel.Where(d => Users.Contains(d.id)).ToList();
+
+            ///olddata
+            var nam = Model.nam;
+            var thang = Model.thang;
+            var thang_old = Model.thang == 1 ? 12 : Model.thang - 1;
+            var nam_old = Model.thang == 1 ? nam - 1 : nam;
+            var SalaryUserModel_old = _context.SalaryUserModel.Include(d => d.salary).Where(d => d.salary.deleted_at == null && d.salary.thang == thang_old && d.salary.nam == nam_old).ToList();
+
+
 
             var list_data_cong_all = _tinhcong.cong(data_post, date_from, date_to);
 
@@ -143,6 +153,7 @@ namespace it_template.Areas.Info.Controllers
                     bophan = d.Key,
                     data = d.ToList()
                 }).ToList();
+
                 Worksheet sheet = workbook.Worksheets[0];
                 var now = DateTime.Now;
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
@@ -178,6 +189,10 @@ namespace it_template.Areas.Info.Controllers
                     foreach (var item in bophan1.data)
                     {
                         var person = SalaryUserModel.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
+                        var person_old = SalaryUserModel_old.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
+
+
+
 
                         var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
                         var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == record.MACHUCVU).FirstOrDefault();
@@ -300,7 +315,7 @@ namespace it_template.Areas.Info.Controllers
                             sheet.CalculateAllValue();
                         }
                         nRow.Cells[37].Value = stk;
-                        if (record.MANV == "NVH150384")
+                        if (record.MANV == "NMK170962")
                         {
                             Console.Write(nRow);
                         }
@@ -336,36 +351,50 @@ namespace it_template.Areas.Info.Controllers
                         person.tc_khuvuc = (decimal)pc_khuvuc;
                         person.tc_khac = (decimal)pc_khac;
 
-                        person.tong_tc = (decimal)Convert.ToSingle(nRow.Cells[16].FormulaValue);
+                        person.tong_tc = Convert.ToDecimal(nRow.Cells[16].FormulaValue);
 
                         person.luongcb = (decimal)luongcb;
-                        person.luongdongbhxh = (decimal)Convert.ToSingle(nRow.Cells[7].FormulaValue);
+                        person.luongdongbhxh = Convert.ToDecimal(nRow.Cells[7].FormulaValue);
 
                         person.luongkpi = (decimal)luongkpi;
-                        person.tongthunhap = (decimal)Convert.ToSingle(nRow.Cells[20].FormulaValue);
 
-                        person.thunhapchiuthue = (decimal)Convert.ToSingle(nRow.Cells[23].FormulaValue);
+                        person.tongthunhap = Convert.ToDecimal(nRow.Cells[20].FormulaValue);
+
+                        person.thunhapchiuthue = Convert.ToDecimal(nRow.Cells[23].FormulaValue);
 
 
                         person.tncn_banthan = (decimal)TNCN_banthan;
                         person.tncn_songuoiphuthuoc = (int)TNCN_nguoiphuthuoc;
-                        person.tncn_nguoiphuthuoc = (decimal)Convert.ToSingle(nRow.Cells[26].FormulaValue);
-                        person.tncn_bhxh = (decimal)Convert.ToSingle(nRow.Cells[27].FormulaValue);
-                        person.thunhaptinhthue = (decimal)Convert.ToSingle(nRow.Cells[28].FormulaValue);
-                        person.thue_tncn = (decimal)Convert.ToSingle(nRow.Cells[29].FormulaValue);
-                        person.dpcd = (decimal)Convert.ToSingle(nRow.Cells[30].FormulaValue);
-                        person.thuclanh = (decimal)Convert.ToSingle(nRow.Cells[32].FormulaValue);
-                        person.tamungdot1 = (decimal)Convert.ToSingle(nRow.Cells[33].EnvalutedValue);
-                        person.conlai = (decimal)Convert.ToSingle(nRow.Cells[34].FormulaValue);
+                        person.tncn_nguoiphuthuoc = Convert.ToDecimal(nRow.Cells[26].FormulaValue);
+                        person.tncn_bhxh = Convert.ToDecimal(nRow.Cells[27].FormulaValue);
+                        person.thunhaptinhthue = Convert.ToDecimal(nRow.Cells[28].FormulaValue);
+                        person.thue_tncn = Convert.ToDecimal(nRow.Cells[29].FormulaValue);
+                        person.dpcd = Convert.ToDecimal(nRow.Cells[30].FormulaValue);
+                        person.thuclanh = Convert.ToDecimal(nRow.Cells[32].FormulaValue);
+                        person.tamungdot1 = Convert.ToDecimal(nRow.Cells[33].EnvalutedValue);
+                        person.conlai = Convert.ToDecimal(nRow.Cells[34].FormulaValue);
                         person.tongphep = (decimal)item["tongphep"];
 
                         decimal phepconlai = (decimal)_tinhcong.phepnam(record, date_to);
                         person.phepconlai = phepconlai;
                         person.phepdauky = phepconlai + person.tongphep;
+                        person.tinhtrangNV = record.LOAIHD == "DV" ? "Dịch vụ" : record.tinhtrang;
                         //if (person.MANV == "DLT021192")
                         //{
                         //    Console.Write(1);
                         //}
+                        //////
+                        if (person != null && person_old != null)
+                        {
+                            var differences = CompareModels(person, person_old);
+
+                            foreach (var diff in differences)
+                            {
+                                CellRange cell = nRow.Cells[diff.Value.column];
+                                cell.Style.Color = System.Drawing.Color.Yellow;
+                            }
+                        }
+
 
                         _context.Update(person);
                         _context.SaveChanges();
@@ -848,7 +877,7 @@ namespace it_template.Areas.Info.Controllers
                 sheet.CalculateAllValue();
             }
 
-           
+
 
             workbook.SaveToFile(_configuration["Source:Path_Private"] + documentPath.Replace("/private", "").Replace("/", "\\"), ExcelVersion.Version2013);
 
@@ -1330,6 +1359,43 @@ namespace it_template.Areas.Info.Controllers
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
+
+        public static Dictionary<string, (object OldValue, object NewValue, int column)> CompareModels(SalaryUserModel oldModel, SalaryUserModel newModel)
+        {
+            var differences = new Dictionary<string, (object OldValue, object NewValue, int column)>();
+
+            var dict = new Dictionary<string, int>();
+            dict.Add("ngaycongthucte", 18);
+            dict.Add("tongthunhap", 20);
+            dict.Add("luongcb", 6);
+            dict.Add("luongdongbhxh", 7);
+            dict.Add("luongkpi", 17);
+            dict.Add("khoancong", 19);
+            dict.Add("khoantru", 31);
+            dict.Add("thuclanh", 32);
+            dict.Add("thunhaptinhthue", 28);
+            dict.Add("thunhapchiuthue", 23);
+
+
+            // Lấy tất cả các thuộc tính của model
+            var properties = typeof(SalaryUserModel).GetProperties();
+
+            foreach (var key in dict.Keys)
+            {
+                PropertyInfo property = typeof(SalaryUserModel).GetProperty(key);
+
+                var oldValue = property.GetValue(oldModel);
+                var newValue = property.GetValue(newModel);
+                if (!Equals(oldValue, newValue))
+                {
+                    int column = dict[key];
+                    differences[property.Name] = (oldValue, newValue, column);
+                }
+            }
+
+            return differences;
+        }
+
 
     }
 

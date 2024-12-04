@@ -39,7 +39,7 @@ namespace Vue.Models
         public string? malo { get; set; }
         public string? sodk { get; set; }
 
-
+        public bool? dat { get; set; }
         public string? handung { get; set; }
         public string? theotieuchuan { get; set; }
         public string? ghichu { get; set; }

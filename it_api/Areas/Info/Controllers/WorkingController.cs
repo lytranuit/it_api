@@ -125,6 +125,8 @@ namespace it_template.Areas.Info.Controllers
             var length = Request.Form["length"].FirstOrDefault();
             int pageSize = length != null ? Convert.ToInt32(length) : 0;
             var search = Request.Form["filters[search]"].FirstOrDefault();
+            var status_string = Request.Form["status"].FirstOrDefault();
+            int status = status_string != null ? Convert.ToInt32(status_string) : 0;
             var id = Request.Form["filters[id]"].FirstOrDefault();
             var department = Request.Form["filters[department]"].FirstOrDefault();
             var date_from_string = Request.Form["filters[date_from]"].FirstOrDefault();
@@ -193,10 +195,18 @@ namespace it_template.Areas.Info.Controllers
             }
 
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV).Skip(skip).Take(pageSize).ToList();
+            var datapost = customerData.OrderByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV).ToList();
 
+            if (status != 1)
+            {
+                datapost = datapost.Skip(skip).Take(pageSize).ToList();
+            }
 
             var data = _tinhcong.cong(datapost, date_from, date_to);
+            if (status == 1)
+            {
+                data = data.Where(d => d["is_finish_chamcong"] == false).ToList();
+            }
             var list_nv = datapost.Select(d => d.MANV).ToList();
             var ChamcongModel = _context.ChamcongModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && list_nv.Contains(d.MANV)).ToList();
 
@@ -929,7 +939,7 @@ namespace it_template.Areas.Info.Controllers
                 sheet.Range["BM3"].NumberValue = tongcong;
                 //sheet.Range["E145"].Value = start_r.ToString();
                 sheet.InsertDataTable(dt, false, 7, 1);
-                sheet.CalculateAllValue(); 
+                sheet.CalculateAllValue();
                 var delete_count = end_column - start_column;
                 if (delete_count > 0)
                 {

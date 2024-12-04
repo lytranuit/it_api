@@ -88,6 +88,8 @@ namespace it_template.Areas.Trend.Controllers
                 var list_point1 = data.Select(d => d.point_id.Value).Distinct().ToList();
                 //limit_all = limit_all.Where(d => d.list_point.Intersect(list_point1).Any()).ToList();
                 var labels = target.data.GroupBy(g => g.date).Select(g => g.Key.Value).OrderBy(g => g).ToList();
+
+
                 var datasets = target.data.GroupBy(g => g.point).Select(g => new Dataset()
                 {
                     label = g.Key.code,

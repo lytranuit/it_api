@@ -181,10 +181,17 @@ namespace it_template.Areas.Info.Controllers
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
             var Model = _context.OrderletterModel.Where(d => d.id == id).FirstOrDefault();
-            Model.date_accept = DateTime.Now;
             Model.status_id = (int)OrderletterStatus.Khong_duyet;
-            Model.user_accept_id = user_id;
-            Model.note = note;
+            if (Model.user1_accept_id != Model.user_accept_id && Model.user1_accept_id == user_id)
+            {
+                Model.date1_accept = DateTime.Now;
+                Model.note1 = note;
+            }
+            else
+            {
+                Model.date_accept = DateTime.Now;
+                Model.note = note;
+            }
             ///UPDATE CHẤM CÔNG
             var list_chamcong = _context.ChamcongModel.Where(d => d.orderletter_id == id).ToList();
             foreach (var d in list_chamcong)

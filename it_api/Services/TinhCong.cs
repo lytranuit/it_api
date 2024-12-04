@@ -99,6 +99,10 @@ namespace Vue.Services
                 var CongMoi = new List<ChamcongModel>();
                 var ngaynhanviec = record.NGAYNHANVIEC;
                 var ngaynghiviec = record.NGAYNGHIVIEC;
+                if(ngaynghiviec != null)
+                {
+                    Console.WriteLine(ngaynghiviec.ToString());
+                }
                 decimal tong = 0;
                 decimal tongphep = 0;
                 foreach (var shift in shifts)
@@ -138,13 +142,14 @@ namespace Vue.Services
                     //    data = s.Select(e => e.list_hiks).ToList(),
                     //})
                 }).ToList();
+                bool is_finish_chamcong = true;
                 foreach (var c in chamcong)
                 {
                     if (ngaynhanviec != null && ngaynhanviec > c.date)
                     {
                         continue;
                     }
-                    if (ngaynghiviec != null && ngaynghiviec < c.date)
+                    if (ngaynghiviec != null && ngaynghiviec <= c.date)
                     {
                         continue;
                     }
@@ -181,6 +186,10 @@ namespace Vue.Services
                                 CongMoi.Add(congModel);
                             }
                         }
+                        if (congModel.value == "" || congModel.value != congModel.value_new)
+                        {
+                            is_finish_chamcong = false;
+                        }
                         if (congModel.value == "X" || congModel.value == "NL" || congModel.value == "Pr" || congModel.value == "P")
                         {
                             cong += shift.ShiftModel.factor != null ? (decimal)shift.ShiftModel.factor : 1;
@@ -210,6 +219,7 @@ namespace Vue.Services
                 d.Add("bophan", record.MAPHONG);
                 d.Add("EMAIL", record.EMAIL);
                 d.Add("tong", tong);
+                d.Add("is_finish_chamcong", is_finish_chamcong);
                 d.Add("tongphep", tongphep);
                 d.Add("phepnamconlai", phepconlai);
                 d.Add("tongcong", chamcong.Count());
