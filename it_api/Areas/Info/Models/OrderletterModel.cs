@@ -19,6 +19,7 @@ namespace Info.Models
         [ForeignKey("created_by")]
         public UserModel? user_created_by { get; set; }
         public int? status_id { get; set; }
+        public int? status1_id { get; set; }
 
         public string? user_accept_id { get; set; }
         [ForeignKey("user_accept_id")]

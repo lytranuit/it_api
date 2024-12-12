@@ -97,12 +97,12 @@ namespace Vue.Services
                 var list_chamcong = new List<ChamCong>();
                 var shifts = _context.ShiftUserModel.Where(d => d.person_id == record.id).Include(d => d.shift).Select(d => d.shift).ToList();
                 var CongMoi = new List<ChamcongModel>();
-                var ngaynhanviec = record.NGAYNHANVIEC;
-                var ngaynghiviec = record.NGAYNGHIVIEC;
-                if(ngaynghiviec != null)
-                {
-                    Console.WriteLine(ngaynghiviec.ToString());
-                }
+                DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNGHIVIEC.Value.Date : null;
+                //if (ngaynghiviec != null)
+                //{
+                //    Console.WriteLine(ngaynghiviec.ToString());
+                //}
                 decimal tong = 0;
                 decimal tongphep = 0;
                 foreach (var shift in shifts)
@@ -213,6 +213,12 @@ namespace Vue.Services
                 }
 
                 var phepconlai = (decimal)phepnam(record, date_to);
+                DateTime denngay = new DateTime(date_from.Year, 12, 25); /// Cuối năm
+                if (date_from > denngay)
+                {
+                    denngay = new DateTime(date_from.Year + 1, 12, 25);
+                }
+                var pheptoida = (decimal)phepnam(record, denngay);
                 d.Add("NV_id", record.id);
                 d.Add("MANV", record.MANV);
                 d.Add("HOVATEN", record.HOVATEN);
@@ -222,6 +228,7 @@ namespace Vue.Services
                 d.Add("is_finish_chamcong", is_finish_chamcong);
                 d.Add("tongphep", tongphep);
                 d.Add("phepnamconlai", phepconlai);
+                d.Add("phepnamtoida", pheptoida);
                 d.Add("tongcong", chamcong.Count());
                 if (addCongMoi)
                 {
@@ -254,6 +261,10 @@ namespace Vue.Services
             else
             {
                 sophepnam = TinhSoNgayPhep(tungay.Value, phep.Value, denngay);
+                if (denngay.Year > tungay.Value.Year)
+                {
+                    tungay = new DateTime(denngay.Year - 1, 12, 26);  // Đặt ngày hiện tại thành đầu năm mới
+                }
                 var count_phep = _context.ChamcongModel.Where(d => d.value == "P" && d.MANV == person.MANV && d.date > tungay && d.date <= denngay).Include(d => d.shift).Sum(d => d.shift.factor);
 
                 sophepnam = sophepnam - (double)count_phep;
@@ -325,7 +336,7 @@ namespace Vue.Services
             // Nếu ngày tương lai qua năm mới, reset ngày phép về 0
             if (ngayTuongLai.Year > ngayHienTai.Year)
             {
-                soNgayPhepHienTai = 0;
+                soNgayPhepHienTai = 1;
                 ngayHienTai = new DateTime(ngayTuongLai.Year, 1, 1);  // Đặt ngày hiện tại thành đầu năm mới
             }
 

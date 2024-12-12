@@ -13,6 +13,10 @@
 		<Optimize>False</Optimize>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
+
 	<ItemGroup>
 	  <None Remove="appsettings.Development.json~RF3ce72485.TMP" />
 	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\AudioRender.dll" />

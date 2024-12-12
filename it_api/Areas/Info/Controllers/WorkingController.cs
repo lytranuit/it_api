@@ -301,6 +301,7 @@ namespace it_template.Areas.Info.Controllers
             var list_hik = _context.HikModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && d.device != "A.CT.1").OrderBy(d => d.date).ThenBy(d => d.time).ToList();
             var list_holidays = _context.HolidayModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to).Select(d => d.date).ToList();
 
+            var user_shift_f = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "F-S" || d.shift.code == "F-C")).Select(d => d.person_id).Distinct().ToList();
 
             var user_shift_vs = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "S-T7" || d.shift.code == "C-T7")).Select(d => d.person_id).Distinct().ToList();
             var user_shift_full = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "F")).Select(d => d.person_id).Distinct().ToList();
@@ -357,8 +358,8 @@ namespace it_template.Areas.Info.Controllers
                     DataRow dr1 = dt.NewRow();
                     dr1["stt"] = (++stt);
                     dr1["HOVATEN"] = record.HOVATEN;
-                    var ngaynhanviec = record.NGAYNHANVIEC;
-                    var ngaynghiviec = record.NGAYNGHIVIEC;
+                    DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
                     //decimal tong = 0;
 
                     //dr1["tong"] = tong;
@@ -377,7 +378,7 @@ namespace it_template.Areas.Info.Controllers
                         {
 
                         }
-                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        else if (ngaynghiviec != null && ngaynghiviec <= date_check)
                         {
 
                         }
@@ -437,7 +438,7 @@ namespace it_template.Areas.Info.Controllers
                         {
 
                         }
-                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        else if (ngaynghiviec != null && ngaynghiviec <= date_check)
                         {
 
                         }
@@ -565,8 +566,8 @@ namespace it_template.Areas.Info.Controllers
                     DataRow dr1 = dt.NewRow();
                     dr1["stt"] = (++stt);
                     dr1["HOVATEN"] = record.HOVATEN;
-                    var ngaynhanviec = record.NGAYNHANVIEC;
-                    var ngaynghiviec = record.NGAYNGHIVIEC;
+                    DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
                     //decimal tong = 0;
 
                     //dr1["tong"] = tong;
@@ -584,7 +585,7 @@ namespace it_template.Areas.Info.Controllers
                         {
 
                         }
-                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        else if (ngaynghiviec != null && ngaynghiviec <= date_check)
                         {
 
                         }
@@ -644,7 +645,7 @@ namespace it_template.Areas.Info.Controllers
                         {
 
                         }
-                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        else if (ngaynghiviec != null && ngaynghiviec <= date_check)
                         {
 
                         }
@@ -735,9 +736,217 @@ namespace it_template.Areas.Info.Controllers
             }
             else
             {
-                WorksheetsCollection worksheets = workbook.Worksheets;
 
-                worksheets.Remove("Dịch vụ");
+                datapost = datapost_all.Where(d => d.LOAIHD == "DV" && user_shift_f.Contains(d.id)).OrderByDescending(d => d.NGAYNHANVIEC).ToList();
+                if (datapost.Count > 0)
+                {
+                    Worksheet sheet = workbook.Worksheets[1];
+                    ////Bt
+                    var shift_s = _context.ShiftModel.Where(d => d.code == "F-S").FirstOrDefault();
+                    var shift_c = _context.ShiftModel.Where(d => d.code == "F-C").FirstOrDefault();
+                    var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
+                    var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+
+                    sheet.Range["C3"].DateTimeValue = date_from;
+                    sheet.Range["U2"].DateTimeValue = date_to;
+                    sheet.Range["BM10"].Value = $"Đông Hòa, ngày {date_to.ToString("dd")} tháng {date_to.ToString("MM")} năm {date_to.ToString("yy")}";
+                    int stt = 0;
+                    var start_r = 6;
+                    DataTable dt = new DataTable();
+                    dt.Columns.Add("stt", typeof(int));
+                    dt.Columns.Add("HOVATEN", typeof(string));
+                    //dt.Columns.Add("tong", typeof(decimal));
+                    var date_check = date_from;
+                    var start_column = 2;
+                    var end_column = 64;
+                    while (date_check <= date_to)
+                    {
+                        dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-S", typeof(string));
+                        dt.Columns.Add(date_check.ToString("yyyyMMdd") + "-C", typeof(string));
+                        date_check = date_check.AddDays(1);
+                        start_column += 2;
+                    }
+                    sheet.InsertRow(8, datapost.Count(), InsertOptionsType.FormatAsAfter);
+
+                    foreach (var record in datapost)
+                    {
+                        DataRow dr1 = dt.NewRow();
+                        dr1["stt"] = (++stt);
+                        dr1["HOVATEN"] = record.HOVATEN;
+                        DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                        DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                        //decimal tong = 0;
+
+                        //dr1["tong"] = tong;
+                        var start_c = 2;
+                        date_check = date_from;
+                        var nRow = sheet.Rows[start_r];
+
+                        var phepdauky = _tinhcong.phepnam(record, date_from);
+
+                        nRow.Cells[74].NumberValue = phepdauky.Value;
+                        while (date_check <= date_to)
+                        {
+                            CellRange originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
+                            if (ngaynhanviec != null && ngaynhanviec > date_check)
+                            {
+
+                            }
+                            else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                            {
+
+                            }
+                            else if (utility_s.IsAWorkDay(date_check))
+                            {
+                                var cong_sModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_s.id).FirstOrDefault();
+                                if (cong_sModel == null)
+                                {
+                                    cong_sModel = new ChamcongModel()
+                                    {
+                                        date = date_check,
+                                        MANV = record.MANV,
+                                        NV_id = record.id,
+                                        shift_id = shift_s.id,
+                                        value = "",
+                                    };
+                                    var first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date_check && d.time.Value >= shift_s.time_from && d.time.Value <= shift_s.time_to).FirstOrDefault();
+
+                                    if (first_hik != null)
+                                    {
+                                        cong_sModel.value = "X";
+                                    }
+                                    if (list_holidays.Contains(date_check))
+                                    {
+                                        cong_sModel.value = "NL";
+                                    }
+                                }
+                                switch (cong_sModel.value)
+                                {
+                                    case "X":
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 11).ToString()];
+                                        break;
+                                    case "P":
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 12).ToString()];
+                                        break;
+                                    case "KL":
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 13).ToString()];
+                                        break;
+                                    case "NL":
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 14).ToString()];
+                                        break;
+                                    default:
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 16).ToString()];
+                                        break;
+                                }
+                                dr1[date_check.ToString("yyyyMMdd") + "-S"] = cong_sModel.value;
+                            }
+
+                            var cell = nRow.Cells[start_c++];
+                            sheet.Copy(originDataRang, cell, true);
+
+
+
+
+                            originDataRang = sheet.Range["E" + (datapost.Count + 15).ToString()]; ///NGAYNGHI
+                            if (ngaynhanviec != null && ngaynhanviec > date_check)
+                            {
+
+                            }
+                            else if (ngaynghiviec != null && ngaynghiviec <= date_check)
+                            {
+
+                            }
+                            else if (utility_c.IsAWorkDay(date_check))
+                            {
+                                var cong_cModel = ChamcongModel.Where(d => d.MANV == record.MANV && d.date == date_check.Date && d.shift_id == shift_c.id).FirstOrDefault();
+                                if (cong_cModel == null)
+                                {
+                                    cong_cModel = new ChamcongModel()
+                                    {
+                                        date = date_check,
+                                        MANV = record.MANV,
+                                        NV_id = record.id,
+                                        shift_id = shift_c.id,
+                                        value = "",
+                                    };
+                                    var first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date_check && d.time.Value >= shift_c.time_from && d.time.Value <= shift_c.time_to).FirstOrDefault();
+
+                                    if (first_hik != null)
+                                    {
+                                        cong_cModel.value = "X";
+                                    }
+                                    if (list_holidays.Contains(date_check))
+                                    {
+                                        cong_cModel.value = "NL";
+                                    }
+                                }
+
+                                switch (cong_cModel.value)
+                                {
+                                    case "X":
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 11).ToString()];
+                                        break;
+                                    case "P":
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 12).ToString()];
+                                        break;
+                                    case "KL":
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 13).ToString()];
+                                        break;
+                                    case "NL":
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 14).ToString()];
+                                        break;
+                                    default:
+                                        originDataRang = sheet.Range["E" + (datapost.Count + 16).ToString()];
+                                        break;
+                                }
+                                dr1[date_check.ToString("yyyyMMdd") + "-C"] = cong_cModel.value;
+                            }
+
+
+
+                            cell = nRow.Cells[start_c++];
+                            sheet.Copy(originDataRang, cell, CopyRangeOptions.All);
+
+                            date_check = date_check.AddDays(1);
+                        }
+                        dt.Rows.Add(dr1);
+                        start_r++;
+                        //CellRange originDataRang = sheet.Range["A7:BZ7"];
+                        //CellRange targetDataRang = sheet.Range["A" + start_r + ":BZ" + start_r];
+                        //sheet.Copy(originDataRang, targetDataRang, true);
+                    }
+
+                    ////// Tổng công trong tháng
+                    var date_working_s = utility_s.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
+                    if (utility_s.IsAWorkDay(date_from))
+                        date_working_s.Add(date_from);
+                    if (utility_s.IsAWorkDay(date_to))
+                        date_working_s.Add(date_to);
+
+                    var date_working_c = utility_c.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
+                    if (utility_c.IsAWorkDay(date_from))
+                        date_working_c.Add(date_from);
+                    if (utility_c.IsAWorkDay(date_to))
+                        date_working_c.Add(date_to);
+
+                    double tongcong = (date_working_s.Count() + date_working_c.Count()) / 2;
+
+                    sheet.Range["BM3"].NumberValue = tongcong;
+                    //sheet.Range["E145"].Value = start_r.ToString();
+                    sheet.InsertDataTable(dt, false, 7, 1);
+                    sheet.CalculateAllValue();
+                    var delete_count = end_column - start_column;
+                    if (delete_count > 0)
+                    {
+                        sheet.DeleteColumn(start_column + 1, delete_count);
+                    }
+                }
+                else
+                {
+                    WorksheetsCollection worksheets = workbook.Worksheets;
+
+                    worksheets.Remove("Dịch vụ");
+                }
 
             }
 
@@ -778,8 +987,8 @@ namespace it_template.Areas.Info.Controllers
                     DataRow dr1 = dt.NewRow();
                     dr1["stt"] = (++stt);
                     dr1["HOVATEN"] = record.HOVATEN;
-                    var ngaynhanviec = record.NGAYNHANVIEC;
-                    var ngaynghiviec = record.NGAYNGHIVIEC;
+                    DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
                     //decimal tong = 0;
 
                     //dr1["tong"] = tong;
@@ -797,7 +1006,7 @@ namespace it_template.Areas.Info.Controllers
                         {
 
                         }
-                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        else if (ngaynghiviec != null && ngaynghiviec <= date_check)
                         {
 
                         }
@@ -857,7 +1066,7 @@ namespace it_template.Areas.Info.Controllers
                         {
 
                         }
-                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        else if (ngaynghiviec != null && ngaynghiviec <= date_check)
                         {
 
                         }
@@ -991,8 +1200,8 @@ namespace it_template.Areas.Info.Controllers
                     DataRow dr1 = dt.NewRow();
                     dr1["stt"] = (++stt);
                     dr1["HOVATEN"] = record.HOVATEN;
-                    var ngaynhanviec = record.NGAYNHANVIEC;
-                    var ngaynghiviec = record.NGAYNGHIVIEC;
+                    DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
                     //decimal tong = 0;
 
                     //dr1["tong"] = tong;
@@ -1010,7 +1219,7 @@ namespace it_template.Areas.Info.Controllers
                         {
 
                         }
-                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        else if (ngaynghiviec != null && ngaynghiviec <= date_check)
                         {
 
                         }
@@ -1070,7 +1279,7 @@ namespace it_template.Areas.Info.Controllers
                         {
 
                         }
-                        else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                        else if (ngaynghiviec != null && ngaynghiviec <= date_check)
                         {
 
                         }

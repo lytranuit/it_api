@@ -132,6 +132,7 @@ namespace it_template.Areas.Info.Controllers
             {
                 Model.date1_accept = DateTime.Now;
                 Model.user1_accept_id = user_id;
+                Model.status1_id = (int)OrderletterStatus.Duyet;
                 _context.Update(Model);
 
                 ///Send mail thông báo đên người phê duyệt
@@ -186,6 +187,7 @@ namespace it_template.Areas.Info.Controllers
             {
                 Model.date1_accept = DateTime.Now;
                 Model.note1 = note;
+                Model.status1_id = (int)OrderletterStatus.Khong_duyet;
             }
             else
             {
@@ -360,6 +362,7 @@ namespace it_template.Areas.Info.Controllers
             var created_by = Request.Form["filters[created_by]"].FirstOrDefault();
             var user_id1 = Request.Form["filters[user_id]"].FirstOrDefault();
             var user_accept_id = Request.Form["filters[user_accept_id]"].FirstOrDefault();
+            var user1_accept_id = Request.Form["filters[user1_accept_id]"].FirstOrDefault();
             var status = Request.Form["filters[status]"].FirstOrDefault();
             var status_id = status != null ? Convert.ToInt32(status) : 0;
             var filter_phep = Request.Form["filters[filter_phep]"].FirstOrDefault();
@@ -396,7 +399,7 @@ namespace it_template.Areas.Info.Controllers
             }
             else
             {
-                customerData = customerData.Where(d => d.created_by == user_id || d.user_accept_id == user_id);
+                customerData = customerData.Where(d => d.created_by == user_id || d.user_accept_id == user_id || d.user1_accept_id == user_id);
             }
 
             if (type == "0")
@@ -405,7 +408,7 @@ namespace it_template.Areas.Info.Controllers
             }
             else if (type == "1")
             {
-                customerData = customerData.Where(d => d.user_accept_id == user_id && d.status_id == 1);
+                customerData = customerData.Where(d => (d.user_accept_id == user_id || d.user_accept_id == user_id) && d.status_id == 1);
             }
             else if (type == "2")
             {
@@ -434,6 +437,10 @@ namespace it_template.Areas.Info.Controllers
             {
                 customerData = customerData.Where(d => d.user_accept_id == user_accept_id);
             }
+            if (user1_accept_id != null)
+            {
+                customerData = customerData.Where(d => d.user1_accept_id == user1_accept_id && d.user_accept_id != user1_accept_id);
+            }
 
             if (status_id != 0)
             {
@@ -445,7 +452,7 @@ namespace it_template.Areas.Info.Controllers
             //    customerData = customerData.Where(d => orderletter.Contains(d.id));
             //}
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderByDescending(d => d.created_at).Skip(skip).Take(pageSize).Include(d => d.user_created_by).Include(d => d.user).Include(d => d.user_accept).ToList();
+            var datapost = customerData.OrderByDescending(d => d.created_at).Skip(skip).Take(pageSize).Include(d => d.user_created_by).Include(d => d.user).Include(d => d.user_accept).Include(d => d.user1_accept).ToList();
             //var data = new ArrayList();
             //foreach (var record in datapost)
             //{
@@ -514,7 +521,7 @@ namespace it_template.Areas.Info.Controllers
 
         public JsonResult Get(string id)
         {
-            var data = _context.OrderletterModel.Where(d => d.id == id).Include(d => d.user_created_by).Include(d => d.user_accept).FirstOrDefault();
+            var data = _context.OrderletterModel.Where(d => d.id == id).Include(d => d.user_created_by).Include(d => d.user_accept).Include(d => d.user1_accept).FirstOrDefault();
             return Json(data, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
