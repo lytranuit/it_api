@@ -26,9 +26,14 @@ namespace it_template.Areas.Trend.Controllers
             UserManager = UserMgr;
         }
 
-        public async Task<JsonResult> updateLimitForResult()
+        public async Task<JsonResult> updateLimitForResult(int? object_id)
         {
-            var results = _context.ResultModel.Where(d => d.deleted_at == null).ToList();
+            var query = _context.ResultModel.Where(d => d.deleted_at == null);
+            if (object_id != null || object_id > 0)
+            {
+                query = query.Where(d => d.object_id == object_id);
+            }
+            var results = query.ToList();
             foreach (var r in results)
             {
                 var limits = _context.LimitModel.Where(d => d.target_id == r.target_id).Include(d => d.points).ToList();

@@ -13,6 +13,7 @@ using Point85.ShiftSharp.Schedule;
 using System.Dynamic;
 using Info.Models;
 using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -31,16 +32,44 @@ namespace it_template.Areas.Info.Controllers
             var user = await UserManager.GetUserAsync(currentUser);
             var user_id = user.Id;
             var email = user.Email;
+            var date_now = DateTime.Now.Date;
 
-
-            var data = _context.HotNewsModel.Where(d => d.id == 1).FirstOrDefault();
-            var tin_moi = _context.NewsModel.Where(d => d.deleted_at == null && d.is_publish == true).OrderByDescending(d => d.created_at).Take(7).ToList();
-            var highlight = _context.NewsModel.Where(d => d.deleted_at == null && d.is_publish == true && d.is_highlight == true).OrderByDescending(d => d.created_at).Take(4).ToList();
-            var cate = _context.CategoryModel.Where(d => d.deleted_at == null).ToList();
-            foreach (var item in cate)
+            var is_admin = await UserManager.IsInRoleAsync(user, "Administrator");
+            var is_manager = await UserManager.IsInRoleAsync(user, "Manager HR");
+            var is_hr = await UserManager.IsInRoleAsync(user, "HR");
+            var customerData = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null);
+            if (is_manager)
             {
-                item.list_news = _context.NewsCategoryModel.Where(d => d.category_id == item.id).Include(d => d.news).Where(d => d.news.deleted_at == null).Select(d => d.news).Take(10).ToList();
+                var person = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
+                if (person != null)
+                {
+                    var maphong = person.MAPHONG;
+                    if (email == "thao.pdp@astahealthcare.com")
+                    {
+                        customerData = customerData.Where(d => d.MAPHONG == maphong || d.MAPHONG == "22");
+                    }
+                    else
+                    {
+                        customerData = customerData.Where(d => d.MAPHONG == maphong);
+                    }
+                }
+                else
+                {
+                    customerData = customerData.Where(d => 0 == 1);
+                }
             }
+            else if (!is_admin && !is_hr)
+            {
+                customerData = customerData.Where(d => d.EMAIL == email);
+            }
+            var tong_nv = customerData.Count();
+            var list_nv = customerData.Select(d => d.MANV).ToList();
+            var list_machamcong = customerData.Select(d => d.MACC).ToList();
+
+            var nghiphep = _context.ChamcongModel.Where(d => list_nv.Contains(d.MANV) && d.date == date_now && d.value_new != "X" && d.value_new != "").Select(d => d.MANV).Distinct().Count();
+            var danglamviec = tong_nv - nghiphep;
+            var dachamcong = _context.HikModel.Where(d => list_machamcong.Contains(d.id) && d.date == date_now).Select(d => d.id).Distinct().Count();
+            var chuachamcong = tong_nv - dachamcong;
 
             /////Công
             ///
@@ -71,49 +100,62 @@ namespace it_template.Areas.Info.Controllers
 
             var tongthunhap = record.FirstOrDefault().tong_thunhap;
             //var noibat = _context.
-            return Json(new { message = data.message, tin_moi, highlight, cate, phep, tong, conglam, tongthunhap, phepconlai }, new System.Text.Json.JsonSerializerOptions()
+            return Json(new { phep, tong, conglam, tongthunhap, phepconlai, tong_nv, nghiphep, chuachamcong, danglamviec }, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
-        private WorkingDaysAndTimeUtility GetSchedule(string id, TimeSpan start, TimeSpan end)
+
+        public async Task<JsonResult> Highlight()
         {
-            var wts = new List<WorkTimeSpan>() { new WorkTimeSpan()
-                { Start = start, End = end } };
-
-            var week = new WeekDaySpan()
+            var highlight = _context.NewsModel.Where(d => d.deleted_at == null && d.is_publish == true && d.is_highlight == true).OrderByDescending(d => d.created_at).Take(4).Select(d => new NewsModel()
             {
-                WorkDays = new Dictionary<DayOfWeek, WorkDaySpan>()
+                title = d.title,
+                image_url = d.image_url,
+                description = d.description,
+            }).ToList();
+            return Json(new { highlight }, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> message()
+        {
+            var data = _context.HotNewsModel.Where(d => d.id == 1).FirstOrDefault();
+            return Json(new { message = data.message, }, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> tin_moi()
+        {
+            var tin_moi = _context.NewsModel.Where(d => d.deleted_at == null && d.is_publish == true).OrderByDescending(d => d.created_at).Take(7).Select(d => new NewsModel()
+            {
+                title = d.title,
+                image_url = d.image_url,
+                description = d.description,
+            }).ToList();
+            return Json(new { tin_moi }, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+        public async Task<JsonResult> cate()
+        {
+            var cate = _context.CategoryModel.Where(d => d.deleted_at == null).Take(3).ToList();
+            foreach (var item in cate)
+            {
+                item.list_news = _context.NewsCategoryModel.Where(d => d.category_id == item.id).Include(d => d.news).Where(d => d.news.deleted_at == null).Select(d => d.news).Take(10).Select(d => new NewsModel()
                 {
-                    {DayOfWeek.Monday, new WorkDaySpan() {TimeSpans = wts}}
-                    ,
-                    {DayOfWeek.Tuesday, new WorkDaySpan() {TimeSpans = wts}}
-                    ,
-                    {DayOfWeek.Wednesday, new WorkDaySpan() {TimeSpans = wts}}
-                    ,
-                    {DayOfWeek.Thursday, new WorkDaySpan() {TimeSpans = wts}}
-                    ,
-                    {DayOfWeek.Friday, new WorkDaySpan() {TimeSpans = wts}}
-                    ,
-                    {DayOfWeek.Saturday, new WorkDaySpan() {TimeSpans = wts}}
-                    ,
-                    {DayOfWeek.Sunday, new WorkDaySpan() {TimeSpans = wts}}
-                }
-            };
-            var context = _context.ShiftHolidayModel.Where(d => d.shift_id == id);
-
-            var holidays = context.ToList();
-            //this is the configuration for holidays: 
-            //in Italy we have this list of Holidays plus 1 day different on each province,
-            //for mine is 1 Dec (see last element of the List<AHolyDay>).
-            var italiansHoliDays = new List<AHolyDay>()
+                    title = d.title,
+                    image_url = d.image_url,
+                    description = d.description,
+                }).ToList();
+            }
+            return Json(new { cate }, new System.Text.Json.JsonSerializerOptions()
             {
-
-            };
-            italiansHoliDays.Add(new WHolidays(holidays));
-            //instantiate with configuration
-            var utility = new WorkingDaysAndTimeUtility(week, italiansHoliDays);
-            return utility;
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
         }
     }
 

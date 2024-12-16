@@ -11,6 +11,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Info.Models;
 using Microsoft.EntityFrameworkCore;
 using Spire.Xls;
+using WorkTimeCalculatorLib.Models;
+using WorkTimeCalculatorLib;
 
 namespace Vue.Services
 {
@@ -108,8 +110,9 @@ namespace Vue.Services
                 foreach (var shift in shifts)
                 {
 
-                    var utility = GetSchedule(shift.id, shift.time_from.Value, shift.time_to.Value);
+                    var utility = GetSchedule(shift.id, shift.time_from.Value, shift.time_to.Value, date_from, date_to);
                     var date_working = utility.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
+                    //var date_working = utility.CalculateWorkTime(date_from, date_to, false);
                     if (utility.IsAWorkDay(date_from))
                         date_working.Add(date_from);
                     if (utility.IsAWorkDay(date_to))
@@ -271,7 +274,41 @@ namespace Vue.Services
             }
             return sophepnam;
         }
-        public WorkingDaysAndTimeUtility GetSchedule(string id, TimeSpan start, TimeSpan end)
+        public WorkTimeCalculator GetSchedule1(string id, TimeSpan start, TimeSpan end)
+        {
+            Dictionary<DayOfWeek, List<WorkShift>> MySchedule = new Dictionary<DayOfWeek, List<WorkShift>>() {
+              { DayOfWeek.Sunday, new List<WorkShift>(){
+                new WorkShift(){ Start = start, End = end},
+              } },
+              { DayOfWeek.Monday, new List<WorkShift>(){
+                 new WorkShift(){ Start = start, End = end},
+              } },
+              { DayOfWeek.Tuesday, new List<WorkShift>(){
+                 new WorkShift(){ Start = start, End = end},
+              } },
+              { DayOfWeek.Wednesday, new List<WorkShift>(){
+                 new WorkShift(){ Start = start, End = end},
+              } },
+              { DayOfWeek.Thursday, new List<WorkShift>(){
+                 new WorkShift(){ Start = start, End = end},
+              } },
+              { DayOfWeek.Friday, new List<WorkShift>(){
+                 new WorkShift(){ Start = start, End = end},
+              } },
+              { DayOfWeek.Saturday, new List<WorkShift>(){
+                 new WorkShift(){ Start = start, End = end},
+              } }
+            };
+
+            var context = _context.ShiftHolidayModel.Where(d => d.shift_id == id);
+
+            var MyHolidays = context.OrderBy(d => d.date).ToList().Select(d => new HolidayConfig() { Start = d.date.Value.Date, End = d.date.Value.Date }).ToList();
+
+            //instantiate with configuration
+            var utility = new WorkTimeCalculator(MySchedule, MyHolidays);
+            return utility;
+        }
+        public WorkingDaysAndTimeUtility GetSchedule(string id, TimeSpan start, TimeSpan end, DateTime date_from, DateTime date_to)
         {
             var wts = new List<WorkTimeSpan>() { new WorkTimeSpan()
                 { Start = start, End = end } };
@@ -295,9 +332,10 @@ namespace Vue.Services
                     {DayOfWeek.Sunday, new WorkDaySpan() {TimeSpans = wts}}
                 }
             };
-            var context = _context.ShiftHolidayModel.Where(d => d.shift_id == id);
 
-            var holidays = context.ToList();
+            var context = _context.ShiftHolidayModel.Where(d => d.shift_id == id && d.date >= date_from && d.date <= date_to);
+
+            var holidays = context.OrderBy(d => d.date).ToList();
             //this is the configuration for holidays: 
             //in Italy we have this list of Holidays plus 1 day different on each province,
             //for mine is 1 Dec (see last element of the List<AHolyDay>).

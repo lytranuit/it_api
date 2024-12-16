@@ -51,6 +51,8 @@ namespace Info.Models
         public decimal? luongkpi { get; set; }
         public decimal? bosung { get; set; }
         public decimal? tongthunhap { get; set; }
+        public decimal? tong_tn { get; set; }
+
 
 
         public decimal? thunhapchiuthue { get; set; }

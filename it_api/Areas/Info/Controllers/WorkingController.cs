@@ -14,6 +14,7 @@ using Vue.Services;
 using Spire.Xls;
 using Microsoft.EntityFrameworkCore;
 using Spire.Xls.Collections;
+using Point85.ShiftSharp.Schedule;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -193,9 +194,14 @@ namespace it_template.Areas.Info.Controllers
             {
                 customerData = customerData.Where(d => d.id == id);
             }
-
+            if (status == 2)
+            {
+                var NV_phep_in_day = _context.ChamcongModel.Where(d => d.value_new != "X" && d.value_new != "" && d.date == DateTime.Now.Date).Select(d => d.MANV).ToList();
+                customerData = customerData.Where(d => NV_phep_in_day.Contains(d.MANV));
+            }
             int recordsFiltered = customerData.Count();
             var datapost = customerData.OrderByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV).ToList();
+
 
             if (status != 1)
             {
@@ -207,11 +213,11 @@ namespace it_template.Areas.Info.Controllers
             {
                 data = data.Where(d => d["is_finish_chamcong"] == false).ToList();
             }
-            var list_nv = datapost.Select(d => d.MANV).ToList();
-            var ChamcongModel = _context.ChamcongModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && list_nv.Contains(d.MANV)).ToList();
+            //var list_nv = datapost.Select(d => d.MANV).ToList();
+            //var ChamcongModel = _context.ChamcongModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && list_nv.Contains(d.MANV)).ToList();
 
             var date_lock = _context.OptionModel.Where(d => d.key == "date_lock").FirstOrDefault();
-            var jsonData = new { draw = draw, recordsFiltered = recordsFiltered, recordsTotal = recordsTotal, data = data, list_chamcong = ChamcongModel, date_lock = date_lock != null ? date_lock.date_value : null };
+            var jsonData = new { draw = draw, recordsFiltered = recordsFiltered, recordsTotal = recordsTotal, data = data, date_lock = date_lock != null ? date_lock.date_value : null };
             return Json(jsonData, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
@@ -327,8 +333,8 @@ namespace it_template.Areas.Info.Controllers
                 ////Bt
                 var shift_s = _context.ShiftModel.Where(d => d.code == "S").FirstOrDefault();
                 var shift_c = _context.ShiftModel.Where(d => d.code == "C").FirstOrDefault();
-                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
-                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value, date_from, date_to);
+                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value, date_from, date_to);
 
                 sheet.Range["C3"].DateTimeValue = date_from;
                 sheet.Range["U2"].DateTimeValue = date_to;
@@ -537,8 +543,8 @@ namespace it_template.Areas.Info.Controllers
                 ////Bt
                 var shift_s = _context.ShiftModel.Where(d => d.code == "S").FirstOrDefault();
                 var shift_c = _context.ShiftModel.Where(d => d.code == "C").FirstOrDefault();
-                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
-                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value, date_from, date_to);
+                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value, date_from, date_to);
 
                 sheet.Range["C3"].DateTimeValue = date_from;
                 sheet.Range["U2"].DateTimeValue = date_to;
@@ -744,8 +750,8 @@ namespace it_template.Areas.Info.Controllers
                     ////Bt
                     var shift_s = _context.ShiftModel.Where(d => d.code == "F-S").FirstOrDefault();
                     var shift_c = _context.ShiftModel.Where(d => d.code == "F-C").FirstOrDefault();
-                    var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
-                    var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+                    var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value, date_from, date_to);
+                    var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value, date_from, date_to);
 
                     sheet.Range["C3"].DateTimeValue = date_from;
                     sheet.Range["U2"].DateTimeValue = date_to;
@@ -958,8 +964,8 @@ namespace it_template.Areas.Info.Controllers
                 ////Bt
                 var shift_s = _context.ShiftModel.Where(d => d.code == "S-T7").FirstOrDefault();
                 var shift_c = _context.ShiftModel.Where(d => d.code == "C-T7").FirstOrDefault();
-                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
-                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value, date_from, date_to);
+                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value, date_from, date_to);
 
                 sheet.Range["C3"].DateTimeValue = date_from;
                 sheet.Range["U2"].DateTimeValue = date_to;
@@ -1171,8 +1177,8 @@ namespace it_template.Areas.Info.Controllers
                 ////Bt
                 var shift_s = _context.ShiftModel.Where(d => d.code == "F").FirstOrDefault();
                 var shift_c = _context.ShiftModel.Where(d => d.code == "F").FirstOrDefault();
-                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value);
-                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value);
+                var utility_s = _tinhcong.GetSchedule(shift_s.id, shift_s.time_from.Value, shift_s.time_to.Value, date_from, date_to);
+                var utility_c = _tinhcong.GetSchedule(shift_c.id, shift_c.time_from.Value, shift_c.time_to.Value, date_from, date_to);
 
                 sheet.Range["C3"].DateTimeValue = date_from;
                 sheet.Range["U2"].DateTimeValue = date_to;

@@ -157,7 +157,7 @@ namespace it_template.Areas.Info.Controllers
                 Worksheet sheet = workbook.Worksheets[0];
                 var now = DateTime.Now;
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AB3"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
+                sheet.Range["AF18"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
                 int stt = 0;
                 int sourceRowIndex = 11; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
@@ -215,6 +215,7 @@ namespace it_template.Areas.Info.Controllers
                         var pc_thuhut = record.pc_thuhut ?? 0;
                         var pc_khac = record.pc ?? 0;
 
+                        var tong_thunhap = record.tong_thunhap ?? 0;
                         var luongkpi = record.tien_luong_kpi ?? 0;
                         var TNCN_banthan = 11000000;
                         var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
@@ -250,7 +251,7 @@ namespace it_template.Areas.Info.Controllers
                             TNCN_nguoiphuthuoc = 0; // Không giảm trừ
                                                     //tyle = 0;
                                                     //tyle_dpcd = 0;
-                            nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
+                            nRow.Cells[30].Formula = "=ROUND(AD" + (start_r + 1) + " * 10%, 0)";
 
                             //nRow.Cells[7].Value2 = "";
                         }
@@ -271,7 +272,7 @@ namespace it_template.Areas.Info.Controllers
                         }
                         if (is_thue != true)
                         {
-                            nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
+                            nRow.Cells[30].ClearAll(); // không đóng thuế TNCN
                         }
 
                         nRow.Cells[0].NumberValue = ++stt;
@@ -291,34 +292,34 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[13].NumberValue = (double)pc_trachnhiem;
                         nRow.Cells[14].NumberValue = (double)pc_khac;
 
-                        nRow.Cells[17].NumberValue = (double)luongkpi;
+                        nRow.Cells[16].NumberValue = (double)luongkpi;
                         nRow.Cells[18].NumberValue = (double)congthucte;
                         nRow.Cells[19].NumberValue = (double)khoancong;
-                        nRow.Cells[24].NumberValue = (double)TNCN_banthan;
-                        nRow.Cells[25].NumberValue = (double)TNCN_nguoiphuthuoc;
-                        nRow.Cells[31].NumberValue = (double)khoantru;
+                        nRow.Cells[25].NumberValue = (double)TNCN_banthan;
+                        nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[32].NumberValue = (double)khoantru;
                         if (note_khoancong != null)
                             nRow.Cells[19].AddComment().Text = note_khoancong;
                         if (note_khoantru != null)
-                            nRow.Cells[31].AddComment().Text = note_khoantru;
+                            nRow.Cells[32].AddComment().Text = note_khoantru;
                         if (note != null)
                             nRow.Cells[20].AddComment().Text = note;
 
 
-                        nRow.Cells[27].Formula = "=ROUND(Q" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                        nRow.Cells[30].Formula = "=ROUND(Q" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
+                        nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
+                        nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[32].FormulaNumberValue)
+                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
                         {
-                            nRow.Cells[33].NumberValue = (double)tamungdot1;
+                            nRow.Cells[34].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[37].Value = stk;
-                        if (record.MANV == "NMK170962")
-                        {
-                            Console.Write(nRow);
-                        }
+                        nRow.Cells[38].Value = stk;
+                        //if (record.MANV == "NMK170962")
+                        //{
+                        //    Console.Write(nRow);
+                        //}
 
                         ////Cập nhật database
 
@@ -354,25 +355,26 @@ namespace it_template.Areas.Info.Controllers
                         person.tong_tc = Convert.ToDecimal(nRow.Cells[15].FormulaValue);
 
                         person.luongcb = (decimal)luongcb;
-                        person.luongdongbhxh = Convert.ToDecimal(nRow.Cells[16].FormulaValue);
+                        person.luongdongbhxh = Convert.ToDecimal(nRow.Cells[21].FormulaValue);
 
                         person.luongkpi = (decimal)luongkpi;
+                        person.tong_tn = (decimal)tong_thunhap;
 
                         person.tongthunhap = Convert.ToDecimal(nRow.Cells[20].FormulaValue);
 
-                        person.thunhapchiuthue = Convert.ToDecimal(nRow.Cells[23].FormulaValue);
+                        person.thunhapchiuthue = Convert.ToDecimal(nRow.Cells[24].FormulaValue);
 
 
                         person.tncn_banthan = (decimal)TNCN_banthan;
                         person.tncn_songuoiphuthuoc = (int)TNCN_nguoiphuthuoc;
-                        person.tncn_nguoiphuthuoc = Convert.ToDecimal(nRow.Cells[26].FormulaValue);
-                        person.tncn_bhxh = Convert.ToDecimal(nRow.Cells[27].FormulaValue);
-                        person.thunhaptinhthue = Convert.ToDecimal(nRow.Cells[28].FormulaValue);
-                        person.thue_tncn = Convert.ToDecimal(nRow.Cells[29].FormulaValue);
-                        person.dpcd = Convert.ToDecimal(nRow.Cells[30].FormulaValue);
-                        person.thuclanh = Convert.ToDecimal(nRow.Cells[32].FormulaValue);
-                        person.tamungdot1 = Convert.ToDecimal(nRow.Cells[33].EnvalutedValue);
-                        person.conlai = Convert.ToDecimal(nRow.Cells[34].FormulaValue);
+                        person.tncn_nguoiphuthuoc = Convert.ToDecimal(nRow.Cells[27].FormulaValue);
+                        person.tncn_bhxh = Convert.ToDecimal(nRow.Cells[28].FormulaValue);
+                        person.thunhaptinhthue = Convert.ToDecimal(nRow.Cells[29].FormulaValue);
+                        person.thue_tncn = Convert.ToDecimal(nRow.Cells[30].FormulaValue);
+                        person.dpcd = Convert.ToDecimal(nRow.Cells[31].FormulaValue);
+                        person.thuclanh = Convert.ToDecimal(nRow.Cells[33].FormulaValue);
+                        person.tamungdot1 = Convert.ToDecimal(nRow.Cells[34].EnvalutedValue);
+                        person.conlai = Convert.ToDecimal(nRow.Cells[35].FormulaValue);
                         person.tongphep = (decimal)item["tongphep"];
 
                         decimal phepconlai = (decimal)_tinhcong.phepnam(record, date_to);
@@ -432,7 +434,7 @@ namespace it_template.Areas.Info.Controllers
                 Worksheet sheet = workbook.Worksheets[1];
                 var now = DateTime.Now;
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AB3"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
+                sheet.Range["AF18"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
                 int stt = 0;
                 int sourceRowIndex = 11; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
@@ -490,6 +492,7 @@ namespace it_template.Areas.Info.Controllers
                         var pc_thuhut = record.pc_thuhut ?? 0;
                         var pc_khac = record.pc ?? 0;
 
+                        var tong_thunhap = record.tong_thunhap ?? 0;
                         var luongkpi = record.tien_luong_kpi ?? 0;
                         var TNCN_banthan = 11000000;
                         var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
@@ -525,7 +528,7 @@ namespace it_template.Areas.Info.Controllers
                             TNCN_nguoiphuthuoc = 0; // Không giảm trừ
                                                     //tyle = 0;
                                                     //tyle_dpcd = 0;
-                            nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
+                            nRow.Cells[30].Formula = "=ROUND(AD" + (start_r + 1) + " * 10%, 0)";
 
                             //nRow.Cells[7].Value2 = "";
                         }
@@ -546,7 +549,7 @@ namespace it_template.Areas.Info.Controllers
                         }
                         if (is_thue != true)
                         {
-                            nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
+                            nRow.Cells[30].ClearAll(); // không đóng thuế TNCN
                         }
 
                         nRow.Cells[0].NumberValue = ++stt;
@@ -566,34 +569,34 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[13].NumberValue = (double)pc_trachnhiem;
                         nRow.Cells[14].NumberValue = (double)pc_khac;
 
-                        nRow.Cells[17].NumberValue = (double)luongkpi;
+                        nRow.Cells[16].NumberValue = (double)luongkpi;
                         nRow.Cells[18].NumberValue = (double)congthucte;
                         nRow.Cells[19].NumberValue = (double)khoancong;
-                        nRow.Cells[24].NumberValue = (double)TNCN_banthan;
-                        nRow.Cells[25].NumberValue = (double)TNCN_nguoiphuthuoc;
-                        nRow.Cells[31].NumberValue = (double)khoantru;
+                        nRow.Cells[25].NumberValue = (double)TNCN_banthan;
+                        nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[32].NumberValue = (double)khoantru;
                         if (note_khoancong != null)
                             nRow.Cells[19].AddComment().Text = note_khoancong;
                         if (note_khoantru != null)
-                            nRow.Cells[31].AddComment().Text = note_khoantru;
+                            nRow.Cells[32].AddComment().Text = note_khoantru;
                         if (note != null)
                             nRow.Cells[20].AddComment().Text = note;
 
 
-                        nRow.Cells[27].Formula = "=ROUND(Q" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                        nRow.Cells[30].Formula = "=ROUND(Q" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
+                        nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
+                        nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[32].FormulaNumberValue)
+                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
                         {
-                            nRow.Cells[33].NumberValue = (double)tamungdot1;
+                            nRow.Cells[34].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[37].Value = stk;
-                        if (record.MANV == "NMK170962")
-                        {
-                            Console.Write(nRow);
-                        }
+                        nRow.Cells[38].Value = stk;
+                        //if (record.MANV == "NMK170962")
+                        //{
+                        //    Console.Write(nRow);
+                        //}
 
                         start_r++;
                     }
@@ -625,7 +628,7 @@ namespace it_template.Areas.Info.Controllers
                 Worksheet sheet = workbook.Worksheets[2];
                 var now = DateTime.Now;
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AB3"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
+                sheet.Range["AF18"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
                 int stt = 0;
                 int sourceRowIndex = 11; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
@@ -683,6 +686,7 @@ namespace it_template.Areas.Info.Controllers
                         var pc_thuhut = record.pc_thuhut ?? 0;
                         var pc_khac = record.pc ?? 0;
 
+                        var tong_thunhap = record.tong_thunhap ?? 0;
                         var luongkpi = record.tien_luong_kpi ?? 0;
                         var TNCN_banthan = 11000000;
                         var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
@@ -718,7 +722,7 @@ namespace it_template.Areas.Info.Controllers
                             TNCN_nguoiphuthuoc = 0; // Không giảm trừ
                                                     //tyle = 0;
                                                     //tyle_dpcd = 0;
-                            nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
+                            nRow.Cells[30].Formula = "=ROUND(AD" + (start_r + 1) + " * 10%, 0)";
 
                             //nRow.Cells[7].Value2 = "";
                         }
@@ -739,7 +743,7 @@ namespace it_template.Areas.Info.Controllers
                         }
                         if (is_thue != true)
                         {
-                            nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
+                            nRow.Cells[30].ClearAll(); // không đóng thuế TNCN
                         }
 
                         nRow.Cells[0].NumberValue = ++stt;
@@ -759,34 +763,34 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[13].NumberValue = (double)pc_trachnhiem;
                         nRow.Cells[14].NumberValue = (double)pc_khac;
 
-                        nRow.Cells[17].NumberValue = (double)luongkpi;
+                        nRow.Cells[16].NumberValue = (double)luongkpi;
                         nRow.Cells[18].NumberValue = (double)congthucte;
                         nRow.Cells[19].NumberValue = (double)khoancong;
-                        nRow.Cells[24].NumberValue = (double)TNCN_banthan;
-                        nRow.Cells[25].NumberValue = (double)TNCN_nguoiphuthuoc;
-                        nRow.Cells[31].NumberValue = (double)khoantru;
+                        nRow.Cells[25].NumberValue = (double)TNCN_banthan;
+                        nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[32].NumberValue = (double)khoantru;
                         if (note_khoancong != null)
                             nRow.Cells[19].AddComment().Text = note_khoancong;
                         if (note_khoantru != null)
-                            nRow.Cells[31].AddComment().Text = note_khoantru;
+                            nRow.Cells[32].AddComment().Text = note_khoantru;
                         if (note != null)
                             nRow.Cells[20].AddComment().Text = note;
 
 
-                        nRow.Cells[27].Formula = "=ROUND(Q" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                        nRow.Cells[30].Formula = "=ROUND(Q" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
+                        nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
+                        nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[32].FormulaNumberValue)
+                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
                         {
-                            nRow.Cells[33].NumberValue = (double)tamungdot1;
+                            nRow.Cells[34].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[37].Value = stk;
-                        if (record.MANV == "NMK170962")
-                        {
-                            Console.Write(nRow);
-                        }
+                        nRow.Cells[38].Value = stk;
+                        //if (record.MANV == "NMK170962")
+                        //{
+                        //    Console.Write(nRow);
+                        //}
 
 
                         start_r++;
@@ -821,7 +825,7 @@ namespace it_template.Areas.Info.Controllers
                 Worksheet sheet = workbook.Worksheets[3];
                 var now = DateTime.Now;
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AB3"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
+                sheet.Range["AF18"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
                 int stt = 0;
                 int sourceRowIndex = 11; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
@@ -879,6 +883,7 @@ namespace it_template.Areas.Info.Controllers
                         var pc_thuhut = record.pc_thuhut ?? 0;
                         var pc_khac = record.pc ?? 0;
 
+                        var tong_thunhap = record.tong_thunhap ?? 0;
                         var luongkpi = record.tien_luong_kpi ?? 0;
                         var TNCN_banthan = 11000000;
                         var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
@@ -914,7 +919,7 @@ namespace it_template.Areas.Info.Controllers
                             TNCN_nguoiphuthuoc = 0; // Không giảm trừ
                                                     //tyle = 0;
                                                     //tyle_dpcd = 0;
-                            nRow.Cells[29].Formula = "=ROUND(AC" + (start_r + 1) + " * 10%, 0)";
+                            nRow.Cells[30].Formula = "=ROUND(AD" + (start_r + 1) + " * 10%, 0)";
 
                             //nRow.Cells[7].Value2 = "";
                         }
@@ -935,7 +940,7 @@ namespace it_template.Areas.Info.Controllers
                         }
                         if (is_thue != true)
                         {
-                            nRow.Cells[29].ClearAll(); // không đóng thuế TNCN
+                            nRow.Cells[30].ClearAll(); // không đóng thuế TNCN
                         }
 
                         nRow.Cells[0].NumberValue = ++stt;
@@ -955,34 +960,34 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[13].NumberValue = (double)pc_trachnhiem;
                         nRow.Cells[14].NumberValue = (double)pc_khac;
 
-                        nRow.Cells[17].NumberValue = (double)luongkpi;
+                        nRow.Cells[16].NumberValue = (double)luongkpi;
                         nRow.Cells[18].NumberValue = (double)congthucte;
                         nRow.Cells[19].NumberValue = (double)khoancong;
-                        nRow.Cells[24].NumberValue = (double)TNCN_banthan;
-                        nRow.Cells[25].NumberValue = (double)TNCN_nguoiphuthuoc;
-                        nRow.Cells[31].NumberValue = (double)khoantru;
+                        nRow.Cells[25].NumberValue = (double)TNCN_banthan;
+                        nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[32].NumberValue = (double)khoantru;
                         if (note_khoancong != null)
                             nRow.Cells[19].AddComment().Text = note_khoancong;
                         if (note_khoantru != null)
-                            nRow.Cells[31].AddComment().Text = note_khoantru;
+                            nRow.Cells[32].AddComment().Text = note_khoantru;
                         if (note != null)
                             nRow.Cells[20].AddComment().Text = note;
 
 
-                        nRow.Cells[27].Formula = "=ROUND(Q" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                        nRow.Cells[30].Formula = "=ROUND(Q" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
+                        nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
+                        nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[32].FormulaNumberValue)
+                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
                         {
-                            nRow.Cells[33].NumberValue = (double)tamungdot1;
+                            nRow.Cells[34].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[37].Value = stk;
-                        if (record.MANV == "NMK170962")
-                        {
-                            Console.Write(nRow);
-                        }
+                        nRow.Cells[38].Value = stk;
+                        //if (record.MANV == "NMK170962")
+                        //{
+                        //    Console.Write(nRow);
+                        //}
 
 
                         start_r++;
