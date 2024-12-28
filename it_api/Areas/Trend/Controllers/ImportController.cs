@@ -67,8 +67,8 @@ namespace it_template.Areas.Trend.Controllers
                     continue;
 
                 DateTime? date = nowRow.Cells[0] != null ? nowRow.Cells[0].DateTimeValue : null;
-               
-                var chitieu_21= nowRow.Cells[2] != null && nowRow.Cells[2].Value.Trim() != "NA" && nowRow.Cells[2].Value != "" ? nowRow.Cells[2].Value.Trim() : null;
+
+                var chitieu_21 = nowRow.Cells[2] != null && nowRow.Cells[2].Value.Trim() != "NA" && nowRow.Cells[2].Value != "" ? nowRow.Cells[2].Value.Trim() : null;
                 decimal? chitieu_11 = nowRow.Cells[3] != null && nowRow.Cells[3].Value != "NA" && nowRow.Cells[3].Value != "" ? (decimal)nowRow.Cells[3].NumberValue : null;
                 decimal? chitieu_22 = nowRow.Cells[4] != null && nowRow.Cells[4].Value != "NA" && nowRow.Cells[4].Value != "" ? (decimal)nowRow.Cells[4].NumberValue : null;
                 decimal? chitieu_23 = nowRow.Cells[5] != null && nowRow.Cells[5].Value != "NA" && nowRow.Cells[5].Value != "" ? (decimal)nowRow.Cells[5].NumberValue : null;
@@ -1991,6 +1991,120 @@ namespace it_template.Areas.Trend.Controllers
                                     point_id = findPoint.id,
                                     value = value,
                                     target_id = findPoint.target_id,
+                                    date = date,
+                                    created_at = DateTime.Now
+                                };
+                                list_Result.Add(result);
+                                _context.Add(result);
+                            }
+                            else
+                            {
+                                find_result.value = value;
+                                _context.Update(find_result);
+                            }
+                            //_context.SaveChanges();
+                        }
+                    }
+
+
+                    //var tansuat = 3;
+
+                    //var chitieu_9 = nowRow.Cells[3] != null && nowRow.Cells[3].Value != "NA" && nowRow.Cells[3].Value != "" ? nowRow.Cells[3].Value : null;
+                    //var chitieu_10 = nowRow.Cells[4] != null && nowRow.Cells[4].Value != "NA" && nowRow.Cells[4].Value != "" ? nowRow.Cells[4].Value : null;
+                    //decimal? chitieu_11 = nowRow.Cells[5] != null && nowRow.Cells[5].Value != "NA" && nowRow.Cells[5].Value != "" ? (decimal)nowRow.Cells[5].NumberValue : null;
+                    //decimal? chitieu_12 = nowRow.Cells[6] != null && nowRow.Cells[6].Value != "NA" && nowRow.Cells[6].Value != "" ? (decimal)nowRow.Cells[6].NumberValue : null;
+                    //decimal? chitieu_13 = nowRow.Cells[7] != null && nowRow.Cells[7].Value != "NA" && nowRow.Cells[7].Value != "" ? (decimal)nowRow.Cells[7].NumberValue : null;
+                    //var chitieu_14 = nowRow.Cells[8] != null && nowRow.Cells[8].Value != "NA" && nowRow.Cells[8].Value != "" ? nowRow.Cells[8].Value : null;
+
+
+
+
+                    //EquipmentModel EquipmentModel = new EquipmentModel { code = code, name = name_vn, name_en = name_en, created_at = DateTime.Now };
+                    //_context.Add(EquipmentModel);
+                    //_context.SaveChanges();
+                }
+            }
+
+            //_context.AddRange(list_Result);
+            _context.SaveChanges();
+
+            return Ok(list_Result);
+        }
+        public async Task<IActionResult> data4T()
+        {
+            return Ok();
+            // Khởi tạo workbook để đọc
+            Spire.Xls.Workbook book = new Spire.Xls.Workbook();
+            book.LoadFromFile("./wwwroot/data/trend/nuoc/KQ PW 4T (NON, DN) PHA 1,2.xlsx", ExcelVersion.Version2013);
+            //book.LoadFromFile("./wwwroot/data/trend/visinh/Raw/Raw data for of microbial results of  equiment quality monitoring_QC- GRADE C.xlsx", ExcelVersion.Version2013);
+
+            var worksheets = book.Worksheets.Count();
+            var list_Result = new List<ResultModel>();
+            for (var worksheetsIndex = 0; worksheetsIndex < worksheets; worksheetsIndex++)
+            {
+                Spire.Xls.Worksheet sheet = book.Worksheets[worksheetsIndex];
+                var lastrow = sheet.LastDataRow;
+                var lastcol = sheet.LastDataColumn;
+                var target_id = 0;
+                switch (worksheetsIndex)
+                {
+                    case 0:
+                        target_id = 12;
+                        break;
+                    case 1:
+                        target_id = 13;
+                        break;
+                    case 2:
+                        target_id = 11;
+                        break;
+                }
+                // nếu vẫn chưa gặp end thì vẫn lấy data
+                Console.WriteLine(lastrow);
+                var location_id = 1;
+                var location = "";
+                var stt = 0;
+                var list_vitri = new Dictionary<int, PointModel>();
+                for (int columnIndex = 2; columnIndex < lastcol; columnIndex++)
+                {
+                    var nowRow = sheet.Rows[0];
+                    var code_vitri = nowRow.Cells[columnIndex].Value;
+                    list_vitri.Add(columnIndex, _context.PointModel.Where(d => d.code == code_vitri).FirstOrDefault());
+                }
+                for (int rowIndex = 2; rowIndex < lastrow; rowIndex++)
+                {
+                    // lấy row hiện tại
+                    Console.WriteLine("rowIndex: {0} ", rowIndex);
+                    var nowRow = sheet.Rows[rowIndex];
+                    if (nowRow == null)
+                        continue;
+
+                    DateTime? date = nowRow.Cells[1] != null && nowRow.Cells[1].Value != "" ? nowRow.Cells[1].DateTimeValue : null;
+                    if (date == null)
+                        continue;
+                    //Console.WriteLine("vitri: {0} ", code_vitri);
+                    //var nowRowDate = sheet.Rows[7];
+                    for (int columnIndex = 2; columnIndex < lastcol; columnIndex++)
+                    {
+
+                        var findPoint = list_vitri[columnIndex];
+
+
+
+                        Console.WriteLine("date: {0} ", date);
+
+
+                        decimal? value = nowRow.Cells[columnIndex] != null && nowRow.Cells[columnIndex].Value != "NA" && nowRow.Cells[columnIndex].Value != "" ? (decimal)nowRow.Cells[columnIndex].NumberValue : null;
+                        if (value != null)
+                        {
+                            var find_result = _context.ResultModel.Where(d => d.date == date && d.point_id == findPoint.id && d.target_id == target_id).FirstOrDefault();
+                            if (find_result == null)
+                            {
+                                var result = new ResultModel()
+                                {
+                                    object_id = findPoint.object_id,
+                                    point_id = findPoint.id,
+                                    value = value,
+                                    target_id = target_id,
                                     date = date,
                                     created_at = DateTime.Now
                                 };

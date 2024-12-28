@@ -82,12 +82,28 @@ namespace it_template.Areas.Info.Controllers
             {
 
                 var now = DateTime.Now;
+
+                // Nếu ngày >= 26, chuyển sang tháng sau
                 if (now.Day >= 26)
                 {
                     now = now.AddMonths(1);
                 }
-                var date_from = new DateTime(now.Year, now.Month - 1, 26);
+
+                // Tính toán tháng và năm trước đó
+                int previousMonth = now.Month - 1;
+                int previousYear = now.Year;
+
+                // Nếu là tháng 1 và lùi về tháng 0, giảm năm và đặt tháng thành 12
+                if (previousMonth == 0)
+                {
+                    previousMonth = 12;
+                    previousYear -= 1;
+                }
+
+                // Tạo đối tượng DateTime
+                var date_from = new DateTime(previousYear, previousMonth, 26);
                 var date_to = new DateTime(now.Year, now.Month, 25);
+
 
                 var list_data_cong = _tinhcong.cong(record, date_from, date_to);
                 IDictionary<string, dynamic> data_cong = list_data_cong.Find(x => x["EMAIL"] == email);
@@ -113,6 +129,7 @@ namespace it_template.Areas.Info.Controllers
                 title = d.title,
                 image_url = d.image_url,
                 description = d.description,
+                id = d.id,
             }).ToList();
             return Json(new { highlight }, new System.Text.Json.JsonSerializerOptions()
             {
@@ -134,6 +151,7 @@ namespace it_template.Areas.Info.Controllers
                 title = d.title,
                 image_url = d.image_url,
                 description = d.description,
+                id = d.id,
             }).ToList();
             return Json(new { tin_moi }, new System.Text.Json.JsonSerializerOptions()
             {
@@ -150,6 +168,7 @@ namespace it_template.Areas.Info.Controllers
                     title = d.title,
                     image_url = d.image_url,
                     description = d.description,
+                    id = d.id,
                 }).ToList();
             }
             return Json(new { cate }, new System.Text.Json.JsonSerializerOptions()

@@ -244,7 +244,7 @@ namespace Vue.Services
             return data;
         }
 
-        public double? phepnam(PersonnelModel person, DateTime denngay)
+        public double? phepnam(PersonnelModel person, DateTime denngay, bool include = true)
         {
             var tungay = person.ngayphep_date;
             var phep = person.ngayphep;
@@ -264,11 +264,21 @@ namespace Vue.Services
             else
             {
                 sophepnam = TinhSoNgayPhep(tungay.Value, phep.Value, denngay);
-                if (denngay.Year > tungay.Value.Year)
+                //if (denngay.Year > tungay.Value.Year)
+                //{
+                //    tungay = new DateTime(denngay.Year - 1, 12, 26);  // Đặt ngày hiện tại thành đầu năm mới
+                //}
+                var query = _context.ChamcongModel.Where(d => d.value == "P" && d.MANV == person.MANV);
+                if (include == true)
                 {
-                    tungay = new DateTime(denngay.Year - 1, 12, 26);  // Đặt ngày hiện tại thành đầu năm mới
+
+                    query = query.Where(d => d.date > tungay && d.date <= denngay);
                 }
-                var count_phep = _context.ChamcongModel.Where(d => d.value == "P" && d.MANV == person.MANV && d.date > tungay && d.date <= denngay).Include(d => d.shift).Sum(d => d.shift.factor);
+                else
+                {
+                    query = query.Where(d => d.date > tungay && d.date < denngay);
+                }
+                var count_phep = query.Include(d => d.shift).Sum(d => d.shift.factor);
 
                 sophepnam = sophepnam - (double)count_phep;
             }
@@ -352,19 +362,21 @@ namespace Vue.Services
         {
             double soLanQuaNgay26 = 0;
 
-            // Duyệt qua từng tháng từ tháng hiện tại đến tháng của ngày tương lai
-            for (int month = ngayHienTai.Month; month <= ngayTuongLai.Month || ngayHienTai.Year < ngayTuongLai.Year; month++)
+            // Duyệt qua từng tháng từ tháng hiện tại đến ngày tương lai
+            DateTime current = new DateTime(ngayHienTai.Year, ngayHienTai.Month, 1);
+
+            while (current <= ngayTuongLai)
             {
-                int year = ngayHienTai.Year + (month - 1) / 12;  // Xử lý nếu qua năm mới
-                int actualMonth = (month - 1) % 12 + 1;          // Xử lý tháng nếu qua năm mới
+                DateTime ngay26CuaThang = new DateTime(current.Year, current.Month, 26);
 
-                DateTime ngay26CuaThang = new DateTime(year, actualMonth, 26);
-
-                // Nếu ngày 26 này nằm trong khoảng từ ngày hiện tại đến ngày tương lai
+                // Kiểm tra nếu ngày 26 nằm trong khoảng ngày hiện tại và ngày tương lai
                 if (ngay26CuaThang > ngayHienTai && ngay26CuaThang <= ngayTuongLai)
                 {
                     soLanQuaNgay26++;
                 }
+
+                // Chuyển sang tháng kế tiếp
+                current = current.AddMonths(1);
             }
 
             return soLanQuaNgay26;
@@ -372,11 +384,11 @@ namespace Vue.Services
         private static double TinhSoNgayPhep(DateTime ngayHienTai, double soNgayPhepHienTai, DateTime ngayTuongLai)
         {
             // Nếu ngày tương lai qua năm mới, reset ngày phép về 0
-            if (ngayTuongLai.Year > ngayHienTai.Year)
-            {
-                soNgayPhepHienTai = 1;
-                ngayHienTai = new DateTime(ngayTuongLai.Year, 1, 1);  // Đặt ngày hiện tại thành đầu năm mới
-            }
+            //if (ngayTuongLai.Year > ngayHienTai.Year)
+            //{
+                //soNgayPhepHienTai = 1;
+                //ngayHienTai = new DateTime(ngayTuongLai.Year, 1, 1);  // Đặt ngày hiện tại thành đầu năm mới
+            //}
 
             // Tính số lần qua ngày 26 từ ngày hiện tại đến ngày tương lai
             double soLanQuaNgay26 = SoLanQuaNgay26(ngayHienTai, ngayTuongLai);

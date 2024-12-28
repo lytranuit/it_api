@@ -196,7 +196,7 @@ namespace it_template.Areas.Info.Controllers
             }
             if (status == 2)
             {
-                var NV_phep_in_day = _context.ChamcongModel.Where(d => d.value_new != "X" && d.value_new != "" && d.date == DateTime.Now.Date).Select(d => d.MANV).ToList();
+                var NV_phep_in_day = _context.ChamcongModel.Where(d => d.value_new != "X" && d.value_new != "" && d.date == DateTime.Now.Date).Select(d => d.MANV).Distinct().ToList();
                 customerData = customerData.Where(d => NV_phep_in_day.Contains(d.MANV));
             }
             int recordsFiltered = customerData.Count();
@@ -374,7 +374,7 @@ namespace it_template.Areas.Info.Controllers
 
                     var nRow = sheet.Rows[start_r];
 
-                    var phepdauky = _tinhcong.phepnam(record, date_from);
+                    var phepdauky = _tinhcong.phepnam(record, date_from, false);
 
                     nRow.Cells[74].NumberValue = phepdauky.Value;
                     while (date_check <= date_to)
@@ -581,7 +581,7 @@ namespace it_template.Areas.Info.Controllers
                     date_check = date_from;
                     var nRow = sheet.Rows[start_r];
 
-                    var phepdauky = _tinhcong.phepnam(record, date_from);
+                    var phepdauky = _tinhcong.phepnam(record, date_from, false);
 
                     nRow.Cells[74].NumberValue = phepdauky.Value;
                     while (date_check <= date_to)
@@ -788,7 +788,7 @@ namespace it_template.Areas.Info.Controllers
                         date_check = date_from;
                         var nRow = sheet.Rows[start_r];
 
-                        var phepdauky = _tinhcong.phepnam(record, date_from);
+                        var phepdauky = _tinhcong.phepnam(record, date_from, false);
 
                         nRow.Cells[74].NumberValue = phepdauky.Value;
                         while (date_check <= date_to)
@@ -1002,7 +1002,7 @@ namespace it_template.Areas.Info.Controllers
                     date_check = date_from;
                     var nRow = sheet.Rows[start_r];
 
-                    var phepdauky = _tinhcong.phepnam(record, date_from);
+                    var phepdauky = _tinhcong.phepnam(record, date_from, false);
 
                     nRow.Cells[74].NumberValue = phepdauky.Value;
                     while (date_check <= date_to)
@@ -1215,7 +1215,7 @@ namespace it_template.Areas.Info.Controllers
                     date_check = date_from;
                     var nRow = sheet.Rows[start_r];
 
-                    var phepdauky = _tinhcong.phepnam(record, date_from);
+                    var phepdauky = _tinhcong.phepnam(record, date_from, false);
 
                     nRow.Cells[74].NumberValue = phepdauky.Value;
                     while (date_check <= date_to)

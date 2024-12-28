@@ -59,17 +59,17 @@ namespace it_template.Areas.Info.Controllers
             Model.deleted_at = DateTime.Now;
             _context.Update(Model);
             ///Trả lại phép năm
-            if (Model.is_capnhat_phepnam == true)
-            {
-                var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
-                foreach (var user in SalaryUserModel)
-                {
-                    var record = _context.PersonnelModel.Where(d => d.MANV == user.MANV).FirstOrDefault();
-                    record.ngayphep = (double)user.phepdauky;
-                    _context.Update(record);
-                }
-                Model.is_capnhat_phepnam = false;
-            }
+            //if (Model.is_capnhat_phepnam == true)
+            //{
+            //    var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
+            //    foreach (var user in SalaryUserModel)
+            //    {
+            //        var record = _context.PersonnelModel.Where(d => d.MANV == user.MANV).FirstOrDefault();
+            //        record.ngayphep = (double)user.phepdauky;
+            //        _context.Update(record);
+            //    }
+            //    Model.is_capnhat_phepnam = false;
+            //}
             _context.SaveChanges();
             return Json(new { success = true, data = Model });
         }
@@ -97,7 +97,11 @@ namespace it_template.Areas.Info.Controllers
                 foreach (string key in list_add)
                 {
                     var PersonModel = _context.PersonnelModel.Where(d => d.id == key).FirstOrDefault();
-                    if (PersonModel.NGAYNHANVIEC != null && PersonModel.NGAYNHANVIEC.Value > SalaryModel.date_to.Value)
+                    if (PersonModel.NGAYNHANVIEC != null && PersonModel.NGAYNHANVIEC.Value.Date > SalaryModel.date_to.Value.Date)
+                    {
+                        continue;
+                    }
+                    if (PersonModel.NGAYNGHIVIEC != null && PersonModel.NGAYNGHIVIEC.Value.Date <= SalaryModel.date_from.Value.Date)
                     {
                         continue;
                     }
@@ -1140,6 +1144,7 @@ namespace it_template.Areas.Info.Controllers
         [Authorize(Roles = "Administrator,HR Lương")]
         public async Task<JsonResult> capnhatphepnam(string id)
         {
+            return Json(new { });
             var SalaryModel = _context.SalaryModel.Where(d => d.id == id).FirstOrDefault();
             SalaryModel.is_capnhat_phepnam = true;
             var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
@@ -1158,6 +1163,7 @@ namespace it_template.Areas.Info.Controllers
         [Authorize(Roles = "Administrator,HR Lương")]
         public async Task<JsonResult> tralaiphepnam(string id)
         {
+            return Json(new { });
             var SalaryModel = _context.SalaryModel.Where(d => d.id == id).FirstOrDefault();
             SalaryModel.is_capnhat_phepnam = false;
             var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
@@ -1177,6 +1183,7 @@ namespace it_template.Areas.Info.Controllers
         [Authorize(Roles = "Administrator,HR Lương")]
         public async Task<JsonResult> sendphieuluong(string id)
         {
+            return Json(new { });
             var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
             var Model = _context.SalaryModel.Where(d => d.id == id).FirstOrDefault();
             foreach (var s in SalaryUserModel)
@@ -1499,14 +1506,14 @@ namespace it_template.Areas.Info.Controllers
             dict.Add("ngaycongthucte", 18);
             dict.Add("tongthunhap", 20);
             dict.Add("luongcb", 6);
-            dict.Add("luongdongbhxh", 16);
-            dict.Add("luongkpi", 17);
-            dict.Add("tong_tc", 15);
-            dict.Add("khoancong", 19);
-            dict.Add("khoantru", 31);
-            dict.Add("thuclanh", 32);
-            dict.Add("thunhaptinhthue", 28);
-            dict.Add("thunhapchiuthue", 23);
+            dict.Add("luongdongbhxh", 21);
+            dict.Add("luongkpi", 16);
+            dict.Add("tong_tc", 14);
+            //dict.Add("khoancong", 19);
+            //dict.Add("khoantru", 31);
+            dict.Add("thuclanh", 33);
+            //dict.Add("thunhaptinhthue", 28);
+            //dict.Add("thunhapchiuthue", 23);
 
 
             // Lấy tất cả các thuộc tính của model
