@@ -17,7 +17,8 @@ namespace Info.Models
         public string? MAKHUVUC { get; set; }
         public string? truongbophan_id { get; set; }
         public string? quanlycong_id { get; set; }
-        
+        public int? sort { get; set; }
+
 
 
     }

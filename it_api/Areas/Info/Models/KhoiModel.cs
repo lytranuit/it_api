@@ -14,6 +14,7 @@ namespace Info.Models
         public string MAKHUVUC { get; set; }
 
         public string TENKHUVUC { get; set; }
+        public int? sort { get; set; }
 
     }
 }

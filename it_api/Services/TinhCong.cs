@@ -227,6 +227,7 @@ namespace Vue.Services
                 d.Add("HOVATEN", record.HOVATEN);
                 d.Add("bophan", record.MAPHONG);
                 d.Add("EMAIL", record.EMAIL);
+                d.Add("MACHUCVU", record.MACHUCVU);
                 d.Add("tong", tong);
                 d.Add("is_finish_chamcong", is_finish_chamcong);
                 d.Add("tongphep", tongphep);

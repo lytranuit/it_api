@@ -11,9 +11,10 @@ namespace Info.Models
     {
         [Key]
         public string id { get; set; }
-        public string MACHUCVU { get; set; }
+        public string? MACHUCVU { get; set; }
 
         public string TENCHUCVU { get; set; }
+        public int? sort { get; set; }
 
     }
 }

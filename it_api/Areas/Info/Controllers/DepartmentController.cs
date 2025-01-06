@@ -104,7 +104,7 @@ namespace it_template.Areas.Info.Controllers
             }
 
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderBy(d => d.MAPHONG).Skip(skip).Take(pageSize).ToList();
+            var datapost = customerData.OrderBy(d => d.sort).ThenBy(d => d.MAPHONG).Skip(skip).Take(pageSize).ToList();
             //var data = new ArrayList();
             //foreach (var record in datapost)
             //{
@@ -145,7 +145,7 @@ namespace it_template.Areas.Info.Controllers
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
-        
+
     }
 
 }

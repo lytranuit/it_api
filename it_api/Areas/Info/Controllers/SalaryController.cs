@@ -131,6 +131,8 @@ namespace it_template.Areas.Info.Controllers
 
 
             var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
+            var PositionModel = _context.PositionModel.ToList();
+            var DepartmentModel = _context.DepartmentModel.ToList();
             var Users = SalaryUserModel.Select(d => d.person_id).ToList();
             var Model = _context.SalaryModel.Where(d => d.id == id).FirstOrDefault();
             var date_from = Model.date_from.Value;
@@ -154,19 +156,27 @@ namespace it_template.Areas.Info.Controllers
 
                 var list_bophan1 = list_data_cong_all.GroupBy(d => d["bophan"]).Select(d => new
                 {
-                    bophan = d.Key,
-                    data = d.ToList()
-                }).OrderBy(d => d.bophan).ToList();
+                    bophan = DepartmentModel.Where(e => e.MAPHONG == d.Key).FirstOrDefault(),
+                    data = d.Select(e =>
+                    {
+                        var chucvu = PositionModel.Where(f => f.MACHUCVU == e["MACHUCVU"]).FirstOrDefault();
+                        e.Add("chucvu", chucvu);
+                        e.Add("sort", chucvu.sort);
+                        return e;
+                    }).OrderBy(d => d["sort"]).ThenBy(d => d["MANV"]).ToList(),
+
+                }).OrderBy(d => d.bophan.sort).ToList();
 
                 Worksheet sheet = workbook.Worksheets[0];
                 var now = DateTime.Now;
+                var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AF18"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
+                sheet.Range["AF17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
-                int sourceRowIndex = 11; // Dòng gốc để sao chép định dạng
+                int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
                 {
-                    int insertRowIndex = 15; // Dòng nơi bạn muốn chèn ba dòng mới
+                    int insertRowIndex = 14; // Dòng nơi bạn muốn chèn ba dòng mới
 
                     // Chèn ba dòng mới tại vị trí insertRowIndex
                     sheet.InsertRow(insertRowIndex);
@@ -180,17 +190,18 @@ namespace it_template.Areas.Info.Controllers
 
                 }
 
-                sheet.DeleteRow(15, 1);
-                var start_r = 12;
+                sheet.DeleteRow(14, 1);
+                var start_r = 11;
                 foreach (var bophan1 in list_bophan1)
                 {
-                    string mabophan = bophan1.bophan;
-                    var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == mabophan).FirstOrDefault();
+                    var bophan = bophan1.bophan;
                     sheet.Range["A" + start_r].Value = bophan.TENPHONG;
                     start_r++;
                     var first_row = start_r;
                     sheet.InsertRow(start_r + 1, bophan1.data.Count(), InsertOptionsType.FormatAsAfter);
-                    foreach (var item in bophan1.data)
+                    var data = bophan1.data;
+                    
+                    foreach (var item in data)
                     {
                         var person = SalaryUserModel.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
                         var person_old = SalaryUserModel_old.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
@@ -199,7 +210,7 @@ namespace it_template.Areas.Info.Controllers
 
 
                         var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
-                        var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == record.MACHUCVU).FirstOrDefault();
+                        var chucvu = item["chucvu"];
 
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
@@ -431,19 +442,22 @@ namespace it_template.Areas.Info.Controllers
 
                 var list_bophan1 = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_chinhthuc.Contains(d["MANV"])).GroupBy(d => d["bophan"]).Select(d => new
                 {
-                    bophan = d.Key,
-                    data = d.ToList()
-                }).OrderBy(d => d.bophan).ToList();
+                    bophan = DepartmentModel.Where(e => e.MAPHONG == d.Key).FirstOrDefault(),
+                    data = d.OrderBy(d => d["sort"]).ThenBy(d => d["MANV"]).ToList(),
+
+                }).OrderBy(d => d.bophan.sort).ToList();
 
                 Worksheet sheet = workbook.Worksheets[1];
                 var now = DateTime.Now;
+                var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AF18"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
+                sheet.Range["AF17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
-                int sourceRowIndex = 11; // Dòng gốc để sao chép định dạng
+
+                int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
                 {
-                    int insertRowIndex = 15; // Dòng nơi bạn muốn chèn ba dòng mới
+                    int insertRowIndex = 14; // Dòng nơi bạn muốn chèn ba dòng mới
 
                     // Chèn ba dòng mới tại vị trí insertRowIndex
                     sheet.InsertRow(insertRowIndex);
@@ -457,17 +471,18 @@ namespace it_template.Areas.Info.Controllers
 
                 }
 
-                sheet.DeleteRow(15, 1);
-                var start_r = 12;
+                sheet.DeleteRow(14, 1);
+                var start_r = 11;
                 foreach (var bophan1 in list_bophan1)
                 {
-                    string mabophan = bophan1.bophan;
-                    var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == mabophan).FirstOrDefault();
+                    var bophan = bophan1.bophan;
                     sheet.Range["A" + start_r].Value = bophan.TENPHONG;
                     start_r++;
                     var first_row = start_r;
                     sheet.InsertRow(start_r + 1, bophan1.data.Count(), InsertOptionsType.FormatAsAfter);
-                    foreach (var item in bophan1.data)
+                    var data = bophan1.data;
+
+                    foreach (var item in data)
                     {
                         var person = SalaryUserModel.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
                         var person_old = SalaryUserModel_old.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
@@ -476,7 +491,7 @@ namespace it_template.Areas.Info.Controllers
 
 
                         var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
-                        var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == record.MACHUCVU).FirstOrDefault();
+                        var chucvu = item["chucvu"];
 
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
@@ -625,19 +640,22 @@ namespace it_template.Areas.Info.Controllers
             {
                 var list_bophan1 = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_dichvu.Contains(d["MANV"])).GroupBy(d => d["bophan"]).Select(d => new
                 {
-                    bophan = d.Key,
-                    data = d.ToList()
-                }).OrderBy(d => d.bophan).ToList();
+                    bophan = DepartmentModel.Where(e => e.MAPHONG == d.Key).FirstOrDefault(),
+                    data = d.OrderBy(d => d["sort"]).ThenBy(d => d["MANV"]).ToList(),
+
+                }).OrderBy(d => d.bophan.sort).ToList();
 
                 Worksheet sheet = workbook.Worksheets[2];
                 var now = DateTime.Now;
+                var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AF18"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
+                sheet.Range["AF17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
-                int sourceRowIndex = 11; // Dòng gốc để sao chép định dạng
+
+                int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
                 {
-                    int insertRowIndex = 15; // Dòng nơi bạn muốn chèn ba dòng mới
+                    int insertRowIndex = 14; // Dòng nơi bạn muốn chèn ba dòng mới
 
                     // Chèn ba dòng mới tại vị trí insertRowIndex
                     sheet.InsertRow(insertRowIndex);
@@ -651,17 +669,18 @@ namespace it_template.Areas.Info.Controllers
 
                 }
 
-                sheet.DeleteRow(15, 1);
-                var start_r = 12;
+                sheet.DeleteRow(14, 1);
+                var start_r = 11;
                 foreach (var bophan1 in list_bophan1)
                 {
-                    string mabophan = bophan1.bophan;
-                    var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == mabophan).FirstOrDefault();
+                    var bophan = bophan1.bophan;
                     sheet.Range["A" + start_r].Value = bophan.TENPHONG;
                     start_r++;
                     var first_row = start_r;
                     sheet.InsertRow(start_r + 1, bophan1.data.Count(), InsertOptionsType.FormatAsAfter);
-                    foreach (var item in bophan1.data)
+                    var data = bophan1.data;
+
+                    foreach (var item in data)
                     {
                         var person = SalaryUserModel.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
                         var person_old = SalaryUserModel_old.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
@@ -670,7 +689,7 @@ namespace it_template.Areas.Info.Controllers
 
 
                         var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
-                        var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == record.MACHUCVU).FirstOrDefault();
+                        var chucvu = item["chucvu"];
 
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
@@ -822,19 +841,22 @@ namespace it_template.Areas.Info.Controllers
 
                 var list_bophan1 = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_hocviec_thuviec.Contains(d["MANV"])).GroupBy(d => d["bophan"]).Select(d => new
                 {
-                    bophan = d.Key,
-                    data = d.ToList()
-                }).OrderBy(d => d.bophan).ToList();
+                    bophan = DepartmentModel.Where(e => e.MAPHONG == d.Key).FirstOrDefault(),
+                    data = d.OrderBy(d => d["sort"]).ThenBy(d => d["MANV"]).ToList(),
+
+                }).OrderBy(d => d.bophan.sort).ToList();
 
                 Worksheet sheet = workbook.Worksheets[3];
                 var now = DateTime.Now;
+                var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AF18"].Value = $"Đông Hòa, ngày {now.ToString("dd")} tháng {now.ToString("MM")} năm {now.ToString("yyyy")}";
+                sheet.Range["AF17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
-                int sourceRowIndex = 11; // Dòng gốc để sao chép định dạng
+
+                int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
                 {
-                    int insertRowIndex = 15; // Dòng nơi bạn muốn chèn ba dòng mới
+                    int insertRowIndex = 14; // Dòng nơi bạn muốn chèn ba dòng mới
 
                     // Chèn ba dòng mới tại vị trí insertRowIndex
                     sheet.InsertRow(insertRowIndex);
@@ -848,17 +870,18 @@ namespace it_template.Areas.Info.Controllers
 
                 }
 
-                sheet.DeleteRow(15, 1);
-                var start_r = 12;
+                sheet.DeleteRow(14, 1);
+                var start_r = 11;
                 foreach (var bophan1 in list_bophan1)
                 {
-                    string mabophan = bophan1.bophan;
-                    var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == mabophan).FirstOrDefault();
+                    var bophan = bophan1.bophan;
                     sheet.Range["A" + start_r].Value = bophan.TENPHONG;
                     start_r++;
                     var first_row = start_r;
                     sheet.InsertRow(start_r + 1, bophan1.data.Count(), InsertOptionsType.FormatAsAfter);
-                    foreach (var item in bophan1.data)
+                    var data = bophan1.data;
+
+                    foreach (var item in data)
                     {
                         var person = SalaryUserModel.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
                         var person_old = SalaryUserModel_old.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
@@ -867,7 +890,7 @@ namespace it_template.Areas.Info.Controllers
 
 
                         var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
-                        var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == record.MACHUCVU).FirstOrDefault();
+                        var chucvu = item["chucvu"];
 
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
