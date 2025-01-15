@@ -26,6 +26,11 @@ using System.Text.Json;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Net.Http;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
+using System.Net.Http.Headers;
+using System.ComponentModel.DataAnnotations;
 
 namespace Vue.Controllers
 {
@@ -512,6 +517,187 @@ namespace Vue.Controllers
 
             return Json(new { success = true });
         }
+
+        public async Task<JsonResult> taovacapnhatEmail()
+        {
+            var list_email_update = _nhansuContext.PersonnelModel.Where(d => d.is_email_update == true && d.EMAIL.Contains("@astahealthcare.com") && d.NGAYNGHIVIEC == null).ToList();
+            if (list_email_update.Count > 0)
+            {
+
+                var user = _configuration["Sync:username"];
+                var pass = _configuration["Sync:password"];
+                ////CHECK TẠO TÀI KHOẢN EMAIL
+                ///
+                var client = new HttpClient();
+                var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{user}:{pass}"));
+
+                // Thêm Authorization header
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authToken);
+
+                var url = "https://mail.astahealthcare.com:2083/execute/Email/list_pops_with_disk";
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    LoginAdminResponse responseJson1 = await response.Content.ReadFromJsonAsync<LoginAdminResponse>();
+                    var list = responseJson1.data.Select(d => d.email).ToList();
+                    foreach (var item in list_email_update)
+                    {
+                        if (list.Contains(item.EMAIL.ToLower()))
+                        {
+                            continue;
+                        }
+                        ///Tạo email mới
+                        var client1 = new HttpClient();
+                        var authToken1 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{user}:{pass}"));
+
+                        // Thêm Authorization header
+                        client1.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authToken1);
+                        string generatedPassword = GenerateStrongPassword();
+                        string url1 = $"https://mail.astahealthcare.com:2083/execute/Email/add_pop?email={item.EMAIL.ToLower()}&password={generatedPassword}";
+                        item.mk_email = generatedPassword;
+                        HttpResponseMessage response1 = await client1.GetAsync(url1);
+                        if (response1.IsSuccessStatusCode)
+                        {
+                            string responseBody = await response1.Content.ReadAsStringAsync();
+                            Console.WriteLine("Tạo tài khoản email thành công:");
+                            Console.WriteLine(responseBody);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Lỗi khi tạo tài khoản email:");
+                            Console.WriteLine(await response1.Content.ReadAsStringAsync());
+                        }
+                    }
+                }
+
+
+                var options = new ChromeOptions();
+                //options.AddArgument("--headless"); // Chạy không cần giao diện (tuỳ chọn)
+
+                // Khởi tạo WebDriver
+                IWebDriver driver = new ChromeDriver(options);
+
+                // Điều hướng đến một URL
+                driver.Navigate().GoToUrl("https://mail.astahealthcare.com:2083/cpsess4532993050/frontend/jupiter/email_accounts/index.html#/list");
+                driver.Manage().Window.Maximize();
+
+                System.Threading.Thread.Sleep(2000);
+
+
+
+                driver.FindElement(By.Name("user")).Clear();
+                driver.FindElement(By.Name("user")).SendKeys(user);
+
+                driver.FindElement(By.Name("pass")).Clear();
+                driver.FindElement(By.Name("pass")).SendKeys(pass);
+
+
+                driver.FindElement(By.Id("login_submit")).Click();
+
+                Thread.Sleep(2000);
+
+                foreach (var person in list_email_update)
+                {
+                    // Đợi một chút để trang tải (tối ưu bằng WebDriverWait nếu cần)
+                    var email = person.EMAIL.ToLower();
+                    var hovaten = person.HOVATEN;
+                    var user_person = "";
+                    string[] words = email.Split('@');
+                    var is_asta = false;
+                    if (words.Length > 1)
+                    {
+                        is_asta = words[1].Trim() == "astahealthcare.com" ? true : false;
+                        user_person = words[0];
+                    }
+
+                    if (!is_asta)
+                    {
+                        continue;
+                    }
+
+                    driver.FindElement(By.Id("email_table_search_input")).Clear();
+                    driver.FindElement(By.Id("email_table_search_input")).SendKeys(user_person);
+
+                    Thread.Sleep(2000);
+
+                    driver.FindElement(By.Id("email_table_menu_webmail_" + email)).Click();
+
+
+
+                    // Lưu lại cửa sổ hiện tại
+                    string originalWindow = driver.CurrentWindowHandle;
+
+                    // Chuyển sang cửa sổ mới
+                    foreach (string window in driver.WindowHandles)
+                    {
+                        if (window != originalWindow)
+                        {
+                            driver.SwitchTo().Window(window);
+                            break;
+                        }
+                    }
+
+                    // Đợi cho đến khi trang mới tải hoàn toàn (nếu cần)
+                    System.Threading.Thread.Sleep(2000);
+
+
+                    //WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                    //IWebElement element = wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementIsVisible(By.Id("element-id")));
+
+                    //System.Threading.Thread.Sleep(5000);
+                    //driver.FindElement(By.Id("rcmbtn110")).Click();
+                    //System.Threading.Thread.Sleep(2000);
+                    //driver.FindElement(By.Id("rcmbtn112")).Click();
+
+                    var current_url = driver.Url;
+                    // Phân tích URL
+                    Uri uri = new Uri(current_url);
+
+                    // Lấy base URL (không bao gồm query string)
+                    string baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}{uri.AbsolutePath}";
+
+                    // Thay đổi đường dẫn và query string
+                    string desiredPath = uri.AbsolutePath.Replace("webmail/jupiter/index.html", "3rdparty/roundcube/");
+
+
+                    string desiredQuery = "?_task=mail&_mbox=INBOX";
+
+                    // Tái tạo URL
+                    string desiredUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}{desiredPath}?{desiredQuery}";
+                    //string desiredUrl = current_url.Replace("_action=identities", "_action=edit-identity&_iid=1&_framed=1");
+
+                    driver.Navigate().GoToUrl(desiredUrl);
+
+
+                    System.Threading.Thread.Sleep(2000);
+
+                    desiredQuery = "_task=settings&_action=edit-identity&_iid=1&_framed=1";
+                    desiredUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}{desiredPath}?{desiredQuery}";
+
+                    driver.Navigate().GoToUrl(desiredUrl);
+
+
+                    System.Threading.Thread.Sleep(2000);
+
+                    driver.FindElement(By.Id("rcmfd_name")).Clear();
+                    driver.FindElement(By.Id("rcmfd_name")).SendKeys(hovaten);
+
+                    driver.FindElement(By.Id("rcmbtnfrm102")).Click();
+                    driver.Close();
+
+                    // Quay lại cửa sổ ban đầu
+                    driver.SwitchTo().Window(originalWindow);
+                    person.is_email_update = false;
+                    _nhansuContext.Update(person);
+                    _nhansuContext.SaveChanges();
+                }
+                driver.Close();
+            }
+
+
+
+            return Json(new { success = true });
+        }
         private async Task<UserInfoSearchResponse> getPerson(int maxResults, int start)
         {
             CredentialCache credentialCache = new CredentialCache();
@@ -587,7 +773,63 @@ namespace Vue.Controllers
 
             return normalized;
         }
+        static string GenerateStrongPassword(int length = 12)
+        {
+            const string uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string lowercase = "abcdefghijklmnopqrstuvwxyz";
+            const string digits = "0123456789";
+            const string specialChars = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+            const string allChars = uppercase + lowercase + digits + specialChars;
 
+            Random random = new Random();
+            char[] password = new char[length];
+
+            // Đảm bảo mật khẩu chứa ít nhất một ký tự từ mỗi nhóm
+            password[0] = uppercase[random.Next(uppercase.Length)];
+            password[1] = lowercase[random.Next(lowercase.Length)];
+            password[2] = digits[random.Next(digits.Length)];
+            password[3] = specialChars[random.Next(specialChars.Length)];
+
+            // Điền các ký tự còn lại ngẫu nhiên
+            for (int i = 4; i < length; i++)
+            {
+                password[i] = allChars[random.Next(allChars.Length)];
+            }
+
+            // Trộn ngẫu nhiên các ký tự trong mật khẩu
+            Shuffle(password, random);
+
+            return new string(password);
+        }
+
+        static void Shuffle(char[] array, Random random)
+        {
+            for (int i = array.Length - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                char temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+        }
+    }
+    public class LoginAdminResponse
+    {
+        [Key]
+        public int id { get; set; }
+
+        public List<UserResult>? data { get; set; }
+    }
+    public class UserResult
+    {
+        [Key]
+        public string id { get; set; }
+        public string email { get; set; }
+        public string user { get; set; }
+
+        //public string fullName { get; set; }
+        //public string description { get; set; }
+        public int? suspended_login { get; set; }
     }
     public class UserInfo
     {

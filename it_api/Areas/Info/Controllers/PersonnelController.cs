@@ -345,7 +345,128 @@ namespace it_template.Areas.Info.Controllers
         }
 
 
+        [HttpPost]
+        public async Task<JsonResult> excel()
+        {
+            var viewPath = "wwwroot/report/excel/Danhsachnhansu.xlsx";
+            var documentPath = "/private/info/data/" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
 
+            string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+
+            Workbook workbook = new Workbook();
+            workbook.LoadFromFile(viewPath);
+
+            var ignore_nghi = Request.Form["filters[ignore_nghi]"].FirstOrDefault();
+            var MANV = Request.Form["filters[MANV]"].FirstOrDefault();
+            var HOVATEN = Request.Form["filters[HOVATEN]"].FirstOrDefault();
+            var GIOITINH = Request.Form["filters[GIOITINH]"].FirstOrDefault();
+            var tinhtrang = Request.Form["filters[tinhtrang]"].FirstOrDefault();
+            var MAPHONG = Request.Form["filters[MAPHONG]"].FirstOrDefault();
+            var MATRINHDO = Request.Form["filters[MATRINHDO]"].FirstOrDefault();
+            var CHUYENMON = Request.Form["filters[CHUYENMON]"].FirstOrDefault();
+            var BOPHAN = Request.Form["filters[BOPHAN]"].FirstOrDefault();
+            var id = Request.Form["filters[id]"].FirstOrDefault();
+
+
+            var customerData = _context.PersonnelModel.Where(d => 1 == 1);
+            if (ignore_nghi == "true")
+            {
+                customerData = customerData.Where(d => d.NGAYNGHIVIEC == null);
+            }
+            if (MANV != null && MANV != "")
+            {
+                customerData = customerData.Where(d => d.MANV.Contains(MANV));
+            }
+            if (HOVATEN != null && HOVATEN != "")
+            {
+                customerData = customerData.Where(d => d.HOVATEN.Contains(HOVATEN));
+            }
+            if (GIOITINH != null && GIOITINH != "")
+            {
+                customerData = customerData.Where(d => d.GIOITINH == GIOITINH);
+            }
+
+            if (tinhtrang != null && tinhtrang != "")
+            {
+                customerData = customerData.Where(d => d.tinhtrang == tinhtrang);
+            }
+
+            if (MAPHONG != null && MAPHONG != "")
+            {
+                customerData = customerData.Where(d => d.MAPHONG == MAPHONG);
+            }
+
+            if (MATRINHDO != null && MATRINHDO != "")
+            {
+                customerData = customerData.Where(d => d.MATRINHDO == MATRINHDO);
+            }
+
+            if (CHUYENMON != null && CHUYENMON != "")
+            {
+                customerData = customerData.Where(d => d.CHUYENMON == CHUYENMON);
+            }
+            if (BOPHAN != null && BOPHAN != "")
+            {
+                customerData = customerData.Where(d => d.MAPHONG == BOPHAN);
+            }
+            if (id != null)
+            {
+                customerData = customerData.Where(d => d.id == id);
+            }
+
+            var datapost = customerData.ToList();
+
+            var DepartmentModel = _context.DepartmentModel.ToList();
+            var PositionModel = _context.PositionModel.ToList();
+            datapost = datapost.Select(d =>
+            {
+                d.bophan = DepartmentModel.Where(e => e.MAPHONG == d.MAPHONG).FirstOrDefault();
+                d.chucvu = PositionModel.Where(e => e.MACHUCVU == d.MACHUCVU).FirstOrDefault();
+                return d;
+            }).OrderBy(d => d.bophan.sort).ThenBy(d => d.bophan.MAPHONG).ThenBy(d => d.chucvu.sort).ThenBy(d => d.chucvu.MACHUCVU).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+
+            Worksheet sheet = workbook.Worksheets[0];
+            int start_r = 1; // Dòng gốc để sao chép định dạng
+
+            sheet.InsertRow(start_r + 1, datapost.Count(), InsertOptionsType.FormatAsAfter);
+            foreach (var record in datapost)
+            {
+                var nRow = sheet.Rows[start_r];
+                nRow.Cells[0].Value = record.MANV;
+                nRow.Cells[1].Value = record.HOVATEN;
+                nRow.Cells[2].Value = record.bophan.TENPHONG;
+                nRow.Cells[3].Value = record.chucvu.TENCHUCVU;
+                nRow.Cells[4].Value = record.GIOITINH;
+                nRow.Cells[5].Value = record.MATRINHDO;
+                nRow.Cells[6].Value = record.CHUYENMON;
+                nRow.Cells[7].Value = record.DIENTHOAI;
+                nRow.Cells[8].Value = record.EMAIL;
+                if (record.NGAYSINH != null)
+                {
+                    nRow.Cells[9].DateTimeValue = record.NGAYSINH.Value;
+
+                }
+                if (record.NGAYNHANVIEC != null)
+                {
+                    nRow.Cells[10].DateTimeValue = record.NGAYNHANVIEC.Value;
+
+                }
+                if (record.NGAYNGHIVIEC != null)
+                {
+                    nRow.Cells[11].DateTimeValue = record.NGAYNGHIVIEC.Value;
+
+                }
+                nRow.Cells[12].Value = record.MACC;
+                nRow.Cells[13].Value = record.tinhtrang;
+                start_r++;
+            }
+
+            workbook.SaveToFile(_configuration["Source:Path_Private"] + documentPath.Replace("/private", "").Replace("/", "\\"), ExcelVersion.Version2013);
+
+            //var congthuc_ct = _QLSXcontext.Congthuc_CTModel.Where()
+            var jsonData = new { success = true, link = documentPath };
+            return Json(jsonData);
+        }
         private string RemoveUnicode(string text)
         {
             string[] arr1 = new string[] { "á", "à", "ả", "ã", "ạ", "â", "ấ", "ầ", "ẩ", "ẫ", "ậ", "ă", "ắ", "ằ", "ẳ", "ẵ", "ặ",

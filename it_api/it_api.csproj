@@ -67,6 +67,8 @@
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.3" />
 		<PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="3.1.32" />
 		<PackageReference Include="PH.WorkingDaysAndTime" Version="2.0.13" />
+		<PackageReference Include="Selenium.Support" Version="4.27.0" />
+		<PackageReference Include="Selenium.WebDriver" Version="4.27.0" />
 		<PackageReference Include="ShiftSharp" Version="2.0.1" />
 		<PackageReference Include="WorkTimeCalculator" Version="1.0.5" />
 	</ItemGroup>

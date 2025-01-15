@@ -65,7 +65,7 @@ namespace it_template.Areas.Trend.Controllers
 
             if (LimitModel.object_id == 2)
             {
-                var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\GHCB_GHHD(Visinh).xls";
+                var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\GHCB_GHHD(Visinh).xlsx";
                 var documentPath = "/temp/GHCB_GHHD(Visinh)_" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
                 string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
 
@@ -164,17 +164,17 @@ namespace it_template.Areas.Trend.Controllers
             }
             else
             {
-                var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\GHCB_GHHD(VS).xls";
+                var viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\GHCB_GHHD(VS).xlsx";
                 var documentPath = "/temp/GHCB_GHHD(VS)_" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
                 if (targetModel.type == "hoaly")
                 {
-                    viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\GHCB_GHHD(HL).xls";
+                    viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\GHCB_GHHD(HL).xlsx";
                     documentPath = "/temp/GHCB_GHHD(HL)_" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
 
                 }
                 else if (targetModel.type == "codien")
                 {
-                    viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\GHCB_GHHD(CD).xls";
+                    viewPath = _configuration["Source:Path_Private"] + "\\trend\\templates\\GHCB_GHHD(CD).xlsx";
                     documentPath = "/temp/GHCB_GHHD(CD)_" + DateTime.Now.ToFileTimeUtc() + ".xlsx";
                 }
                 string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
@@ -254,13 +254,13 @@ namespace it_template.Areas.Trend.Controllers
                     sheet.InsertDataTable(dt, false, 9, 1);
                     sheet.DeleteRow(8);
                     //avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
-                    //sheet.CalculateAllValue();
+                    sheet.CalculateAllValue();
                     //var avg = sheet.Range["C" + (start_r + 3)].FormulaNumberValue;
                     //var min = sheet.Range["C" + (start_r + 4)].FormulaNumberValue;
                     //var max = sheet.Range["C" + (start_r + 5)].FormulaNumberValue;
 
                 }
-                workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2013);
+                workbook.SaveToFile("./wwwroot" + documentPath, ExcelVersion.Version2016);
 
                 return Json(new { success = true, link = Domain + documentPath, data = list });
             }

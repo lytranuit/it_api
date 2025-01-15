@@ -163,9 +163,9 @@ namespace it_template.Areas.Info.Controllers
                         e.Add("chucvu", chucvu);
                         e.Add("sort", chucvu.sort);
                         return e;
-                    }).OrderBy(d => d["sort"]).ThenBy(d => d["MANV"]).ToList(),
+                    }).OrderBy(d => d["sort"]).ThenBy(d => d["MACHUCVU"]).ThenBy(d => d["MANV"]).ToList(),
 
-                }).OrderBy(d => d.bophan.sort).ToList();
+                }).OrderBy(d => d.bophan.sort).ThenBy(d => d.bophan.MAPHONG).ToList();
 
                 Worksheet sheet = workbook.Worksheets[0];
                 var now = DateTime.Now;
@@ -200,7 +200,7 @@ namespace it_template.Areas.Info.Controllers
                     var first_row = start_r;
                     sheet.InsertRow(start_r + 1, bophan1.data.Count(), InsertOptionsType.FormatAsAfter);
                     var data = bophan1.data;
-                    
+
                     foreach (var item in data)
                     {
                         var person = SalaryUserModel.Where(d => d.person_id == item["NV_id"]).FirstOrDefault();
@@ -443,9 +443,9 @@ namespace it_template.Areas.Info.Controllers
                 var list_bophan1 = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_chinhthuc.Contains(d["MANV"])).GroupBy(d => d["bophan"]).Select(d => new
                 {
                     bophan = DepartmentModel.Where(e => e.MAPHONG == d.Key).FirstOrDefault(),
-                    data = d.OrderBy(d => d["sort"]).ThenBy(d => d["MANV"]).ToList(),
+                    data = d.OrderBy(d => d["sort"]).ThenBy(d => d["MACHUCVU"]).ThenBy(d => d["MANV"]).ToList(),
 
-                }).OrderBy(d => d.bophan.sort).ToList();
+                }).OrderBy(d => d.bophan.sort).ThenBy(d => d.bophan.MAPHONG).ToList();
 
                 Worksheet sheet = workbook.Worksheets[1];
                 var now = DateTime.Now;
@@ -641,9 +641,9 @@ namespace it_template.Areas.Info.Controllers
                 var list_bophan1 = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_dichvu.Contains(d["MANV"])).GroupBy(d => d["bophan"]).Select(d => new
                 {
                     bophan = DepartmentModel.Where(e => e.MAPHONG == d.Key).FirstOrDefault(),
-                    data = d.OrderBy(d => d["sort"]).ThenBy(d => d["MANV"]).ToList(),
+                    data = d.OrderBy(d => d["sort"]).ThenBy(d => d["MACHUCVU"]).ThenBy(d => d["MANV"]).ToList(),
 
-                }).OrderBy(d => d.bophan.sort).ToList();
+                }).OrderBy(d => d.bophan.sort).ThenBy(d => d.bophan.MAPHONG).ToList();
 
                 Worksheet sheet = workbook.Worksheets[2];
                 var now = DateTime.Now;
@@ -842,9 +842,9 @@ namespace it_template.Areas.Info.Controllers
                 var list_bophan1 = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_hocviec_thuviec.Contains(d["MANV"])).GroupBy(d => d["bophan"]).Select(d => new
                 {
                     bophan = DepartmentModel.Where(e => e.MAPHONG == d.Key).FirstOrDefault(),
-                    data = d.OrderBy(d => d["sort"]).ThenBy(d => d["MANV"]).ToList(),
+                    data = d.OrderBy(d => d["sort"]).ThenBy(d => d["MACHUCVU"]).ThenBy(d => d["MANV"]).ToList(),
 
-                }).OrderBy(d => d.bophan.sort).ToList();
+                }).OrderBy(d => d.bophan.sort).ThenBy(d => d.bophan.MAPHONG).ToList();
 
                 Worksheet sheet = workbook.Worksheets[3];
                 var now = DateTime.Now;
@@ -1499,7 +1499,7 @@ namespace it_template.Areas.Info.Controllers
             var MANV = person.MANV;
 
             var data = _context.SalaryUserModel.Where(d => d.MANV == MANV).Include(d => d.salary).Select(d => d.salary).ToList();
-            data = data.Where(d => d.deleted_at == null && d.status == "Đã khóa").ToList();
+            data = data.Where(d => d.deleted_at == null && d.status == "Đã khóa").OrderByDescending(d => d.date_from).ToList();
             return Json(data, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull

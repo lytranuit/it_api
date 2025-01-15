@@ -99,9 +99,17 @@ namespace Info.Models
 
         public bool? is_bhxh { get; set; }
         public bool? is_thue { get; set; }
+        public bool? is_email_update { get; set; }
         public string? image_url { get; set; }
+        public string? mk_email { get; set; }
         [NotMapped]
         public List<string>? list_shift { get; set; }
+
+        [NotMapped]
+        public PositionModel chucvu { get; set; }
+        [NotMapped]
+        public PhongModel bophan { get; set; }
+
 
         public string NormalizeName
         {
