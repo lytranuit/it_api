@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NodaTime.TimeZones.Cldr;
+using Spire.Doc;
 using Spire.Xls;
 using System.Data;
 using System.Drawing;
@@ -35,7 +36,7 @@ namespace it_template.Areas.Info.Controllers
         [HttpPost]
         public async Task<JsonResult> Delete(string id)
         {
-            var Model = _context.PersonnelModel.Where(d => d.MANV == id).FirstOrDefault();
+            var Model = _context.PersonnelModel.Where(d => d.id == id).FirstOrDefault();
             _context.Remove(Model);
             _context.SaveChanges();
             return Json(new { success = true, data = Model });
@@ -344,7 +345,156 @@ namespace it_template.Areas.Info.Controllers
             }
         }
 
+        [HttpPost]
+        public async Task<JsonResult> fileHDLD(string id)
+        {
+            var viewPath = "wwwroot/report/word/HĐLĐ mẫu.docx";
+            var documentPath = "/private/info/data/" + DateTime.Now.ToFileTimeUtc() + ".docx";
 
+            string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+
+            var Model = _context.PersonnelModel.Where(d => d.id == id).FirstOrDefault();
+
+            var chuyenmon = _context.ChuyenmonModel.Where(d => d.MACHUYENMON == Model.CHUYENMON).FirstOrDefault();
+            var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == Model.MACHUCVU).FirstOrDefault();
+            var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == Model.MAPHONG).FirstOrDefault();
+
+
+            var raw = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "hovaten",Model.HOVATEN.ToUpper() },
+                { "ngaysinh",Model.NGAYSINH != null ? Model.NGAYSINH.Value.ToString("dd/MM/yyyy") :" " },
+                { "diachi",Model.THUONGTRU },
+                { "SOCCCD",Model.SOCCCD },
+                { "NGAYCAPCCCD",Model.NGAYCAPCCCD != null ? Model.NGAYCAPCCCD.Value.ToString("dd/MM/yyyy") :" " },
+                { "NOICAPCCCD",Model.NOICAPCCCD },
+                { "CHUYENMON",chuyenmon != null ? chuyenmon.TENCHUYENMON : " " },
+                { "NGAYKYHD",Model.NGAYKYHD != null ? Model.NGAYKYHD.Value.ToString("dd/MM/yyyy") : " " },
+                { "NGAYKTHD",Model.NGAYKTHD != null ? Model.NGAYKTHD.Value.ToString("dd/MM/yyyy") : " " },
+                { "CHUCVU",chucvu != null ? chucvu.TENCHUCVU : " " },
+                { "BOPHAN",bophan != null ? bophan.TENPHONG : " " },
+                { "tien_luong",Model.tien_luong  != null ? Model.tien_luong.Value.ToString("0,###") : " " },
+                { "pc_trachnhiem",Model.pc_trachnhiem != null ? Model.pc_trachnhiem.Value.ToString("0,###") : " "},
+
+            };
+            //Creates Document instance
+            Spire.Doc.Document document = new Spire.Doc.Document();
+            Section section = document.AddSection();
+
+            document.LoadFromFile(viewPath, Spire.Doc.FileFormat.Docx);
+
+            string[] fieldName = raw.Keys.ToArray();
+            string[] fieldValue = raw.Values.ToArray();
+
+            string[] MergeFieldNames = document.MailMerge.GetMergeFieldNames();
+            string[] GroupNames = document.MailMerge.GetMergeGroupNames();
+
+            document.MailMerge.Execute(fieldName, fieldValue);
+
+            document.SaveToFile(_configuration["Source:Path_Private"] + documentPath.Replace("/private", "").Replace("/", "\\"), Spire.Doc.FileFormat.Docx);
+
+            //var congthuc_ct = _QLSXcontext.Congthuc_CTModel.Where()
+            var jsonData = new { success = true, link = documentPath };
+            return Json(jsonData);
+        }
+        [HttpPost]
+        public async Task<JsonResult> fileBMTT(string id)
+        {
+            var viewPath = "wwwroot/report/word/3. CK bảo mật thông tin.docx";
+            var documentPath = "/private/info/data/" + DateTime.Now.ToFileTimeUtc() + ".docx";
+
+            string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+
+            var Model = _context.PersonnelModel.Where(d => d.id == id).FirstOrDefault();
+
+            var chucvu = _context.PositionModel.Where(d => d.MACHUCVU == Model.MACHUCVU).FirstOrDefault();
+            var bophan = _context.DepartmentModel.Where(d => d.MAPHONG == Model.MAPHONG).FirstOrDefault();
+
+
+            var raw = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "hovaten",Model.HOVATEN.ToUpper() },
+                { "ngaysinh",Model.NGAYSINH != null ? Model.NGAYSINH.Value.ToString("dd/MM/yyyy") :" " },
+                { "diachi",Model.THUONGTRU },
+                { "SOCCCD",Model.SOCCCD },
+                { "NGAYCAPCCCD",Model.NGAYCAPCCCD != null ? Model.NGAYCAPCCCD.Value.ToString("dd/MM/yyyy") :" " },
+                { "NOICAPCCCD",Model.NOICAPCCCD },
+                { "CHUCVU",chucvu != null ? chucvu.TENCHUCVU : " " },
+                { "BOPHAN",bophan != null ? bophan.TENPHONG : " " },
+                { "NGAYNHANVIEC",Model.NGAYNHANVIEC  != null ? Model.NGAYNHANVIEC.Value.ToString("dd/MM/yyyy") : " " },
+
+            };
+            //Creates Document instance
+            Spire.Doc.Document document = new Spire.Doc.Document();
+            Section section = document.AddSection();
+
+            document.LoadFromFile(viewPath, Spire.Doc.FileFormat.Docx);
+
+            string[] fieldName = raw.Keys.ToArray();
+            string[] fieldValue = raw.Values.ToArray();
+
+            string[] MergeFieldNames = document.MailMerge.GetMergeFieldNames();
+            string[] GroupNames = document.MailMerge.GetMergeGroupNames();
+
+            document.MailMerge.Execute(fieldName, fieldValue);
+
+            document.SaveToFile(_configuration["Source:Path_Private"] + documentPath.Replace("/private", "").Replace("/", "\\"), Spire.Doc.FileFormat.Docx);
+
+            //var congthuc_ct = _QLSXcontext.Congthuc_CTModel.Where()
+            var jsonData = new { success = true, link = documentPath };
+            return Json(jsonData);
+        }
+        [HttpPost]
+        public async Task<JsonResult> fileHVTV(string id)
+        {
+            var viewPath = "wwwroot/report/word/3. TT Học việc và thử việc.docx";
+            var documentPath = "/private/info/data/" + DateTime.Now.ToFileTimeUtc() + ".docx";
+
+            string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+
+            var Model = _context.PersonnelModel.Where(d => d.id == id).FirstOrDefault();
+
+            var chuyenmon = _context.ChuyenmonModel.Where(d => d.MACHUYENMON == Model.CHUYENMON).FirstOrDefault();
+
+
+            var raw = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "hovaten",Model.HOVATEN.ToUpper() },
+                { "ngaysinh",Model.NGAYSINH != null ? Model.NGAYSINH.Value.ToString("dd/MM/yyyy") :" " },
+                { "diachi",Model.THUONGTRU },
+                { "SOCCCD",Model.SOCCCD },
+                { "NGAYCAPCCCD",Model.NGAYCAPCCCD != null ? Model.NGAYCAPCCCD.Value.ToString("dd/MM/yyyy") :" " },
+                { "NOICAPCCCD",Model.NOICAPCCCD },
+                { "CHUYENMON",chuyenmon != null ? chuyenmon.TENCHUYENMON : " " },
+                { "NGAYNHANVIEC",Model.NGAYNHANVIEC != null ? Model.NGAYNHANVIEC.Value.ToString("dd/MM/yyyy") : " " },
+
+                { "NGAYHOCVIEC",Model.NGAYHOCVIEC != null ? Model.NGAYHOCVIEC.Value.ToString("dd/MM/yyyy") : " " },
+                { "NGAYTHUVIEC",Model.NGAYTHUVIEC != null ? Model.NGAYTHUVIEC.Value.ToString("dd/MM/yyyy") : " " },
+
+                { "NGAYKTHOCVIEC",Model.NGAYHOCVIEC != null ? Model.NGAYHOCVIEC.Value.AddMonths(2).AddDays(-1).ToString("dd/MM/yyyy") : " " },
+                { "NGAYKTTHUVIEC",Model.NGAYTHUVIEC != null ? Model.NGAYTHUVIEC.Value.AddMonths(2).AddDays(-1).ToString("dd/MM/yyyy") : " " },
+
+            };
+            //Creates Document instance
+            Spire.Doc.Document document = new Spire.Doc.Document();
+            Section section = document.AddSection();
+
+            document.LoadFromFile(viewPath, Spire.Doc.FileFormat.Docx);
+
+            string[] fieldName = raw.Keys.ToArray();
+            string[] fieldValue = raw.Values.ToArray();
+
+            string[] MergeFieldNames = document.MailMerge.GetMergeFieldNames();
+            string[] GroupNames = document.MailMerge.GetMergeGroupNames();
+
+            document.MailMerge.Execute(fieldName, fieldValue);
+
+            document.SaveToFile(_configuration["Source:Path_Private"] + documentPath.Replace("/private", "").Replace("/", "\\"), Spire.Doc.FileFormat.Docx);
+
+            //var congthuc_ct = _QLSXcontext.Congthuc_CTModel.Where()
+            var jsonData = new { success = true, link = documentPath };
+            return Json(jsonData);
+        }
         [HttpPost]
         public async Task<JsonResult> excel()
         {
