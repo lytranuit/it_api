@@ -87,5 +87,9 @@ namespace Info.Models
         public decimal? tyle_bhtn_cty { get; set; }
         public decimal? tyle_dpcd_cty { get; set; }
 
+        public bool? is_bhxh { get; set; }
+
+        public bool? is_thue { get; set; }
+
     }
 }
