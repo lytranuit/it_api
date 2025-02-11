@@ -142,6 +142,7 @@ namespace it_template.Areas.Info.Controllers
             int skip = start != null ? Convert.ToInt32(start) : 0;
             var customerData = _context.PersonnelModel.Where(d => (d.NGAYNGHIVIEC == null || d.NGAYNGHIVIEC > date_from));
 
+            var sort_MANV = Request.Form["sorts[MANV]"].FirstOrDefault();
 
             /// CHECK PHAN QUYEN
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
@@ -199,8 +200,24 @@ namespace it_template.Areas.Info.Controllers
                 var NV_phep_in_day = _context.ChamcongModel.Where(d => d.value_new != "X" && d.value_new != "" && d.date == DateTime.Now.Date).Select(d => d.MANV).Distinct().ToList();
                 customerData = customerData.Where(d => NV_phep_in_day.Contains(d.MANV));
             }
+
             int recordsFiltered = customerData.Count();
-            var datapost = customerData.OrderByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV).ToList();
+            if (sort_MANV != null)
+            {
+                if (sort_MANV == "1")
+                {
+                    customerData = customerData.OrderBy(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV);
+                }
+                else if (sort_MANV == "-1")
+                {
+                    customerData = customerData.OrderByDescending(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV);
+                }
+            }
+            else
+            {
+                customerData = customerData.OrderByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV);
+            }
+            var datapost = customerData.ToList();
 
 
             if (status != 1)
@@ -243,6 +260,9 @@ namespace it_template.Areas.Info.Controllers
             var department = Request.Form["filters[department]"].FirstOrDefault();
             var date_from_string = Request.Form["filters[date_from]"].FirstOrDefault();
             var date_to_string = Request.Form["filters[date_to]"].FirstOrDefault();
+
+            var sort_MANV = Request.Form["sorts[MANV]"].FirstOrDefault();
+
             DateTime date_from = date_from_string != null ? date_from = DateTime.ParseExact(date_from_string, "yyyy-MM-dd",
                                            System.Globalization.CultureInfo.InvariantCulture) : date_from = DateTime.Now;
             DateTime date_to = date_to_string != null ? date_to = DateTime.ParseExact(date_to_string, "yyyy-MM-dd",
@@ -327,6 +347,17 @@ namespace it_template.Areas.Info.Controllers
             ////Nhân viên chính thức / thử việc / học việc
 
             var datapost = datapost_all.Where(d => d.LOAIHD != "DV" && user_shift.Contains(d.id)).OrderByDescending(d => d.NGAYNHANVIEC).ToList();
+            if (sort_MANV != null)
+            {
+                if (sort_MANV == "1")
+                {
+                    datapost = datapost.OrderBy(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+                }
+                else if (sort_MANV == "-1")
+                {
+                    datapost = datapost.OrderByDescending(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+                }
+            }
             if (datapost.Count > 0)
             {
                 Worksheet sheet = workbook.Worksheets[0];
@@ -537,6 +568,17 @@ namespace it_template.Areas.Info.Controllers
             ////Nhân viên DV
 
             datapost = datapost_all.Where(d => d.LOAIHD == "DV" && user_shift.Contains(d.id)).OrderByDescending(d => d.NGAYNHANVIEC).ToList();
+            if (sort_MANV != null)
+            {
+                if (sort_MANV == "1")
+                {
+                    datapost = datapost.OrderBy(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+                }
+                else if (sort_MANV == "-1")
+                {
+                    datapost = datapost.OrderByDescending(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+                }
+            }
             if (datapost.Count > 0)
             {
                 Worksheet sheet = workbook.Worksheets[1];
@@ -958,6 +1000,17 @@ namespace it_template.Areas.Info.Controllers
 
             ////Nhân viên vệ sinh bảo vệ
             datapost = datapost_all.Where(d => user_shift_vs.Contains(d.id)).OrderByDescending(d => d.NGAYNHANVIEC).ToList();
+            if (sort_MANV != null)
+            {
+                if (sort_MANV == "1")
+                {
+                    datapost = datapost.OrderBy(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+                }
+                else if (sort_MANV == "-1")
+                {
+                    datapost = datapost.OrderByDescending(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+                }
+            }
             if (datapost.Count > 0)
             {
                 Worksheet sheet = workbook.Worksheets["Vệ sinh-Bảo vệ-T7"];
@@ -1171,6 +1224,17 @@ namespace it_template.Areas.Info.Controllers
             }
             ////Nhân viên Full 
             datapost = datapost_all.Where(d => user_shift_full.Contains(d.id)).OrderByDescending(d => d.NGAYNHANVIEC).ToList();
+            if (sort_MANV != null)
+            {
+                if (sort_MANV == "1")
+                {
+                    datapost = datapost.OrderBy(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+                }
+                else if (sort_MANV == "-1")
+                {
+                    datapost = datapost.OrderByDescending(d => d.HOVATEN).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+                }
+            }
             if (datapost.Count > 0)
             {
                 Worksheet sheet = workbook.Worksheets["Full công"];

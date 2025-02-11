@@ -29,6 +29,8 @@ namespace Info.Models
         public DateTime? NGAYNHANVIEC { get; set; }
         public DateTime? NGAYHOCVIEC { get; set; }
         public DateTime? NGAYTHUVIEC { get; set; }
+        public DateTime? NGAYKTHOCVIEC { get; set; }
+        public DateTime? NGAYKTTHUVIEC { get; set; }
         public DateTime? NGAYKYHD { get; set; }
         public DateTime? NGAYKTHD { get; set; }
         public string? SOCCCD { get; set; }

@@ -9,12 +9,17 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NodaTime.TimeZones.Cldr;
 using Spire.Doc;
+using Spire.Doc.Documents;
+using Spire.Doc.Reporting;
 using Spire.Xls;
+using System.Collections;
 using System.Data;
 using System.Drawing;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Vue.Data;
 using Vue.Models;
 using Vue.Services;
@@ -156,6 +161,7 @@ namespace it_template.Areas.Info.Controllers
             var MATRINHDO = Request.Form["filters[MATRINHDO]"].FirstOrDefault();
             var CHUYENMON = Request.Form["filters[CHUYENMON]"].FirstOrDefault();
             var BOPHAN = Request.Form["filters[BOPHAN]"].FirstOrDefault();
+            var EMAIL = Request.Form["filters[EMAIL]"].FirstOrDefault();
             var id = Request.Form["filters[id]"].FirstOrDefault();
             //var tenhh = Request.Form["filters[tenhh]"].FirstOrDefault();
             int skip = start != null ? Convert.ToInt32(start) : 0;
@@ -168,6 +174,10 @@ namespace it_template.Areas.Info.Controllers
             if (MANV != null && MANV != "")
             {
                 customerData = customerData.Where(d => d.MANV.Contains(MANV));
+            }
+            if (EMAIL != null && EMAIL != "")
+            {
+                customerData = customerData.Where(d => d.EMAIL.Contains(EMAIL));
             }
             if (HOVATEN != null && HOVATEN != "")
             {
@@ -466,14 +476,7 @@ namespace it_template.Areas.Info.Controllers
                 { "NGAYCAPCCCD",Model.NGAYCAPCCCD != null ? Model.NGAYCAPCCCD.Value.ToString("dd/MM/yyyy") :" " },
                 { "NOICAPCCCD",Model.NOICAPCCCD },
                 { "CHUYENMON",chuyenmon != null ? chuyenmon.TENCHUYENMON : " " },
-                { "NGAYNHANVIEC",Model.NGAYNHANVIEC != null ? Model.NGAYNHANVIEC.Value.ToString("dd/MM/yyyy") : " " },
-
-                { "NGAYHOCVIEC",Model.NGAYHOCVIEC != null ? Model.NGAYHOCVIEC.Value.ToString("dd/MM/yyyy") : " " },
-                { "NGAYTHUVIEC",Model.NGAYTHUVIEC != null ? Model.NGAYTHUVIEC.Value.ToString("dd/MM/yyyy") : " " },
-
-                { "NGAYKTHOCVIEC",Model.NGAYHOCVIEC != null ? Model.NGAYHOCVIEC.Value.AddMonths(2).AddDays(-1).ToString("dd/MM/yyyy") : " " },
-                { "NGAYKTTHUVIEC",Model.NGAYTHUVIEC != null ? Model.NGAYTHUVIEC.Value.AddMonths(2).AddDays(-1).ToString("dd/MM/yyyy") : " " },
-
+                { "NGAYNHANVIEC",Model.NGAYNHANVIEC != null ? Model.NGAYNHANVIEC.Value.ToString("dd/MM/yyyy") : " " }
             };
             //Creates Document instance
             Spire.Doc.Document document = new Spire.Doc.Document();
@@ -486,6 +489,109 @@ namespace it_template.Areas.Info.Controllers
 
             string[] MergeFieldNames = document.MailMerge.GetMergeFieldNames();
             string[] GroupNames = document.MailMerge.GetMergeGroupNames();
+
+
+
+            List<DictionaryEntry> relationsList = new List<DictionaryEntry>();
+            if (Model.NGAYHOCVIEC != null)
+            {
+                relationsList.Add(new DictionaryEntry("hocviec", string.Empty));
+            }
+            if (Model.NGAYTHUVIEC != null)
+            {
+                relationsList.Add(new DictionaryEntry("thuviec", string.Empty));
+            }
+            //relationsList.Add(new DictionaryEntry("fres", string.Empty));
+            //relationsList.Add(new DictionaryEntry("targets", "parent = %fres.key%"));
+            //relationsList.Add(new DictionaryEntry("locations", "parent = %locations.key%"));
+
+            MailMergeDataSet mailMergeDataSet = new MailMergeDataSet();
+            if (Model.NGAYHOCVIEC != null)
+            {
+                var hocviec = new List<dynamic>()
+                {
+                    new {
+                        NGAYHOCVIEC = Model.NGAYHOCVIEC != null ? Model.NGAYHOCVIEC.Value.ToString("dd/MM/yyyy") : " " ,
+                        NGAYKTHOCVIEC = Model.NGAYKTHOCVIEC != null ? Model.NGAYKTHOCVIEC.Value.ToString("dd/MM/yyyy") : " "
+                    }
+                };
+                mailMergeDataSet.Add(new MailMergeDataTable("hocviec", hocviec));
+            }
+            else
+            {
+                Body body = document.Sections[0].Body;
+                bool insideGroup = false;
+                List<Paragraph> paragraphsToRemove = new List<Paragraph>();
+
+                foreach (Paragraph para in body.Paragraphs)
+                {
+                    if (para.Text.Contains("GroupStart:hocviec"))
+                    {
+                        insideGroup = true;
+                    }
+
+                    if (insideGroup)
+                    {
+                        paragraphsToRemove.Add(para);
+                    }
+
+                    if (para.Text.Contains("GroupEnd:hocviec"))
+                    {
+                        break;
+                    }
+                }
+
+                // Xóa các đoạn văn bản trong nhóm
+                foreach (Paragraph para in paragraphsToRemove)
+                {
+                    body.Paragraphs.Remove(para);
+                }
+            }
+            if (Model.NGAYTHUVIEC != null)
+            {
+                var thuviec = new List<dynamic>()
+                {
+                    new {
+                        NGAYTHUVIEC = Model.NGAYTHUVIEC != null ? Model.NGAYTHUVIEC.Value.ToString("dd/MM/yyyy") : " " ,
+                        NGAYKTTHUVIEC = Model.NGAYKTTHUVIEC != null ? Model.NGAYKTTHUVIEC.Value.ToString("dd/MM/yyyy") : " "
+                    }
+                };
+                mailMergeDataSet.Add(new MailMergeDataTable("thuviec", thuviec));
+            }
+            else
+            {
+                Body body = document.Sections[0].Body;
+                bool insideGroup = false;
+                List<Paragraph> paragraphsToRemove = new List<Paragraph>();
+
+                foreach (Paragraph para in body.Paragraphs)
+                {
+                    if (para.Text.Contains("GroupStart:thuviec"))
+                    {
+                        insideGroup = true;
+                    }
+
+                    if (insideGroup)
+                    {
+                        paragraphsToRemove.Add(para);
+                    }
+
+                    if (para.Text.Contains("GroupEnd:thuviec"))
+                    {
+                        break;
+                    }
+                }
+
+                // Xóa các đoạn văn bản trong nhóm
+                foreach (Paragraph para in paragraphsToRemove)
+                {
+                    body.Paragraphs.Remove(para);
+                }
+            }
+
+
+            document.MailMerge.ExecuteWidthNestedRegion(mailMergeDataSet, relationsList);
+
 
             document.MailMerge.Execute(fieldName, fieldValue);
 
@@ -582,15 +688,15 @@ namespace it_template.Areas.Info.Controllers
             foreach (var record in datapost)
             {
                 var nRow = sheet.Rows[start_r];
-                nRow.Cells[0].Value = record.MANV;
-                nRow.Cells[1].Value = record.HOVATEN;
-                nRow.Cells[2].Value = record.bophan.TENPHONG;
-                nRow.Cells[3].Value = record.chucvu.TENCHUCVU;
+                nRow.Cells[0].Value = record.MANV.Trim();
+                nRow.Cells[1].Value = record.HOVATEN.Trim();
+                nRow.Cells[2].Value = record.bophan.TENPHONG.Trim();
+                nRow.Cells[3].Value = record.chucvu.TENCHUCVU.Trim();
                 nRow.Cells[4].Value = record.GIOITINH;
                 nRow.Cells[5].Value = record.MATRINHDO;
                 nRow.Cells[6].Value = record.CHUYENMON;
                 nRow.Cells[7].Value = record.DIENTHOAI;
-                nRow.Cells[8].Value = record.EMAIL;
+                nRow.Cells[8].Value = record.EMAIL.Trim();
                 if (record.NGAYSINH != null)
                 {
                     nRow.Cells[9].DateTimeValue = record.NGAYSINH.Value;

@@ -35,6 +35,8 @@ namespace Vue.Data
         public DbSet<Info.Models.NganhangModel> NganhangModel { get; set; }
         public DbSet<Info.Models.TrinhdoModel> TrinhdoModel { get; set; }
         public DbSet<Info.Models.LoaiHDModel> LoaiHDModel { get; set; }
+        public DbSet<Info.Models.MeetingModel> MeetingModel { get; set; }
+        public DbSet<Info.Models.PhonghopModel> PhonghopModel { get; set; }
 
         public DbSet<Info.Models.ShiftModel> ShiftModel { get; set; }
         public DbSet<Info.Models.ShiftHolidayModel> ShiftHolidayModel { get; set; }

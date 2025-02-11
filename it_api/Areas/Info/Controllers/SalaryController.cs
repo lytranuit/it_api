@@ -234,7 +234,7 @@ namespace it_template.Areas.Info.Controllers
                         var luongkpi = record.tien_luong_kpi ?? 0;
                         var TNCN_banthan = 11000000;
                         var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
-                        var tamungdot1 = record.tien_luong_dot1 ?? 0;
+                        var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
                         var note_khoantru = person.note_khoantru;
@@ -325,7 +325,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
                         {
                             nRow.Cells[34].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
@@ -416,7 +416,6 @@ namespace it_template.Areas.Info.Controllers
 
 
                         _context.Update(person);
-                        _context.SaveChanges();
                         start_r++;
                     }
 
@@ -433,6 +432,9 @@ namespace it_template.Areas.Info.Controllers
                 //sheet.DeleteRow(12, 1);
                 sheet.DeleteRow(start_r, 3);
                 sheet.CalculateAllValue();
+
+
+                _context.SaveChanges();
             }
 
 
@@ -517,7 +519,7 @@ namespace it_template.Areas.Info.Controllers
                         var luongkpi = record.tien_luong_kpi ?? 0;
                         var TNCN_banthan = 11000000;
                         var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
-                        var tamungdot1 = record.tien_luong_dot1 ?? 0;
+                        var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
                         var note_khoantru = person.note_khoantru;
@@ -608,7 +610,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
                         {
                             nRow.Cells[34].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
@@ -715,7 +717,7 @@ namespace it_template.Areas.Info.Controllers
                         var luongkpi = record.tien_luong_kpi ?? 0;
                         var TNCN_banthan = 11000000;
                         var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
-                        var tamungdot1 = record.tien_luong_dot1 ?? 0;
+                        var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
                         var note_khoantru = person.note_khoantru;
@@ -806,7 +808,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
                         {
                             nRow.Cells[34].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
@@ -916,7 +918,7 @@ namespace it_template.Areas.Info.Controllers
                         var luongkpi = record.tien_luong_kpi ?? 0;
                         var TNCN_banthan = 11000000;
                         var TNCN_nguoiphuthuoc = record.nguoiphuthuoc ?? 0;
-                        var tamungdot1 = record.tien_luong_dot1 ?? 0;
+                        var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
                         var note_khoantru = person.note_khoantru;
@@ -1007,7 +1009,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 > 0 && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
                         {
                             nRow.Cells[34].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
@@ -1178,12 +1180,12 @@ namespace it_template.Areas.Info.Controllers
             var PositionModel = _context.PositionModel.ToList();
             var DepartmentModel = _context.DepartmentModel.ToList();
 
-            var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
+            var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id && d.tinhtrangNV != "Dịch vụ").ToList();
             var Users = SalaryUserModel.Select(d => d.person_id).ToList();
             var Model = _context.SalaryModel.Where(d => d.id == id).FirstOrDefault();
             var date_from = Model.date_from.Value;
             var date_to = Model.date_to.Value;
-            var data_post = _context.PersonnelModel.Where(d => Users.Contains(d.id) && d.is_bhxh == true).ToList();
+            var data_post = _context.PersonnelModel.Where(d => Users.Contains(d.id)).ToList();
 
 
 
@@ -1253,7 +1255,7 @@ namespace it_template.Areas.Info.Controllers
                         var luongcb = person.luongcb ?? 0;
 
                         var pc_xangxe = person.tc_xangxe ?? 0;
-                        var pc_trachnhiem = person.tc_hieusuat ?? 0;
+                        var pc_trachnhiem = person.tc_chucvu ?? 0;
                         var pc_thuebang = person.tc_thuebang ?? 0;
                         var pc_khuvuc = person.tc_khuvuc ?? 0;
                         var pc_thamnien = person.tc_thamnien ?? 0;
@@ -1265,8 +1267,7 @@ namespace it_template.Areas.Info.Controllers
                         var tong_thunhap = person.tongthunhap ?? 0;
                         var luongkpi = person.luongkpi ?? 0;
                         var TNCN_banthan = 11000000;
-
-                        var TNCN_nguoiphuthuoc = person.tncn_nguoiphuthuoc ?? 0;
+                        var TNCN_nguoiphuthuoc = person.tncn_songuoiphuthuoc ?? 0;
                         var tamungdot1 = person.tamungdot1 ?? 0;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
@@ -1360,7 +1361,7 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 > 0 && tamungdot1 < (decimal)nRow.Cells[33].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < (decimal)nRow.Cells[33].FormulaNumberValue)
                         {
                             nRow.Cells[34].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
@@ -1451,7 +1452,7 @@ namespace it_template.Areas.Info.Controllers
                         var luongcb = person.luongcb ?? 0;
 
                         var pc_xangxe = person.tc_xangxe ?? 0;
-                        var pc_trachnhiem = person.tc_hieusuat ?? 0;
+                        var pc_trachnhiem = person.tc_chucvu ?? 0;
                         var pc_thuebang = person.tc_thuebang ?? 0;
                         var pc_khuvuc = person.tc_khuvuc ?? 0;
                         var pc_thamnien = person.tc_thamnien ?? 0;
@@ -1464,7 +1465,7 @@ namespace it_template.Areas.Info.Controllers
                         var luongkpi = person.luongkpi ?? 0;
                         var TNCN_banthan = 11000000;
 
-                        var TNCN_nguoiphuthuoc = person.tncn_nguoiphuthuoc ?? 0;
+                        var TNCN_nguoiphuthuoc = person.tncn_songuoiphuthuoc ?? 0;
                         var tamungdot1 = person.tamungdot1 ?? 0;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
@@ -1525,11 +1526,11 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[22].Formula = "=ROUND(U" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        //if (tamungdot1 > 0 && tamungdot1 < (decimal) nRow.Cells[24].FormulaNumberValue)
-                        //{
-                        //    nRow.Cells[25].NumberValue = (double)tamungdot1;
-                        //    sheet.CalculateAllValue();  
-                        //}
+                        if (tamungdot1 != null && tamungdot1 < (decimal)nRow.Cells[24].FormulaNumberValue)
+                        {
+                            nRow.Cells[25].NumberValue = (double)tamungdot1;
+                            sheet.CalculateAllValue();
+                        }
                         nRow.Cells[27].Value = stk;
 
                         start_r++;
@@ -1549,7 +1550,204 @@ namespace it_template.Areas.Info.Controllers
                 sheet.DeleteRow(start_r, 3);
                 sheet.CalculateAllValue();
             }
+            if (data_post.Count() > 0)
+            {
+                //var list_data_cong = list_data_cong_all.Where(d => d.ContainsKey("MANV") && list_chinhthuc.Contains(d["MANV"])).ToList();
 
+                var list_bophan1 = data_post.GroupBy(d => d.MAPHONG).Select(d => new
+                {
+                    bophan = DepartmentModel.Where(e => e.MAPHONG == d.Key).FirstOrDefault(),
+                    data = d.Select(e =>
+                    {
+                        var chucvu = PositionModel.Where(f => f.MACHUCVU == e.MACHUCVU).FirstOrDefault();
+                        e.chucvu = chucvu;
+                        return e;
+                    }).OrderBy(d => d.chucvu.sort).ThenBy(d => d.MACHUCVU).ThenBy(d => d.MANV).ToList(),
+
+                }).OrderBy(d => d.bophan.sort).ThenBy(d => d.bophan.MAPHONG).ToList();
+
+
+                Worksheet sheet = workbook.Worksheets[2];
+                var now = DateTime.Now;
+                var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
+                sheet.Range["D6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
+                sheet.Range["P17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
+                int stt = 0;
+                int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
+                foreach (var bophan1 in list_bophan1)
+                {
+                    int insertRowIndex = 14; // Dòng nơi bạn muốn chèn ba dòng mới
+
+                    // Chèn ba dòng mới tại vị trí insertRowIndex
+                    sheet.InsertRow(insertRowIndex);
+                    sheet.InsertRow(insertRowIndex + 1);
+                    sheet.InsertRow(insertRowIndex + 2);
+
+                    // Sao chép định dạng từ sourceRowIndex sang ba dòng mới
+                    sheet.Rows[sourceRowIndex].Copy(sheet.Rows[insertRowIndex], CopyRangeOptions.All);
+                    sheet.Rows[sourceRowIndex + 1].Copy(sheet.Rows[insertRowIndex + 1], CopyRangeOptions.All);
+                    sheet.Rows[sourceRowIndex + 2].Copy(sheet.Rows[insertRowIndex + 2], CopyRangeOptions.All);
+
+                }
+
+                sheet.DeleteRow(14, 1);
+                var start_r = 11;
+                foreach (var bophan1 in list_bophan1)
+                {
+                    var bophan = bophan1.bophan;
+                    sheet.Range["A" + start_r].Value = bophan.TENPHONG;
+                    start_r++;
+                    var first_row = start_r;
+                    sheet.InsertRow(start_r + 1, bophan1.data.Count(), InsertOptionsType.FormatAsAfter);
+                    var data = bophan1.data;
+
+                    foreach (var record in data)
+                    {
+                        var person = SalaryUserModel.Where(d => d.person_id == record.id).FirstOrDefault();
+                        var chucvu = record.chucvu;
+
+                        var congtrongthang = person.ngaycongchuan;
+                        var congthucte = person.ngaycongthucte;
+                        var tenchucvu = person.CHUCVU;
+                        var phanloai = person.BOPHAN;
+                        var manv = person.MANV;
+                        var hovaten = person.HOVATEN;
+                        var email = person.email;
+                        var luongcb = person.luongcb ?? 0;
+
+                        var pc_xangxe = person.tc_xangxe ?? 0;
+                        var pc_trachnhiem = person.tc_chucvu ?? 0;
+                        var pc_thuebang = person.tc_thuebang ?? 0;
+                        var pc_khuvuc = person.tc_khuvuc ?? 0;
+                        var pc_thamnien = person.tc_thamnien ?? 0;
+                        var pc_hieusuat = person.tc_hieusuat ?? 0;
+                        var pc_thuhut = person.tc_thuhut ?? 0;
+                        var pc_khac = person.tc_khac ?? 0;
+                        //var to = person.tc_khac ?? 0;
+
+                        var tong_thunhap = person.tongthunhap ?? 0;
+                        var luongkpi = person.luongkpi ?? 0;
+                        var TNCN_banthan = 11000000;
+
+                        var TNCN_nguoiphuthuoc = person.tncn_nguoiphuthuoc ?? 0;
+                        var tamungdot1 = person.tamungdot1 ?? 0;
+                        var khoantru = person.khoantru ?? 0;
+                        var khoancong = person.khoancong ?? 0;
+                        var note_khoantru = person.note_khoantru;
+                        var note_khoancong = person.note_khoancong;
+                        var note = person.note;
+                        var is_bhxh = person.is_bhxh;
+                        var is_thue = person.is_thue;
+                        var tyle_bhxh = person.tyle_bhxh ?? 0;
+                        var tyle_bhyt = person.tyle_bhyt ?? 0;
+                        var tyle_bhtn = person.tyle_bhtn ?? 0;
+                        var tyle_dpcd = person.tyle_dpcd ?? 0;
+
+
+                        var tyle_bhxh_cty = person.tyle_bhxh_cty ?? 0;
+                        var tyle_bhyt_cty = person.tyle_bhyt_cty ?? 0;
+                        var tyle_bhtn_cty = person.tyle_bhtn_cty ?? 0;
+                        var tyle_dpcd_cty = person.tyle_dpcd_cty ?? 0;
+                        var thunhaptinhthue = person.thunhaptinhthue;
+
+                        var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
+                        var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
+
+                        var tinhtrangNV = person.tinhtrangNV;
+
+                        var nRow = sheet.Rows[start_r];
+
+                        if (tinhtrangNV == "Dịch vụ")
+                        {
+                            //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
+
+                            TNCN_banthan = 0; //// Không giảm trừ
+                            TNCN_nguoiphuthuoc = 0; // Không giảm trừ
+                                                    //tyle = 0;
+                                                    //tyle_dpcd = 0;
+                            nRow.Cells[30].Formula = "=ROUND(AD" + (start_r + 1) + " * 10%, 0)";
+
+                            //nRow.Cells[7].Value2 = "";
+                        }
+                        if (is_bhxh != true)
+                        {
+                            tyle_bhxh = 0;
+                            tyle_bhyt = 0;
+                            tyle_bhtn = 0;
+
+                            tyle_bhxh_cty = 0;
+                            tyle_bhyt_cty = 0;
+                            tyle_bhtn_cty = 0;
+
+                            tyle = 0;
+                            tyle_dpcd = 0;
+                            tyle_dpcd_cty = 0;
+                            //nRow.Cells[7].ClearAll(); // không đóng bảo hiểm
+                        }
+                        if (is_thue != true)
+                        {
+                            nRow.Cells[30].ClearAll(); // không đóng thuế TNCN
+                        }
+
+                        nRow.Cells[0].NumberValue = ++stt;
+                        nRow.Cells[1].Value = manv;
+                        nRow.Cells[2].Value = hovaten;
+                        nRow.Cells[3].Value = tenchucvu;
+                        nRow.Cells[4].Value = phanloai;
+                        nRow.Cells[5].NumberValue = (double)congtrongthang;
+                        //nRow.Cells[6].NumberValue = (double)luongcb
+
+                        //nRow.Cells[7].NumberValue = (double)pc_hieusuat;
+                        //nRow.Cells[8].NumberValue = (double)pc_thuebang;
+                        //nRow.Cells[9].NumberValue = (double)pc_xangxe;
+                        //nRow.Cells[10].NumberValue = (double)pc_thamnien;
+                        //nRow.Cells[11].NumberValue = (double)pc_thuhut;
+                        //nRow.Cells[12].NumberValue = (double)pc_khuvuc;
+                        //nRow.Cells[13].NumberValue = (double)pc_trachnhiem;
+                        //nRow.Cells[14].NumberValue = (double)pc_khac;
+
+                        nRow.Cells[6].NumberValue = (double)luongkpi;
+                        nRow.Cells[7].NumberValue = (double)congthucte;
+                        nRow.Cells[8].NumberValue = (double)khoancong;
+                        nRow.Cells[14].NumberValue = (double)thunhaptinhthue;
+                        //nRow.Cells[25].NumberValue = (double)TNCN_banthan;
+                        //nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[16].NumberValue = (double)khoantru;
+                        if (note_khoancong != null)
+                            nRow.Cells[8].AddComment().Text = note_khoancong;
+                        if (note_khoantru != null)
+                            nRow.Cells[16].AddComment().Text = note_khoantru;
+                        //if (note != null)
+                        //    nRow.Cells[20].AddComment().Text = note;
+
+
+                        nRow.Cells[18].Formula = "='Tổng'!AI" + (start_r) + " - 'Lương cơ bản'!Z" + (start_r); ///tạm ứng đợt 1
+
+                        sheet.CalculateAllValue();
+                        //if (tamungdot1 != null && tamungdot1 < (decimal)nRow.Cells[33].FormulaNumberValue)
+                        //{
+                        //    nRow.Cells[34].NumberValue = (double)tamungdot1;
+                        //    sheet.CalculateAllValue();
+                        //}
+                        nRow.Cells[22].Value = stk;
+
+                        start_r++;
+                    }
+
+                    sheet.DeleteRow(first_row, 1);
+                    sheet.DeleteRow(start_r, 1);
+
+                    //CellRange originDataRang = sheet.Range[$"A{(list_data_cong.Count() + 12)}:AZ{(list_data_cong.Count() + 12)}"];
+                    //CellRange targetDataRang = sheet.Range["A" + start_r + ":AZ" + start_r];
+                    //sheet.Copy(originDataRang, targetDataRang, true);
+
+                }
+
+                //sheet.InsertDataTable(dt, false, 13, 1);
+                //sheet.DeleteRow(12, 1);
+                sheet.DeleteRow(start_r, 3);
+                sheet.CalculateAllValue();
+            }
 
             workbook.SaveToFile(_configuration["Source:Path_Private"] + documentPath.Replace("/private", "").Replace("/", "\\"), ExcelVersion.Version2013);
 

@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = null;
+}
+<center>
+    <table width="100%">
+        <tbody>
+            <tr>
+                <td>
+                    <div>
+                        <div style="box-sizing:border-box;margin:0;padding:0 40px">
+                            <h2 style="text-align:left">📢 Xin chào</h2>
+                            <p style="text-align:left">Có một buổi họp/sự kiện tại phòng  <b>@Model.data.phong_hop</b>.</p>
+                            <p style="text-align:left">
+                            <p>
+                                🔹 Tiêu đề: @Model.data.name
+                            </p>
+                            <p>
+                                🔹 Thời gian: @Model.data.date_from.ToString("HH:mm") - @Model.data.date_to.ToString("HH:mm"), ngày @Model.data.date_from.ToString("dd/MM/yy")
+                            </p>
+                            <p>
+                                🔹 Địa điểm: @Model.data.phong_hop
+                            </p>
+                            <p>
+                                🔹 Ghi chú: @Model.data.ghichu
+                            </p>
+                          
+                            <p>Hoặc bạn có thể xem chi tiết ở link dưới:</p>
+                            <p style="text-align:left;">
+                                <a href="@Model.link" style="padding: 10px 30px;
+                                    display:inline-block;
+                                    background: #ffb009;
+                                    color: white;
+                                    text-decoration: none;
+                                    font-size: 13px;
+                                    border-radius: 5px;">
+                                    Đi Đến
+                                </a>
+                            </p>
+                            <p style="text-align:left">Trân trọng.</p>
+                            <p style="text-align:left">ASTA</p>
+                            <br>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</center>

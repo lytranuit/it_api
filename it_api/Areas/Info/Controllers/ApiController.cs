@@ -28,6 +28,15 @@ namespace it_template.Areas.Info.Controllers
             UserManager = UserMgr;
         }
 
+        public async Task<JsonResult> Phonghop()
+        {
+            var All = _context.PhonghopModel.ToList();
+            //var jsonData = new { data = ProcessModel };
+            return Json(All, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
         public async Task<JsonResult> category()
         {
             var All = _context.CategoryModel.Where(d => d.deleted_at == null).ToList();
