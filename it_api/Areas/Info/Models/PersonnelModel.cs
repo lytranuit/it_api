@@ -111,6 +111,12 @@ namespace Info.Models
         public PositionModel chucvu { get; set; }
         [NotMapped]
         public PhongModel bophan { get; set; }
+        [NotMapped]
+        public TrinhdoModel TRINHDO { get; set; }
+        [NotMapped]
+        public ChuyenmonModel CHUYENMON_Model { get; set; }
+        [NotMapped]
+        public TinhModel TinhModel { get; set; }
 
 
         public string NormalizeName

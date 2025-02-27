@@ -66,6 +66,8 @@ namespace it_template.Areas.Info.Controllers
         [HttpPost]
         public async Task<JsonResult> Save(MeetingModel MeetingModel)
         {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await UserManager.GetUserAsync(currentUser);
             var properties = typeof(MeetingModel).GetProperties().Where(prop => prop.CanRead && prop.CanWrite && prop.PropertyType == typeof(DateTime?));
 
             foreach (var prop in properties)
@@ -88,8 +90,6 @@ namespace it_template.Areas.Info.Controllers
             }
             else
             {
-                System.Security.Claims.ClaimsPrincipal currentUser = this.User;
-                var user = await UserManager.GetUserAsync(currentUser);
                 MeetingModel.created_at = DateTime.Now;
                 MeetingModel.created_by = user.Id;
                 _context.Add(MeetingModel);
@@ -110,7 +110,8 @@ namespace it_template.Areas.Info.Controllers
             {
                 link_logo = Domain + "/images/clientlogo_astahealthcare.com_f1800.png",
                 link = _configuration["Application:Info:link"] + "Meeting",
-                data = MeetingModel
+                data = MeetingModel,
+                user = user.FullName
             });
             var email = new EmailModel
             {

@@ -396,7 +396,7 @@ namespace it_template.Areas.Info.Controllers
                     dr1["stt"] = (++stt);
                     dr1["HOVATEN"] = record.HOVATEN;
                     DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
-                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNGHIVIEC.Value.Date : null;
                     //decimal tong = 0;
 
                     //dr1["tong"] = tong;
@@ -615,7 +615,7 @@ namespace it_template.Areas.Info.Controllers
                     dr1["stt"] = (++stt);
                     dr1["HOVATEN"] = record.HOVATEN;
                     DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
-                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNGHIVIEC.Value.Date : null;
                     //decimal tong = 0;
 
                     //dr1["tong"] = tong;
@@ -822,7 +822,7 @@ namespace it_template.Areas.Info.Controllers
                         dr1["stt"] = (++stt);
                         dr1["HOVATEN"] = record.HOVATEN;
                         DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
-                        DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                        DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNGHIVIEC.Value.Date : null;
                         //decimal tong = 0;
 
                         //dr1["tong"] = tong;
@@ -840,7 +840,7 @@ namespace it_template.Areas.Info.Controllers
                             {
 
                             }
-                            else if (ngaynghiviec != null && ngaynghiviec < date_check)
+                            else if (ngaynghiviec != null && ngaynghiviec <= date_check)
                             {
 
                             }
@@ -1047,7 +1047,7 @@ namespace it_template.Areas.Info.Controllers
                     dr1["stt"] = (++stt);
                     dr1["HOVATEN"] = record.HOVATEN;
                     DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
-                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNGHIVIEC.Value.Date : null;
                     //decimal tong = 0;
 
                     //dr1["tong"] = tong;
@@ -1271,7 +1271,7 @@ namespace it_template.Areas.Info.Controllers
                     dr1["stt"] = (++stt);
                     dr1["HOVATEN"] = record.HOVATEN;
                     DateTime? ngaynhanviec = record.NGAYNHANVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
-                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNHANVIEC.Value.Date : null;
+                    DateTime? ngaynghiviec = record.NGAYNGHIVIEC != null ? record.NGAYNGHIVIEC.Value.Date : null;
                     //decimal tong = 0;
 
                     //dr1["tong"] = tong;

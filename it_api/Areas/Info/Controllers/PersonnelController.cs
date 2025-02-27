@@ -674,12 +674,23 @@ namespace it_template.Areas.Info.Controllers
 
             var DepartmentModel = _context.DepartmentModel.ToList();
             var PositionModel = _context.PositionModel.ToList();
+            var TrinhdoModel = _context.TrinhdoModel.ToList();
+            var ChuyenmonModel = _context.ChuyenmonModel.ToList();
+            var TinhModel = _context.TinhModel.ToList();
             datapost = datapost.Select(d =>
             {
                 d.bophan = DepartmentModel.Where(e => e.MAPHONG == d.MAPHONG).FirstOrDefault();
                 d.chucvu = PositionModel.Where(e => e.MACHUCVU == d.MACHUCVU).FirstOrDefault();
+                d.TRINHDO = TrinhdoModel.Where(e => e.MATRINHDO == d.MATRINHDO).FirstOrDefault();
+                d.CHUYENMON_Model = ChuyenmonModel.Where(e => e.MACHUYENMON == d.CHUYENMON).FirstOrDefault();
+                d.TinhModel = TinhModel.Where(e => e.MaTinh == d.DIADIEM).FirstOrDefault();
                 return d;
-            }).OrderBy(d => d.bophan.sort).ThenBy(d => d.bophan.MAPHONG).ThenBy(d => d.chucvu.sort).ThenBy(d => d.chucvu.MACHUCVU).ThenByDescending(d => d.NGAYNHANVIEC).ToList();
+            }).OrderBy(d => d.bophan.sort)
+            .ThenBy(d => d.bophan.MAPHONG)
+            .ThenBy(d => d.chucvu.sort)
+            .ThenBy(d => d.chucvu.MACHUCVU)
+            .ThenByDescending(d => d.NGAYNHANVIEC)
+            .ToList();
 
             Worksheet sheet = workbook.Worksheets[0];
             int start_r = 1; // Dòng gốc để sao chép định dạng
@@ -693,8 +704,9 @@ namespace it_template.Areas.Info.Controllers
                 nRow.Cells[2].Value = record.bophan.TENPHONG.Trim();
                 nRow.Cells[3].Value = record.chucvu.TENCHUCVU.Trim();
                 nRow.Cells[4].Value = record.GIOITINH;
-                nRow.Cells[5].Value = record.MATRINHDO;
-                nRow.Cells[6].Value = record.CHUYENMON;
+                nRow.Cells[5].Value = record.TRINHDO != null ? record.TRINHDO.TENTRINHDO.Trim() : "";
+                nRow.Cells[6].Value = record.CHUYENMON_Model != null ? record.CHUYENMON_Model.TENCHUYENMON.Trim() : "";
+
                 nRow.Cells[7].Value = record.DIENTHOAI;
                 nRow.Cells[8].Value = record.EMAIL.Trim();
                 if (record.NGAYSINH != null)
@@ -713,7 +725,9 @@ namespace it_template.Areas.Info.Controllers
 
                 }
                 nRow.Cells[12].Value = record.MACC;
-                nRow.Cells[13].Value = record.tinhtrang;
+                nRow.Cells[13].Value = record.TinhModel != null ? record.TinhModel.TenTinh.Trim() : "";
+                nRow.Cells[14].Value = record.tinhtrang;
+                nRow.Cells[15].Value = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
                 start_r++;
             }
 

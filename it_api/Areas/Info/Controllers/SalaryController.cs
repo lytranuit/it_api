@@ -133,6 +133,7 @@ namespace it_template.Areas.Info.Controllers
             var SalaryUserModel = _context.SalaryUserModel.Where(d => d.salary_id == id).ToList();
             var PositionModel = _context.PositionModel.ToList();
             var DepartmentModel = _context.DepartmentModel.ToList();
+            var TinhModel = _context.TinhModel.ToList();
             var Users = SalaryUserModel.Select(d => d.person_id).ToList();
             var Model = _context.SalaryModel.Where(d => d.id == id).FirstOrDefault();
             var date_from = Model.date_from.Value;
@@ -210,12 +211,15 @@ namespace it_template.Areas.Info.Controllers
 
 
                         var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
+                        var DIADIEM = record.DIADIEM;
+                        var tinh = TinhModel.Where(d => d.MaTinh == DIADIEM).FirstOrDefault();
                         var chucvu = item["chucvu"];
 
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
                         var phanloai = bophan != null ? bophan.TENPHONG : "";
+                        var diachilamviec = tinh != null ? tinh.TenTinh : "";
                         var manv = record.MANV;
                         var hovaten = record.HOVATEN;
                         var email = record.EMAIL;
@@ -255,7 +259,6 @@ namespace it_template.Areas.Info.Controllers
 
                         var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
                         var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
-
                         var nRow = sheet.Rows[start_r];
 
                         if (record.LOAIHD == "DV")
@@ -331,6 +334,7 @@ namespace it_template.Areas.Info.Controllers
                             sheet.CalculateAllValue();
                         }
                         nRow.Cells[38].Value = stk;
+                        nRow.Cells[39].Value = diachilamviec;
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -495,12 +499,15 @@ namespace it_template.Areas.Info.Controllers
 
 
                         var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
+                        var DIADIEM = record.DIADIEM;
+                        var tinh = TinhModel.Where(d => d.MaTinh == DIADIEM).FirstOrDefault();
                         var chucvu = item["chucvu"];
 
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
                         var phanloai = bophan != null ? bophan.TENPHONG : "";
+                        var diachilamviec = tinh != null ? tinh.TenTinh : "";
                         var manv = record.MANV;
                         var hovaten = record.HOVATEN;
                         var email = record.EMAIL;
@@ -616,6 +623,7 @@ namespace it_template.Areas.Info.Controllers
                             sheet.CalculateAllValue();
                         }
                         nRow.Cells[38].Value = stk;
+                        nRow.Cells[39].Value = diachilamviec;
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -693,12 +701,15 @@ namespace it_template.Areas.Info.Controllers
 
 
                         var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
+                        var DIADIEM = record.DIADIEM;
+                        var tinh = TinhModel.Where(d => d.MaTinh == DIADIEM).FirstOrDefault();
                         var chucvu = item["chucvu"];
 
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
                         var phanloai = bophan != null ? bophan.TENPHONG : "";
+                        var diachilamviec = tinh != null ? tinh.TenTinh : "";
                         var manv = record.MANV;
                         var hovaten = record.HOVATEN;
                         var email = record.EMAIL;
@@ -814,6 +825,7 @@ namespace it_template.Areas.Info.Controllers
                             sheet.CalculateAllValue();
                         }
                         nRow.Cells[38].Value = stk;
+                        nRow.Cells[39].Value = diachilamviec;
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -894,12 +906,15 @@ namespace it_template.Areas.Info.Controllers
 
 
                         var record = data_post.Where(d => d.MANV == item["MANV"]).FirstOrDefault();
+                        var DIADIEM = record.DIADIEM;
+                        var tinh = TinhModel.Where(d => d.MaTinh == DIADIEM).FirstOrDefault();
                         var chucvu = item["chucvu"];
 
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
                         var phanloai = bophan != null ? bophan.TENPHONG : "";
+                        var diachilamviec = tinh != null ? tinh.TenTinh : "";
                         var manv = record.MANV;
                         var hovaten = record.HOVATEN;
                         var email = record.EMAIL;
@@ -1015,6 +1030,7 @@ namespace it_template.Areas.Info.Controllers
                             sheet.CalculateAllValue();
                         }
                         nRow.Cells[38].Value = stk;
+                        nRow.Cells[39].Value = diachilamviec;
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);

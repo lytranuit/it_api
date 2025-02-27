@@ -31,6 +31,10 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System.Net.Http.Headers;
 using System.ComponentModel.DataAnnotations;
+using CertificateManager.Models;
+using CertificateManager;
+using System.Security.Cryptography.X509Certificates;
+using NodaTime;
 
 namespace Vue.Controllers
 {
@@ -462,9 +466,11 @@ namespace Vue.Controllers
             {
                 var employees = await getPerson(maxResults, start);
                 totalMatches = employees.UserInfoSearch.totalMatches;
-
                 foreach (var employee in employees.UserInfoSearch.UserInfo)
                 {
+                    var is_enable = employee.Valid.enable;
+                    if (!is_enable)
+                        continue;
                     var name = employee.name;
                     var macc = employee.employeeNo;
                     var Normalize = NormalizeName(name);
@@ -542,7 +548,22 @@ namespace Vue.Controllers
                     var list = responseJson1.data.Select(d => d.email).ToList();
                     foreach (var item in list_email_update)
                     {
-                        if (list.Contains(item.EMAIL.ToLower()))
+                        var email = item.EMAIL.ToLower();
+                        var hovaten = item.HOVATEN;
+                        var user_person = "";
+                        string[] words = email.Split('@');
+                        var is_asta = false;
+                        if (words.Length > 1)
+                        {
+                            is_asta = words[1].Trim() == "astahealthcare.com" ? true : false;
+                            user_person = words[0];
+                        }
+
+                        if (!is_asta)
+                        {
+                            continue;
+                        }
+                        if (list.Contains(email))
                         {
                             continue;
                         }
@@ -553,7 +574,7 @@ namespace Vue.Controllers
                         // Thêm Authorization header
                         client1.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authToken1);
                         string generatedPassword = GenerateStrongPassword();
-                        string url1 = $"https://mail.astahealthcare.com:2083/execute/Email/add_pop?email={item.EMAIL.ToLower()}&password={generatedPassword}";
+                        string url1 = $"https://mail.astahealthcare.com:2083/execute/Email/add_pop?email={email}&password={generatedPassword}";
                         item.mk_email = generatedPassword;
                         HttpResponseMessage response1 = await client1.GetAsync(url1);
                         if (response1.IsSuccessStatusCode)
@@ -567,6 +588,33 @@ namespace Vue.Controllers
                             Console.WriteLine("Lỗi khi tạo tài khoản email:");
                             Console.WriteLine(await response1.Content.ReadAsStringAsync());
                         }
+
+                        /////Thêm vào esign
+                        UserModel user_esign = new UserModel
+                        {
+                            Email = user_person + "@astahealthcare.com",
+                            UserName = user_person + "@astahealthcare.com",
+                            EmailConfirmed = true,
+                            FullName = hovaten,
+                            image_sign = "/private/images/tick.png",
+                            image_url = "/private/images/user.webp",
+                        };
+                        user_esign.deleted_at = null;
+                        user_esign.LockoutEnd = null;
+
+                        _context.Add(user_esign);
+
+                        _context.SaveChanges();
+                        var user_role = new UserRoleModel
+                        {
+                            UserId = user_esign.Id,
+                            RoleId = "fa63ccaa-1f31-4d24-8344-20eca0410141"
+                        };
+                        _context.Add(user_role);
+                        _context.SaveChanges();
+
+                        CreatePfx(user_esign);
+
                     }
                 }
 
@@ -622,7 +670,9 @@ namespace Vue.Controllers
 
                     driver.FindElement(By.Id("email_table_menu_webmail_" + email)).Click();
 
+                    
 
+                    ////SỬA HỌ VÀ TÊN.
 
                     // Lưu lại cửa sổ hiện tại
                     string originalWindow = driver.CurrentWindowHandle;
@@ -687,10 +737,138 @@ namespace Vue.Controllers
 
                     // Quay lại cửa sổ ban đầu
                     driver.SwitchTo().Window(originalWindow);
+
+
+
+
+
+
                     person.is_email_update = false;
+
                     _nhansuContext.Update(person);
                     _nhansuContext.SaveChanges();
                 }
+
+
+                /////Add vào asta.all
+                var list_email = list_email_update.Select(d => d.EMAIL.ToLower()).ToList();
+                var current_url1 = driver.Url;
+                var uri1 = new Uri(current_url1);
+                var AbsolutePath = uri1.AbsolutePath.Split('/');
+                var cpress = AbsolutePath.Count() > 1 ? AbsolutePath[1] : "";
+                var desiredUrl1 = $"{uri1.Scheme}://{uri1.Host}:{uri1.Port}/{cpress}/frontend/jupiter/mail/lists.html";
+
+                driver.Navigate().GoToUrl(desiredUrl1);
+
+                System.Threading.Thread.Sleep(2000);
+                driver.FindElement(By.Id("datarow_asta_all_astahealthcare_com_manage_btn")).Click();
+                // Lưu lại cửa sổ hiện tại
+                var originalWindow1 = driver.CurrentWindowHandle;
+
+                // Chuyển sang cửa sổ mới
+                foreach (string window in driver.WindowHandles)
+                {
+                    if (window != originalWindow1)
+                    {
+                        driver.SwitchTo().Window(window);
+                        break;
+                    }
+                }
+                // Đợi cho đến khi trang mới tải hoàn toàn (nếu cần)
+                System.Threading.Thread.Sleep(2000);
+
+                current_url1 = driver.Url;
+                uri1 = new Uri(current_url1);
+                var AbsolutePath1 = uri1.AbsolutePath.Split('/');
+                var cpress1 = AbsolutePath1.Count() > 1 ? AbsolutePath1[1] : "";
+                desiredUrl1 = $"{uri1.Scheme}://{uri1.Host}:{uri1.Port}/{cpress1}/3rdparty/mailman/admin/asta.all_astahealthcare.com/members/add";
+
+                driver.Navigate().GoToUrl(desiredUrl1);
+
+                System.Threading.Thread.Sleep(2000);
+                driver.FindElement(By.Name("subscribees")).Clear();
+                driver.FindElement(By.Name("subscribees")).SendKeys(string.Join("\n", list_email));
+                driver.FindElement(By.Name("setmemberopts_btn")).Click();
+
+                System.Threading.Thread.Sleep(2000);
+                driver.Close();
+                driver.SwitchTo().Window(originalWindow1);
+
+
+
+
+                //////Add vào sharecontact
+                // Điều hướng đến một URL
+
+                Thread.Sleep(2000);
+                current_url1 = driver.Url;
+                uri1 = new Uri(current_url1);
+                AbsolutePath1 = uri1.AbsolutePath.Split('/');
+                cpress1 = AbsolutePath1.Count() > 1 ? AbsolutePath1[1] : "";
+                desiredUrl1 = $"{uri1.Scheme}://{uri1.Host}:{uri1.Port}/{cpress}/frontend/jupiter/email_accounts/index.html#/list";
+
+                driver.Navigate().GoToUrl(desiredUrl1);
+                Thread.Sleep(2000);
+
+
+                driver.FindElement(By.Id("email_table_search_input")).Clear();
+                driver.FindElement(By.Id("email_table_search_input")).SendKeys("sharecontact");
+
+                Thread.Sleep(2000);
+
+                driver.FindElement(By.Id("email_table_menu_webmail_sharecontact@astahealthcare.com")).Click();
+
+                // Lưu lại cửa sổ hiện tại
+                originalWindow1 = driver.CurrentWindowHandle;
+
+                // Chuyển sang cửa sổ mới
+                foreach (string window in driver.WindowHandles)
+                {
+                    if (window != originalWindow1)
+                    {
+                        driver.SwitchTo().Window(window);
+                        break;
+                    }
+                }
+
+                // Đợi cho đến khi trang mới tải hoàn toàn (nếu cần)
+                System.Threading.Thread.Sleep(2000);
+
+
+                current_url1 = driver.Url;
+                uri1 = new Uri(current_url1);
+                AbsolutePath1 = uri1.AbsolutePath.Split('/');
+                cpress1 = AbsolutePath1.Count() > 1 ? AbsolutePath1[1] : "";
+                foreach (var person in list_email_update)
+                {
+                    desiredUrl1 = $"{uri1.Scheme}://{uri1.Host}:{uri1.Port}/{cpress1}/3rdparty/roundcube/?_task=addressbook&_framed=1&_action=add&_source=carddav_1";
+
+                    driver.Navigate().GoToUrl(desiredUrl1);
+
+                    System.Threading.Thread.Sleep(2000);
+
+                    var email = person.EMAIL.ToLower();
+                    var hovaten = person.HOVATEN;
+                    driver.FindElement(By.Id("ff_email0")).Clear();
+                    driver.FindElement(By.Id("ff_email0")).SendKeys(email);
+
+                    //driver.FindElement(By.ClassName("displayname")).Click();
+                    IWebElement element = driver.FindElement(By.ClassName("displayname"));
+                    IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                    js.ExecuteScript("arguments[0].style.display='block';", element);
+
+                    driver.FindElement(By.Id("ff_name")).Clear();
+                    driver.FindElement(By.Id("ff_name")).SendKeys(hovaten);
+
+                    driver.FindElement(By.Id("rcmbtnfrm102")).Click();
+
+                    System.Threading.Thread.Sleep(2000);
+                }
+                driver.Close();
+
+                // Quay lại cửa sổ ban đầu
+                driver.SwitchTo().Window(originalWindow1);
+
                 driver.Close();
             }
 
@@ -802,6 +980,31 @@ namespace Vue.Controllers
             return new string(password);
         }
 
+        private JsonResult CreatePfx(UserModel user)
+        {
+            // Generate private-public key pair
+            var serviceProvider = new ServiceCollection()
+                  .AddCertificateManager()
+                  .BuildServiceProvider();
+
+            string passwordPublic = _configuration["Matkhau:PFX"];
+            var createClientServerAuthCerts = serviceProvider.GetService<CreateCertificatesClientServerAuth>();
+            var private_f = _configuration["Source:Path_Private"];
+            X509Certificate2 rootCaL1 = new X509Certificate2(private_f + "\\rootca\\localhost_root.pfx", passwordPublic);
+            var serverL3 = createClientServerAuthCerts.NewClientChainedCertificate(
+                new DistinguishedName { CommonName = user.FullName + "<" + user.Email + ">", OrganisationUnit = "" },
+                new ValidityPeriod { ValidFrom = DateTime.UtcNow, ValidTo = DateTime.UtcNow.AddYears(10) },
+                "localhost", rootCaL1);
+            var importExportCertificate = serviceProvider.GetService<ImportExportCertificate>();
+            var serverCertL3InPfxBtyes = importExportCertificate.ExportChainedCertificatePfx(passwordPublic, serverL3, rootCaL1);
+            System.IO.File.WriteAllBytes(private_f + "\\pfx\\" + user.Id + ".pfx", serverCertL3InPfxBtyes);
+
+            user.signature = "/private/pfx/" + user.Id + ".pfx";
+            _context.Update(user);
+            _context.SaveChanges();
+            return Json(new { success = true });
+
+        }
         static void Shuffle(char[] array, Random random)
         {
             for (int i = array.Length - 1; i > 0; i--)
@@ -831,10 +1034,18 @@ namespace Vue.Controllers
         //public string description { get; set; }
         public int? suspended_login { get; set; }
     }
+    public class Valid
+    {
+        public bool enable { get; set; }
+        public DateTime? beginTime { get; set; }
+        public DateTime? endTime { get; set; }
+        public string? timeType { get; set; }
+    }
     public class UserInfo
     {
         public string employeeNo { get; set; }
         public string name { get; set; }
+        public Valid Valid { get; set; }
     }
 
     public class UserInfoSearch
