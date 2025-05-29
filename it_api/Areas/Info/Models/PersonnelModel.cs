@@ -118,6 +118,7 @@ namespace Info.Models
         [NotMapped]
         public TinhModel TinhModel { get; set; }
 
+        public ICollection<NguoiphuthuocModel> NguoiPhuThuocs { get; set; }
 
         public string NormalizeName
         {

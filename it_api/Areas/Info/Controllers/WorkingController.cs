@@ -200,6 +200,11 @@ namespace it_template.Areas.Info.Controllers
                 var NV_phep_in_day = _context.ChamcongModel.Where(d => d.value_new != "X" && d.value_new != "" && d.date == DateTime.Now.Date).Select(d => d.MANV).Distinct().ToList();
                 customerData = customerData.Where(d => NV_phep_in_day.Contains(d.MANV));
             }
+            else if (status == 3)
+            {
+                var truongbophan = _context.DepartmentModel.Where(d => d.truongbophan_id != null).Select(d => d.truongbophan_id).Distinct().ToList();
+                customerData = customerData.Where(d => truongbophan.Contains(d.id));
+            }
 
             int recordsFiltered = customerData.Count();
             if (sort_MANV != null)

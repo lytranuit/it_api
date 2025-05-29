@@ -8,9 +8,6 @@ using iText.Commons.Actions.Contexts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using NodaTime.TimeZones.Cldr;
 using Spire.Doc;
 using Spire.Doc.Documents;
 using Spire.Doc.Reporting;
@@ -236,18 +233,14 @@ namespace it_template.Areas.Info.Controllers
             //return Ok();
             // Khởi tạo workbook để đọc
             Spire.Xls.Workbook book = new Spire.Xls.Workbook();
-            book.LoadFromFile("./wwwroot/report/excel/Personnel File.xlsx", ExcelVersion.Version2013);
+            book.LoadFromFile("./wwwroot/report/excel/DS Phép năm.xlsx", ExcelVersion.Version2013);
 
             Spire.Xls.Worksheet sheet = book.Worksheets[0];
             var lastrow = sheet.LastDataRow;
             // nếu vẫn chưa gặp end thì vẫn lấy data    
             Console.WriteLine(lastrow);
-            var list_Result = new List<ResultModel>();
-            var location_id = 1;
-            var location = "";
-            var stt = 0;
             var list_person = _context.PersonnelModel.ToList();
-            for (int rowIndex = 1; rowIndex < lastrow; rowIndex++)
+            for (int rowIndex = 2; rowIndex < lastrow; rowIndex++)
             {
                 // lấy row hiện tại
                 var nowRow = sheet.Rows[rowIndex];
@@ -256,31 +249,25 @@ namespace it_template.Areas.Info.Controllers
                 // vì ta dùng 3 cột A, B, C => data của ta sẽ như sau
                 //int numcount = nowRow.Cells.Count;
                 //for(int y = 0;y<numcount - 1 ;y++)
-                var macc = nowRow.Cells[0] != null ? nowRow.Cells[0].Value.TrimStart('\'') : null;
+                var manv = nowRow.Cells[0] != null ? nowRow.Cells[0].Value.TrimStart('\'') : null;
                 // Xuất ra thông tin lên màn hình
-                Console.WriteLine("MS: {0} ", macc);
+                Console.WriteLine("MS: {0} ", manv);
                 Console.WriteLine("rowIndex: {0} ", rowIndex);
 
-                if (macc == null)
+                if (manv == null)
                     continue;
 
-                var name = nowRow.Cells[2] != null ? nowRow.Cells[2].Value : null;
-                name = name.ToLower().Trim();
+                int? ngayphep = nowRow.Cells[2] != null ? (int)nowRow.Cells[2].NumberValue : null;
+                //name = name.ToLower().Trim();
                 PersonnelModel? findP = null;
                 //DateTime? date = nowRow.Cells[2] != null ? nowRow.Cells[2].DateTimeValue : null;
-                foreach (var p in list_person)
-                {
-                    var hoten = RemoveUnicode(p.HOVATEN).ToLower().Trim();
-                    if (hoten == name)
-                    {
-                        findP = p;
-                        break;
-                    }
-                }
+                findP = list_person.Where(d => d.MANV == manv).FirstOrDefault();
 
                 if (findP != null)
                 {
-                    findP.MACC = macc;
+                    findP.ngayphep = ngayphep;
+                    findP.ngayphep_date = new DateTime(2025, 4, 1);
+
                     _context.Update(findP);
                     _context.SaveChanges();
                 }
@@ -728,6 +715,7 @@ namespace it_template.Areas.Info.Controllers
                 nRow.Cells[13].Value = record.TinhModel != null ? record.TinhModel.TenTinh.Trim() : "";
                 nRow.Cells[14].Value = record.tinhtrang;
                 nRow.Cells[15].Value = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
+                nRow.Cells[16].Value = record.MATHUE;
                 start_r++;
             }
 

@@ -10,7 +10,7 @@ namespace it_template.Areas.Info.Controllers
 {
     [Area("Info")]
     //[Authorize(Roles = "Administrator,Manager HR,HR,User")]
-    [Authorize]
+    //[Authorize]
     public class BaseController : Controller
     {
         private AesOperation _AesOperation;

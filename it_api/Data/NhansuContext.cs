@@ -37,6 +37,7 @@ namespace Vue.Data
         public DbSet<Info.Models.LoaiHDModel> LoaiHDModel { get; set; }
         public DbSet<Info.Models.MeetingModel> MeetingModel { get; set; }
         public DbSet<Info.Models.PhonghopModel> PhonghopModel { get; set; }
+        public DbSet<Info.Models.NguoiphuthuocModel> NguoiphuthuocModel { get; set; }
 
         public DbSet<Info.Models.ShiftModel> ShiftModel { get; set; }
         public DbSet<Info.Models.ShiftHolidayModel> ShiftHolidayModel { get; set; }
@@ -65,7 +66,11 @@ namespace Vue.Data
                 table.device,
                 table.datetime
             });
-
+            modelBuilder.Entity<NguoiphuthuocModel>()
+                .HasOne(n => n.PersonnelModel)
+                .WithMany(p => p.NguoiPhuThuocs)
+                .HasForeignKey(n => n.MANV)
+                .HasPrincipalKey(p => p.MANV); // nếu MANV không phải là khóa chính, dòng này bắt buộc
         }
         protected override void ConfigureConventions(ModelConfigurationBuilder builder)
         {

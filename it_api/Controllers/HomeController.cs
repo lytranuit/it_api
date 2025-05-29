@@ -534,14 +534,49 @@ namespace Vue.Controllers
                 var pass = _configuration["Sync:password"];
                 ////CHECK TẠO TÀI KHOẢN EMAIL
                 ///
+
+
+
+                var options = new ChromeOptions();
+                //options.AddArgument("--headless"); // Chạy không cần giao diện (tuỳ chọn)
+
+                // Khởi tạo WebDriver
+                IWebDriver driver = new ChromeDriver(options);
+
+                // Điều hướng đến một URL
+                driver.Navigate().GoToUrl("https://mail.astahealthcare.com:2083/cpsess4532993050/frontend/jupiter/email_accounts/index.html#/list");
+                driver.Manage().Window.Maximize();
+
+                System.Threading.Thread.Sleep(2000);
+
+
+
+                driver.FindElement(By.Name("user")).Clear();
+                driver.FindElement(By.Name("user")).SendKeys(user);
+
+                driver.FindElement(By.Name("pass")).Clear();
+                driver.FindElement(By.Name("pass")).SendKeys(pass);
+
+
+                driver.FindElement(By.Id("login_submit")).Click();
+
+                Thread.Sleep(2000);
+
+
+                var cookies = driver.Manage().Cookies.AllCookies;
+                string cookieHeader = string.Join("; ", cookies.Select(c => $"{c.Name}={c.Value}"));
+                var current_url10 = driver.Url;
+                var uri10 = new Uri(current_url10);
+                var AbsolutePath10 = uri10.AbsolutePath.Split('/');
+                var cpress10 = AbsolutePath10.Count() > 1 ? AbsolutePath10[1] : "";
+                var desiredUrl10 = $"{uri10.Scheme}://{uri10.Host}:{uri10.Port}/{cpress10}/execute/Email/list_pops_with_disk";
                 var client = new HttpClient();
                 var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{user}:{pass}"));
-
+                client.DefaultRequestHeaders.Add("Cookie", cookieHeader);
                 // Thêm Authorization header
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authToken);
 
-                var url = "https://mail.astahealthcare.com:2083/execute/Email/list_pops_with_disk";
-                var response = await client.GetAsync(url);
+                var response = await client.GetAsync(desiredUrl10);
                 if (response.IsSuccessStatusCode)
                 {
                     LoginAdminResponse responseJson1 = await response.Content.ReadFromJsonAsync<LoginAdminResponse>();
@@ -570,11 +605,12 @@ namespace Vue.Controllers
                         ///Tạo email mới
                         var client1 = new HttpClient();
                         var authToken1 = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{user}:{pass}"));
+                        client1.DefaultRequestHeaders.Add("Cookie", cookieHeader);
 
                         // Thêm Authorization header
                         client1.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authToken1);
-                        string generatedPassword = GenerateStrongPassword();
-                        string url1 = $"https://mail.astahealthcare.com:2083/execute/Email/add_pop?email={email}&password={generatedPassword}";
+                        string generatedPassword = $"!{user_person}@123";
+                        string url1 = $"{uri10.Scheme}://{uri10.Host}:{uri10.Port}/{cpress10}/execute/Email/add_pop?email={email}&password={generatedPassword}";
                         item.mk_email = generatedPassword;
                         HttpResponseMessage response1 = await client1.GetAsync(url1);
                         if (response1.IsSuccessStatusCode)
@@ -618,32 +654,6 @@ namespace Vue.Controllers
                     }
                 }
 
-
-                var options = new ChromeOptions();
-                //options.AddArgument("--headless"); // Chạy không cần giao diện (tuỳ chọn)
-
-                // Khởi tạo WebDriver
-                IWebDriver driver = new ChromeDriver(options);
-
-                // Điều hướng đến một URL
-                driver.Navigate().GoToUrl("https://mail.astahealthcare.com:2083/cpsess4532993050/frontend/jupiter/email_accounts/index.html#/list");
-                driver.Manage().Window.Maximize();
-
-                System.Threading.Thread.Sleep(2000);
-
-
-
-                driver.FindElement(By.Name("user")).Clear();
-                driver.FindElement(By.Name("user")).SendKeys(user);
-
-                driver.FindElement(By.Name("pass")).Clear();
-                driver.FindElement(By.Name("pass")).SendKeys(pass);
-
-
-                driver.FindElement(By.Id("login_submit")).Click();
-
-                Thread.Sleep(2000);
-
                 foreach (var person in list_email_update)
                 {
                     // Đợi một chút để trang tải (tối ưu bằng WebDriverWait nếu cần)
@@ -670,7 +680,7 @@ namespace Vue.Controllers
 
                     driver.FindElement(By.Id("email_table_menu_webmail_" + email)).Click();
 
-                    
+
 
                     ////SỬA HỌ VÀ TÊN.
 

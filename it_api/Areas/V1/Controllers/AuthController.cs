@@ -124,6 +124,7 @@ namespace it_template.Areas.V1.Controllers
                     var roles = await UserManager.GetRolesAsync(user);
                     var person = _nhansucontext.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault();
                     string? report_for = null;
+                    bool is_truongbophan = false;
                     if (person != null)
                     {
                         var report_for_person = _nhansucontext.PersonnelModel.Where(d => d.id == person.MAQUANLYTRUCTIEP).FirstOrDefault();
@@ -131,6 +132,11 @@ namespace it_template.Areas.V1.Controllers
                         {
                             var report_for_user = _context.UserModel.Where(d => d.Email.ToLower() == report_for_person.EMAIL.ToLower()).FirstOrDefault();
                             report_for = report_for_user != null ? report_for_user.Id : null;
+                        }
+                        var phong = _nhansucontext.DepartmentModel.Where(d => d.truongbophan_id == person.id).FirstOrDefault();
+                        if (phong != null)
+                        {
+                            is_truongbophan = true;
                         }
                     }
                     responseJson.user = new UserInfo()
@@ -142,7 +148,9 @@ namespace it_template.Areas.V1.Controllers
                         image_url = user.image_url,
                         image_sign = user.image_sign,
                         report_for = report_for,
-                        key_private = _configuration["Key_Access"]
+                        is_truongbophan = is_truongbophan,
+                        key_private = _configuration["Key_Access"],
+                        last_updated = DateTime.Now,
                     };
                     ////
                     Response.Cookies.Append(
@@ -179,6 +187,7 @@ namespace it_template.Areas.V1.Controllers
                 var roles = await UserManager.GetRolesAsync(user);
                 var person = _nhansucontext.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault();
                 string? report_for = null;
+                bool is_truongbophan = false;
                 if (person != null)
                 {
                     var report_for_person = _nhansucontext.PersonnelModel.Where(d => d.id == person.MAQUANLYTRUCTIEP).FirstOrDefault();
@@ -186,6 +195,11 @@ namespace it_template.Areas.V1.Controllers
                     {
                         var report_for_user = _context.UserModel.Where(d => d.Email.ToLower() == report_for_person.EMAIL.ToLower()).FirstOrDefault();
                         report_for = report_for_user != null ? report_for_user.Id : null;
+                    }
+                    var phong = _nhansucontext.DepartmentModel.Where(d => d.truongbophan_id == person.id).FirstOrDefault();
+                    if (phong != null)
+                    {
+                        is_truongbophan = true;
                     }
                 }
                 responseJson.user = new UserInfo()
@@ -197,7 +211,9 @@ namespace it_template.Areas.V1.Controllers
                     image_url = user.image_url,
                     image_sign = user.image_sign,
                     report_for = report_for,
-                    key_private = _configuration["Key_Access"]
+                    is_truongbophan = is_truongbophan,
+                    key_private = _configuration["Key_Access"],
+                    last_updated = DateTime.Now,
                 };
                 ////
                 Response.Cookies.Append(

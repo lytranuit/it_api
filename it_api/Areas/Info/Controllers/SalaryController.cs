@@ -220,6 +220,7 @@ namespace it_template.Areas.Info.Controllers
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
                         var phanloai = bophan != null ? bophan.TENPHONG : "";
                         var diachilamviec = tinh != null ? tinh.TenTinh : "";
+                        var masothue = record.MATHUE;
                         var manv = record.MANV;
                         var hovaten = record.HOVATEN;
                         var email = record.EMAIL;
@@ -335,6 +336,7 @@ namespace it_template.Areas.Info.Controllers
                         }
                         nRow.Cells[38].Value = stk;
                         nRow.Cells[39].Value = diachilamviec;
+                        nRow.Cells[40].Value = masothue;
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -508,6 +510,7 @@ namespace it_template.Areas.Info.Controllers
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
                         var phanloai = bophan != null ? bophan.TENPHONG : "";
                         var diachilamviec = tinh != null ? tinh.TenTinh : "";
+                        var masothue = record.MATHUE;
                         var manv = record.MANV;
                         var hovaten = record.HOVATEN;
                         var email = record.EMAIL;
@@ -624,6 +627,8 @@ namespace it_template.Areas.Info.Controllers
                         }
                         nRow.Cells[38].Value = stk;
                         nRow.Cells[39].Value = diachilamviec;
+                        nRow.Cells[40].Value = masothue;
+
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -710,6 +715,7 @@ namespace it_template.Areas.Info.Controllers
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
                         var phanloai = bophan != null ? bophan.TENPHONG : "";
                         var diachilamviec = tinh != null ? tinh.TenTinh : "";
+                        var masothue = record.MATHUE;
                         var manv = record.MANV;
                         var hovaten = record.HOVATEN;
                         var email = record.EMAIL;
@@ -826,6 +832,8 @@ namespace it_template.Areas.Info.Controllers
                         }
                         nRow.Cells[38].Value = stk;
                         nRow.Cells[39].Value = diachilamviec;
+                        nRow.Cells[40].Value = masothue;
+
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -915,6 +923,7 @@ namespace it_template.Areas.Info.Controllers
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
                         var phanloai = bophan != null ? bophan.TENPHONG : "";
                         var diachilamviec = tinh != null ? tinh.TenTinh : "";
+                        var masothue = record.MATHUE;
                         var manv = record.MANV;
                         var hovaten = record.HOVATEN;
                         var email = record.EMAIL;
@@ -1031,6 +1040,8 @@ namespace it_template.Areas.Info.Controllers
                         }
                         nRow.Cells[38].Value = stk;
                         nRow.Cells[39].Value = diachilamviec;
+                        nRow.Cells[40].Value = masothue;
+
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -1547,7 +1558,7 @@ namespace it_template.Areas.Info.Controllers
                             nRow.Cells[25].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[27].Value = stk;
+                        nRow.Cells[29].Value = stk;
 
                         start_r++;
                     }
@@ -2121,9 +2132,16 @@ namespace it_template.Areas.Info.Controllers
             var user = await UserManager.GetUserAsync(currentUser);
             var person = _context.PersonnelModel.Where(d => d.EMAIL == user.Email).FirstOrDefault();
             var MANV = person.MANV;
+            var maphong = person.MAPHONG;
 
 
-            var data = _context.SalaryUserModel.Where(d => d.salary_id == id && d.MANV == MANV).FirstOrDefault();
+            var data = _context.SalaryUserModel.Where(d => d.salary_id == id && d.MANV == MANV).ToList();
+            ///Check is_truongbophan
+            var phong = _context.DepartmentModel.Where(d => d.truongbophan_id == person.id).FirstOrDefault();
+            if (phong != null)
+            {
+                data = _context.SalaryUserModel.Where(d => d.salary_id == id && d.MABOPHAN == phong.MAPHONG).ToList();
+            }
             return Json(data, new System.Text.Json.JsonSerializerOptions()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull

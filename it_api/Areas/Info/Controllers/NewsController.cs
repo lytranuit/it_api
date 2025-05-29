@@ -21,7 +21,7 @@ using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 namespace it_template.Areas.Info.Controllers
 {
 
-    [Authorize(Roles = "Administrator,HR")]
+    [Authorize(Roles = "Administrator,HR,Manager Website")]
     public class NewsController : BaseController
     {
         private readonly IConfiguration _configuration;

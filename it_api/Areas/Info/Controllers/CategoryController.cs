@@ -20,7 +20,7 @@ using Vue.Services;
 namespace it_template.Areas.Info.Controllers
 {
 
-    [Authorize(Roles = "Administrator,HR")]
+    [Authorize(Roles = "Administrator,HR,Manager Website")]
     public class CategoryController : BaseController
     {
         private readonly IConfiguration _configuration;

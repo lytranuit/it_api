@@ -14,6 +14,7 @@ using System.Dynamic;
 using Info.Models;
 using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Spire.Xls;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -121,6 +122,83 @@ namespace it_template.Areas.Info.Controllers
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             });
         }
+        public async Task<JsonResult> getDashboard()
+        {
+            //var biendong = new { labels = data.Select(d => d.label).ToList(), datasets = new List<Chart>() { new Chart { label = "Doanh thu", data = data.Select(d => d.data).ToList() } } };
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user_id = UserManager.GetUserId(currentUser);
+            var user = await UserManager.GetUserAsync(currentUser);
+            var person = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault(); ///Check is_truongbophan
+
+
+            var tong = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null).Count();
+            var chinhthuc = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null && d.tinhtrang == "Chính thức" && d.LOAIHD != "DV").Count();
+            var hocthuviec = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null && (d.tinhtrang == "Học việc" || d.tinhtrang == "Thử việc" || d.tinhtrang == "Thử việc không bảo hiểm và không phép năm") && d.LOAIHD != "DV").Count();
+            var dichvu = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null && (d.LOAIHD == "DV" || d.tinhtrang == "Dịch vụ" || d.tinhtrang == "Dịch vụ không phép năm")).Count();
+
+            ///Check is_truongbophan
+            var phong = _context.DepartmentModel.Where(d => d.truongbophan_id == person.id).FirstOrDefault();
+            if (phong != null)
+            {
+                tong = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null && d.MAPHONG == person.MAPHONG).Count();
+                chinhthuc = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null && d.tinhtrang == "Chính thức" && d.LOAIHD != "DV" && d.MAPHONG == person.MAPHONG).Count();
+                hocthuviec = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null && (d.tinhtrang == "Học việc" || d.tinhtrang == "Thử việc" || d.tinhtrang == "Thử việc không bảo hiểm và không phép năm") && d.LOAIHD != "DV" && d.MAPHONG == person.MAPHONG).Count();
+                dichvu = _context.PersonnelModel.Where(d => d.NGAYNGHIVIEC == null && (d.LOAIHD == "DV" || d.tinhtrang == "Dịch vụ" || d.tinhtrang == "Dịch vụ không phép năm") && d.MAPHONG == person.MAPHONG).Count();
+
+            }
+            var json = new { tong, chinhthuc, hocthuviec, dichvu };
+            return Json(json);
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> biendong(int nam, string department)
+        {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user_id = UserManager.GetUserId(currentUser);
+            var user = await UserManager.GetUserAsync(currentUser);
+            var person = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault(); ///Check is_truongbophan
+
+            var is_admin = await UserManager.IsInRoleAsync(user, "Administrator");
+            var is_manager = await UserManager.IsInRoleAsync(user, "Manager HR");
+            var is_hr = await UserManager.IsInRoleAsync(user, "HR");
+
+            //var biendong = new { labels = data.Select(d => d.label).ToList(), datasets = new List<Chart>() { new Chart { label = "Doanh thu", data = data.Select(d => d.data).ToList() } } };
+            var salaryUser = _context.SalaryUserModel.Include(d => d.salary).Where(d => d.salary.deleted_at == null && d.salary.status == "Đã khóa" && d.salary.nam == nam).ToList();
+            ///Check is_truongbophan
+            var phong = _context.DepartmentModel.Where(d => d.truongbophan_id == person.id).FirstOrDefault();
+            var is_truongbophan = false;
+            if (phong != null)
+            {
+                is_truongbophan = true;
+                salaryUser = salaryUser.Where(d => d.MABOPHAN == person.MAPHONG).ToList();
+            }
+            var data = salaryUser.GroupBy(d => new { year = d.salary.nam, month = d.salary.thang }).Select(group => new ChartNhansu1
+            {
+                sort = $"{group.Key.year:D4}-{group.Key.month:D2}",
+                label = group.Key.month + "/" + group.Key.year,
+                data = (double)group.Sum(d => d.thuclanh),
+                data_nv = (double)group.Count()
+            }).OrderBy(d => d.sort).ToList();
+
+            var biendong = new
+            {
+                labels = data.Select(d => d.label).ToList(),
+                datasets = new List<ChartNhansu>() {
+                    new ChartNhansu { type="bar",label = "Tổng NV", data = data.Select(d => d.data_nv).ToList(),yAxisID="A" }
+                }
+            };
+            if (is_truongbophan)
+            {
+                biendong.datasets.Add(new ChartNhansu { label = "Tổng lương", data = data.Select(d => d.data).ToList(), type = "line", fill = false, yAxisID = "B" });
+            }
+            return Json(new
+            {
+                data = biendong
+            }, new System.Text.Json.JsonSerializerOptions()
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
 
         public async Task<JsonResult> Highlight()
         {
@@ -177,5 +255,19 @@ namespace it_template.Areas.Info.Controllers
             });
         }
     }
-
+    public class ChartNhansu
+    {
+        public string label { get; set; }
+        public List<double> data { get; set; }
+        public bool fill { get; set; }
+        public string type { get; set; }
+        public string yAxisID { get; set; }
+    }
+    public class ChartNhansu1
+    {
+        public string sort { get; set; }
+        public string label { get; set; }
+        public double data { get; set; }
+        public double data_nv { get; set; }
+    }
 }

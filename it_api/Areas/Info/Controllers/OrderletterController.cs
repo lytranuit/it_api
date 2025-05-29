@@ -56,7 +56,7 @@ namespace it_template.Areas.Info.Controllers
             return Json(new { success = true, data = Model });
         }
         [HttpPost]
-        public async Task<JsonResult> Pheduyet(string id)
+        public async Task<JsonResult> Pheduyet(string id, string note)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
@@ -69,6 +69,7 @@ namespace it_template.Areas.Info.Controllers
 
                 Model.date_accept = DateTime.Now;
                 Model.user_accept_id = user_id;
+                Model.note = note;
                 Model.status_id = (int)OrderletterStatus.Duyet;
                 _context.Update(Model);
                 ///UPDATE CHẤM CÔNG
@@ -100,14 +101,14 @@ namespace it_template.Areas.Info.Controllers
                 var user_apply = _context.UserModel.Where(d => d.Id == Model.user_id).FirstOrDefault();
                 var person_apply = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user_apply.Email.ToLower()).FirstOrDefault();
                 var user_related = new List<string>() { user_created.Email, user_apply.Email };
-                if (person_apply != null && person_apply.DIADIEM == "Hồ Chí Minh")
-                {
-                    user_related.Add("thu.ttn@astahealthcare.com");
-                }
-                else
-                {
-                    user_related.Add("hcns@astahealthcare.com");
-                }
+                //if (person_apply != null && person_apply.DIADIEM == "Hồ Chí Minh")
+                //{
+                //    user_related.Add("thu.ttn@astahealthcare.com");
+                //}
+                //else
+                //{
+                //    user_related.Add("hcns@astahealthcare.com");
+                //}
                 user_related = user_related.Distinct().ToList();
 
                 var mail_string = string.Join(",", user_related);
@@ -115,7 +116,7 @@ namespace it_template.Areas.Info.Controllers
                 var body = _view.Render("Emails/Orderletter_Success", new
                 {
                     link_logo = Domain + "/images/clientlogo_astahealthcare.com_f1800.png",
-                    link = _configuration["Application:Info:link"] + "OrderLetter/edit/" + Model.id,
+                    link = _configuration["Application:Info:link"] + "OrderLetter/edit/" + Model.id
                 });
                 var email = new EmailModel
                 {
@@ -132,6 +133,7 @@ namespace it_template.Areas.Info.Controllers
             {
                 Model.date1_accept = DateTime.Now;
                 Model.user1_accept_id = user_id;
+                Model.note1 = note;
                 Model.status1_id = (int)OrderletterStatus.Duyet;
                 _context.Update(Model);
 
@@ -532,7 +534,7 @@ namespace it_template.Areas.Info.Controllers
             var user = _context.UserModel.Where(d => d.Id == user_id).FirstOrDefault();
             var customerData = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault();
             var OrderLetterModel = _context.OrderletterModel.Where(d => d.id == id).FirstOrDefault();
-            var ChamcongModel = _context.ChamcongModel.Where(d => customerData.MANV == d.MANV && d.orderletter_id != null && d.orderletter_id == id).Include(d => d.shift).Select(d => new
+            var ChamcongModel = _context.ChamcongModel.Where(d => customerData.id == d.NV_id && d.orderletter_id != null && d.orderletter_id == id).Include(d => d.shift).Select(d => new
             {
                 id = d.id,
                 shift = d.shift,
@@ -542,7 +544,7 @@ namespace it_template.Areas.Info.Controllers
             }).ToList();
             if (OrderLetterModel.status_id != (int)OrderletterStatus.New)
             {
-                ChamcongModel = _context.OrderletterDetailsModel.Where(d => customerData.MANV == d.MANV && d.orderletter_id != null && d.orderletter_id == id).Include(d => d.shift).Select(d => new
+                ChamcongModel = _context.OrderletterDetailsModel.Where(d => customerData.id == d.NV_id && d.orderletter_id != null && d.orderletter_id == id).Include(d => d.shift).Select(d => new
                 {
                     id = d.id,
                     shift = d.shift,

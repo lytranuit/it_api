@@ -39,6 +39,8 @@ namespace Vue.Models
                 return false;
             }
         }
+        public bool is_truongbophan { get; set; }
+        public DateTime last_updated { get; set; }
         public IList<string>? roles { get; set; }
     }
 }
