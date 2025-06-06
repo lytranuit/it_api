@@ -87,7 +87,7 @@ namespace it_template.Areas.V1.Controllers
             });
         }
 
-        public async Task<JsonResult> locationswithpoint(int? filter_object, int? filter_target, int? filter_type_bc)
+        public async Task<JsonResult> locationswithpoint(int? filter_object, int? filter_target, int? filter_type_bc, bool? is_nhap)
         {
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
@@ -103,8 +103,13 @@ namespace it_template.Areas.V1.Controllers
             {
                 objects = _context.ObjectModel.Where(d => d.deleted_at == null).Select(d => d.id).ToList();
             }
-
-            var All = await GetChild2(0, filter_object, filter_target, filter_type_bc, objects);
+            var list_location = _context.LocationModel.Where(d => d.deleted_at == null).ToList();
+            if (is_nhap == true)
+            {
+                list_location = list_location.Where(d => d.id != 2).ToList();////Bỏ các vị trị QC
+            }
+            var list_point = _context.PointModel.Where(d => d.deleted_at == null).ToList();
+            var All = await GetChild2(0, filter_object, filter_target, filter_type_bc, objects, list_location, list_point);
             //var jsonData = new { data = ProcessModel };
             return Json(All, new System.Text.Json.JsonSerializerOptions()
             {
@@ -229,10 +234,10 @@ namespace it_template.Areas.V1.Controllers
             }
             return list;
         }
-        private async Task<List<SelectLocationResponse>> GetChild2(int parent, int? filter_object, int? filter_target, int? filter_type_bc, List<int>? objects)
+        private async Task<List<SelectLocationResponse>> GetChild2(int parent, int? filter_object, int? filter_target, int? filter_type_bc, List<int>? objects, List<LocationModel> list_location, List<PointModel> list_point)
         {
 
-            var Models = _context.LocationModel.Where(d => d.deleted_at == null && d.parent == parent).OrderBy(d => d.stt).ToList();
+            var Models = list_location.Where(d => d.deleted_at == null && d.parent == parent).OrderBy(d => d.stt).ToList();
             var list = new List<SelectLocationResponse>();
             if (Models.Count() > 0)
             {
@@ -251,8 +256,8 @@ namespace it_template.Areas.V1.Controllers
                     //var count_child = _context.DepartmentModel.Where(d => d.deleted_at == null && d.parent == department.id).Count();
                     //if (count_child > 0)
                     //{
-                    var child = await GetChild2(model.id, filter_object, filter_target, filter_type_bc, objects);
-                    var points_context = _context.PointModel.Where(d => d.location_id == model.id && objects.Contains(d.object_id.Value));
+                    var child = await GetChild2(model.id, filter_object, filter_target, filter_type_bc, objects, list_location, list_point);
+                    var points_context = list_point.Where(d => d.location_id == model.id && objects.Contains(d.object_id.Value));
 
                     if (filter_object != null)
                     {

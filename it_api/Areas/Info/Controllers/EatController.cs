@@ -246,7 +246,7 @@ namespace it_template.Areas.Info.Controllers
             }
             var now = DateTime.Now;
             var deadline = DateTime.Now.Date;
-            if (now > DateTime.Now.Date.AddHours(17))
+            if (now > DateTime.Now.Date.AddHours(15).AddMinutes(15))
             {
                 deadline = deadline.AddDays(1);
             }

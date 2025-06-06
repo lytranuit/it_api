@@ -716,6 +716,7 @@ namespace it_template.Areas.Info.Controllers
                 nRow.Cells[14].Value = record.tinhtrang;
                 nRow.Cells[15].Value = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
                 nRow.Cells[16].Value = record.MATHUE;
+                nRow.Cells[17].Value = record.SOCCCD;
                 start_r++;
             }
 

@@ -7,27 +7,28 @@ using Info.Models;
 using it_template.Areas.Trend.Controllers;
 using iText.Commons.Actions.Contexts;
 using iText.Commons.Utils;
+using iText.StyledXmlParser.Jsoup.Nodes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using PH.WorkingDaysAndTimeUtility.Configuration;
 using PH.WorkingDaysAndTimeUtility;
+using PH.WorkingDaysAndTimeUtility.Configuration;
+using Spire.Xls;
+using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Dynamic;
+using System.Reflection;
+using System.Security.Policy;
 using System.Text.Json.Serialization;
 using Vue.Data;
 using Vue.Models;
 using Vue.Services;
-using Spire.Xls;
-using System.Security.Policy;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.Diagnostics;
-using iText.StyledXmlParser.Jsoup.Nodes;
-using System.Collections.Generic;
-using System.Reflection;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -242,8 +243,10 @@ namespace it_template.Areas.Info.Controllers
                         var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
+                        var khoancong_sauthue = person.khoancong_sauthue ?? 0;
                         var note_khoantru = person.note_khoantru;
                         var note_khoancong = person.note_khoancong;
+                        var note_khoancong_sauthue = person.note_khoancong_sauthue;
                         var note = person.note;
                         var is_bhxh = record.is_bhxh;
                         var is_thue = record.is_thue;
@@ -317,26 +320,29 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[25].NumberValue = (double)TNCN_banthan;
                         nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
                         nRow.Cells[32].NumberValue = (double)khoantru;
+                        nRow.Cells[33].NumberValue = (double)khoancong_sauthue;
                         if (note_khoancong != null)
                             nRow.Cells[19].AddComment().Text = note_khoancong;
                         if (note_khoantru != null)
                             nRow.Cells[32].AddComment().Text = note_khoantru;
                         if (note != null)
                             nRow.Cells[20].AddComment().Text = note;
+                        if (note_khoancong_sauthue != null)
+                            nRow.Cells[33].AddComment().Text = note_khoancong_sauthue;
 
 
                         nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
                         nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[34].FormulaNumberValue)
                         {
-                            nRow.Cells[34].NumberValue = (double)tamungdot1;
+                            nRow.Cells[35].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[38].Value = stk;
-                        nRow.Cells[39].Value = diachilamviec;
-                        nRow.Cells[40].Value = masothue;
+                        nRow.Cells[39].Value = stk;
+                        nRow.Cells[40].Value = diachilamviec;
+                        nRow.Cells[41].Value = masothue;
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -393,9 +399,9 @@ namespace it_template.Areas.Info.Controllers
                         person.thunhaptinhthue = Convert.ToDecimal(nRow.Cells[29].FormulaValue);
                         person.thue_tncn = Convert.ToDecimal(nRow.Cells[30].FormulaValue);
                         person.dpcd = Convert.ToDecimal(nRow.Cells[31].FormulaValue);
-                        person.thuclanh = Convert.ToDecimal(nRow.Cells[33].FormulaValue);
-                        person.tamungdot1 = Convert.ToDecimal(nRow.Cells[34].EnvalutedValue);
-                        person.conlai = Convert.ToDecimal(nRow.Cells[35].FormulaValue);
+                        person.thuclanh = Convert.ToDecimal(nRow.Cells[34].FormulaValue);
+                        person.tamungdot1 = Convert.ToDecimal(nRow.Cells[35].EnvalutedValue);
+                        person.conlai = Convert.ToDecimal(nRow.Cells[36].FormulaValue);
                         person.tongphep = (decimal)item["tongphep"];
 
                         decimal phepconlai = (decimal)_tinhcong.phepnam(record, date_to);
@@ -532,8 +538,10 @@ namespace it_template.Areas.Info.Controllers
                         var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
+                        var khoancong_sauthue = person.khoancong_sauthue ?? 0;
                         var note_khoantru = person.note_khoantru;
                         var note_khoancong = person.note_khoancong;
+                        var note_khoancong_sauthue = person.note_khoancong_sauthue;
                         var note = person.note;
                         var is_bhxh = record.is_bhxh;
                         var is_thue = record.is_thue;
@@ -608,26 +616,29 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[25].NumberValue = (double)TNCN_banthan;
                         nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
                         nRow.Cells[32].NumberValue = (double)khoantru;
+                        nRow.Cells[33].NumberValue = (double)khoancong_sauthue;
                         if (note_khoancong != null)
                             nRow.Cells[19].AddComment().Text = note_khoancong;
                         if (note_khoantru != null)
                             nRow.Cells[32].AddComment().Text = note_khoantru;
                         if (note != null)
                             nRow.Cells[20].AddComment().Text = note;
+                        if (note_khoancong_sauthue != null)
+                            nRow.Cells[33].AddComment().Text = note_khoancong_sauthue;
 
 
                         nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
                         nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[34].FormulaNumberValue)
                         {
-                            nRow.Cells[34].NumberValue = (double)tamungdot1;
+                            nRow.Cells[35].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[38].Value = stk;
-                        nRow.Cells[39].Value = diachilamviec;
-                        nRow.Cells[40].Value = masothue;
+                        nRow.Cells[39].Value = stk;
+                        nRow.Cells[40].Value = diachilamviec;
+                        nRow.Cells[41].Value = masothue;
 
                         //if (record.MANV == "NMK170962")
                         //{
@@ -737,8 +748,10 @@ namespace it_template.Areas.Info.Controllers
                         var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
+                        var khoancong_sauthue = person.khoancong_sauthue ?? 0;
                         var note_khoantru = person.note_khoantru;
                         var note_khoancong = person.note_khoancong;
+                        var note_khoancong_sauthue = person.note_khoancong_sauthue;
                         var note = person.note;
                         var is_bhxh = record.is_bhxh;
                         var is_thue = record.is_thue;
@@ -813,26 +826,29 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[25].NumberValue = (double)TNCN_banthan;
                         nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
                         nRow.Cells[32].NumberValue = (double)khoantru;
+                        nRow.Cells[33].NumberValue = (double)khoancong_sauthue;
                         if (note_khoancong != null)
                             nRow.Cells[19].AddComment().Text = note_khoancong;
                         if (note_khoantru != null)
                             nRow.Cells[32].AddComment().Text = note_khoantru;
                         if (note != null)
                             nRow.Cells[20].AddComment().Text = note;
+                        if (note_khoancong_sauthue != null)
+                            nRow.Cells[33].AddComment().Text = note_khoancong_sauthue;
 
 
                         nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
                         nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[34].FormulaNumberValue)
                         {
-                            nRow.Cells[34].NumberValue = (double)tamungdot1;
+                            nRow.Cells[35].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[38].Value = stk;
-                        nRow.Cells[39].Value = diachilamviec;
-                        nRow.Cells[40].Value = masothue;
+                        nRow.Cells[39].Value = stk;
+                        nRow.Cells[40].Value = diachilamviec;
+                        nRow.Cells[41].Value = masothue;
 
                         //if (record.MANV == "NMK170962")
                         //{
@@ -945,8 +961,10 @@ namespace it_template.Areas.Info.Controllers
                         var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
+                        var khoancong_sauthue = person.khoancong_sauthue ?? 0;
                         var note_khoantru = person.note_khoantru;
                         var note_khoancong = person.note_khoancong;
+                        var note_khoancong_sauthue = person.note_khoancong_sauthue;
                         var note = person.note;
                         var is_bhxh = record.is_bhxh;
                         var is_thue = record.is_thue;
@@ -1021,26 +1039,29 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[25].NumberValue = (double)TNCN_banthan;
                         nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
                         nRow.Cells[32].NumberValue = (double)khoantru;
+                        nRow.Cells[33].NumberValue = (double)khoancong_sauthue;
                         if (note_khoancong != null)
                             nRow.Cells[19].AddComment().Text = note_khoancong;
                         if (note_khoantru != null)
                             nRow.Cells[32].AddComment().Text = note_khoantru;
                         if (note != null)
                             nRow.Cells[20].AddComment().Text = note;
+                        if (note_khoancong_sauthue != null)
+                            nRow.Cells[33].AddComment().Text = note_khoancong_sauthue;
 
 
                         nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
                         nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[33].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[34].FormulaNumberValue)
                         {
-                            nRow.Cells[34].NumberValue = (double)tamungdot1;
+                            nRow.Cells[35].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[38].Value = stk;
-                        nRow.Cells[39].Value = diachilamviec;
-                        nRow.Cells[40].Value = masothue;
+                        nRow.Cells[39].Value = stk;
+                        nRow.Cells[40].Value = diachilamviec;
+                        nRow.Cells[41].Value = masothue;
 
                         //if (record.MANV == "NMK170962")
                         //{
@@ -1863,8 +1884,29 @@ namespace it_template.Areas.Info.Controllers
 
         }
         [HttpPost]
+        public async Task<JsonResult> Myphieuluong(string salary_id)
+        {
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var user = await UserManager.GetUserAsync(currentUser);
+            var SalaryUserModel = _context.SalaryUserModel.Where(d => d.email == user.Email && d.salary_id == salary_id).FirstOrDefault();
+            if (SalaryUserModel == null)
+            {
+                return Json(new { success = false });
+            }
+
+            var id = SalaryUserModel.id;
+
+            var documentPath = _tinhcong.phieuluong(id, _configuration);
+
+            //var congthuc_ct = _QLSXcontext.Congthuc_CTModel.Where()
+            var jsonData = new { success = true, link = documentPath };
+            return Json(jsonData);
+
+        }
+        [HttpPost]
         public async Task<JsonResult> phieuluong(int id)
         {
+
             var documentPath = _tinhcong.phieuluong(id, _configuration);
 
             //var congthuc_ct = _QLSXcontext.Congthuc_CTModel.Where()
@@ -1975,6 +2017,10 @@ namespace it_template.Areas.Info.Controllers
             {
                 SalaryUserModel_old.khoancong = SalaryUserModel.khoancong;
             }
+            if (ModelState.ContainsKey("khoancong_sauthue"))
+            {
+                SalaryUserModel_old.khoancong_sauthue = SalaryUserModel.khoancong_sauthue;
+            }
             if (ModelState.ContainsKey("note_khoancong"))
             {
                 SalaryUserModel_old.note_khoancong = SalaryUserModel.note_khoancong;
@@ -1982,6 +2028,10 @@ namespace it_template.Areas.Info.Controllers
             if (ModelState.ContainsKey("note_khoantru"))
             {
                 SalaryUserModel_old.note_khoantru = SalaryUserModel.note_khoantru;
+            }
+            if (ModelState.ContainsKey("note_khoancong_sauthue"))
+            {
+                SalaryUserModel_old.note_khoancong_sauthue = SalaryUserModel.note_khoancong_sauthue;
             }
             if (ModelState.ContainsKey("note"))
             {
@@ -2011,6 +2061,10 @@ namespace it_template.Areas.Info.Controllers
                 {
                     item.khoancong = SalaryUserModel.khoancong;
                 }
+                if (ModelState.ContainsKey("khoancong_sauthue"))
+                {
+                    item.khoancong_sauthue = SalaryUserModel.khoancong_sauthue;
+                }
                 if (ModelState.ContainsKey("note_khoancong"))
                 {
                     item.note_khoancong = SalaryUserModel.note_khoancong;
@@ -2018,6 +2072,10 @@ namespace it_template.Areas.Info.Controllers
                 if (ModelState.ContainsKey("note_khoantru"))
                 {
                     item.note_khoantru = SalaryUserModel.note_khoantru;
+                }
+                if (ModelState.ContainsKey("note_khoancong_sauthue"))
+                {
+                    item.note_khoancong_sauthue = SalaryUserModel.note_khoancong_sauthue;
                 }
             }
 
@@ -2161,7 +2219,7 @@ namespace it_template.Areas.Info.Controllers
             dict.Add("tong_tc", 14);
             //dict.Add("khoancong", 19);
             //dict.Add("khoantru", 31);
-            dict.Add("thuclanh", 33);
+            dict.Add("thuclanh", 34);
             //dict.Add("thunhaptinhthue", 28);
             //dict.Add("thunhapchiuthue", 23);
 

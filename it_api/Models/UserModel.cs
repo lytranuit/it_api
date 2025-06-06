@@ -10,6 +10,7 @@ namespace Vue.Models
     public class UserModel : IdentityUser
     {
         public string FullName { get; set; }
+        public string? msnv { get; set; }
         public string? image_url { get; set; }
         public string? image_sign { get; set; }
         public string? signature { get; set; }

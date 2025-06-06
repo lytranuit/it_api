@@ -632,6 +632,7 @@ namespace Vue.Controllers
                             UserName = user_person + "@astahealthcare.com",
                             EmailConfirmed = true,
                             FullName = hovaten,
+                            msnv = item.MANV,
                             image_sign = "/private/images/tick.png",
                             image_url = "/private/images/user.webp",
                         };
