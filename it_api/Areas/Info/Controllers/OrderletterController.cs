@@ -2,24 +2,16 @@
 
 
 
-using Holdtime.Models;
 using Info.Models;
-using it_template.Areas.Trend.Controllers;
-using iText.Commons.Actions.Contexts;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Text.Json.Serialization;
 using Vue.Data;
 using Vue.Models;
 using Vue.Services;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -534,24 +526,34 @@ namespace it_template.Areas.Info.Controllers
             var user = _context.UserModel.Where(d => d.Id == user_id).FirstOrDefault();
             var customerData = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault();
             var OrderLetterModel = _context.OrderletterModel.Where(d => d.id == id).FirstOrDefault();
-            var ChamcongModel = _context.ChamcongModel.Where(d => customerData.id == d.NV_id && d.orderletter_id != null && d.orderletter_id == id).Include(d => d.shift).Select(d => new
+            var ChamcongModel = _context.ChamcongModel.Where(d => customerData.id == d.NV_id && d.orderletter_id != null && d.orderletter_id == id).Include(d => d.shift).Select(d => new ChamcongModel
             {
                 id = d.id,
                 shift = d.shift,
+                shift_id = d.shift_id,
+                NV_id = d.NV_id,
+                MANV = d.MANV,
                 date = d.date,
                 value = d.value,
-                value_new = d.value_new
+                value_new = d.value_new,
+                orderletter_id = d.orderletter_id,
+                is_duyet = d.is_duyet,
             }).ToList();
+            ///KHI ĐÃ PHÊ DUYỆT
             if (OrderLetterModel.status_id != (int)OrderletterStatus.New)
             {
-                ChamcongModel = _context.OrderletterDetailsModel.Where(d => customerData.id == d.NV_id && d.orderletter_id != null && d.orderletter_id == id).Include(d => d.shift).Select(d => new
+                ChamcongModel = _context.OrderletterDetailsModel.Where(d => customerData.id == d.NV_id && d.orderletter_id != null && d.orderletter_id == id).Include(d => d.shift).Select(d => new ChamcongModel
                 {
                     id = d.id,
                     shift = d.shift,
+                    shift_id = d.shift_id,
+                    NV_id = d.NV_id,
+                    MANV = d.MANV,
                     date = d.date,
                     value = d.value,
-                    value_new = d.value_new
-
+                    value_new = d.value_new,
+                    orderletter_id = d.orderletter_id,
+                    is_duyet = true,
                 }).ToList();
             }
 

@@ -35,6 +35,7 @@ namespace Info.Models
 
         public string? note { get; set; }
         public string? note1 { get; set; }
+        public string? summary { get; set; }
 
         public DateTime? date_accept { get; set; }
         public DateTime? date1_accept { get; set; }
