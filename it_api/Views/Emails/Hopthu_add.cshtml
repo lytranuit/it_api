@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Index";
+    Layout = null;
+}
+<center>
+    <table width="100%">
+        <tbody>
+            <tr>
+                <td>
+                    <div>
+                        <div style="box-sizing:border-box;margin:0;padding:0 40px">
+                            <p style="text-align:left"><b>Loại: </b> @Model.data.loai_label</p>
+                            <p style="text-align:left"><b>Nội dung:</b></p>
+                            <p style="text-align:left;white-space:break-spaces">@Model.data.content</p>
+                            <p>Hoặc bạn có thể xem chi tiết ở link dưới:</p>
+                            <p style="text-align:center;">
+                                <a href="@Model.link" style="padding: 10px 30px;
+                                    display:inline-block;
+                                    background: #ffb009;
+                                    color: white;
+                                    text-decoration: none;
+                                    font-size: 13px;
+                                    border-radius: 5px;">
+                                    Đi Đến
+                                </a>
+                            </p>
+                            <p style="text-align:left">Trân trọng.</p>
+                            <p style="text-align:left">ASTA</p>
+                            <br>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</center>

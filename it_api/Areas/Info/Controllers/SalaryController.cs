@@ -13,22 +13,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using PH.WorkingDaysAndTimeUtility;
-using PH.WorkingDaysAndTimeUtility.Configuration;
 using Spire.Xls;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.Dynamic;
 using System.Reflection;
-using System.Security.Policy;
 using System.Text.Json.Serialization;
 using Vue.Data;
 using Vue.Models;
 using Vue.Services;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace it_template.Areas.Info.Controllers
 {
@@ -172,8 +164,8 @@ namespace it_template.Areas.Info.Controllers
                 Worksheet sheet = workbook.Worksheets[0];
                 var now = DateTime.Now;
                 var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
-                sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AF17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
+                sheet.Range["Q6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
+                sheet.Range["AI17"].Value = $"Hòa Hiệp, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
                 int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
@@ -233,6 +225,7 @@ namespace it_template.Areas.Info.Controllers
                         var pc_khuvuc = record.pc_khuvuc ?? 0;
                         var pc_thamnien = record.pc_thamnien ?? 0;
                         var pc_hieusuat = record.pc_hieusuat ?? 0;
+                        var pc_tienan = record.pc_tienan ?? 0;
                         var pc_thuhut = record.pc_thuhut ?? 0;
                         var pc_khac = record.pc ?? 0;
 
@@ -243,9 +236,13 @@ namespace it_template.Areas.Info.Controllers
                         var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
+                        var khoantru_sauthue = person.khoantru_sauthue ?? 0;
                         var khoancong_sauthue = person.khoancong_sauthue ?? 0;
+                        var luongdoanhso = person.luongdoanhso ?? 0;
+
                         var note_khoantru = person.note_khoantru;
                         var note_khoancong = person.note_khoancong;
+                        var note_khoantru_sauthue = person.note_khoantru_sauthue;
                         var note_khoancong_sauthue = person.note_khoancong_sauthue;
                         var note = person.note;
                         var is_bhxh = record.is_bhxh;
@@ -273,7 +270,7 @@ namespace it_template.Areas.Info.Controllers
                             TNCN_nguoiphuthuoc = 0; // Không giảm trừ
                                                     //tyle = 0;
                                                     //tyle_dpcd = 0;
-                            nRow.Cells[30].Formula = "=ROUND(AD" + (start_r + 1) + " * 10%, 0)";
+                            nRow.Cells[33].Formula = "=ROUND(AG" + (start_r + 1) + " * 10%, 0)";
 
                             //nRow.Cells[7].Value2 = "";
                         }
@@ -294,7 +291,7 @@ namespace it_template.Areas.Info.Controllers
                         }
                         if (is_thue != true)
                         {
-                            nRow.Cells[30].ClearAll(); // không đóng thuế TNCN
+                            nRow.Cells[33].ClearAll(); // không đóng thuế TNCN
                         }
 
                         nRow.Cells[0].NumberValue = ++stt;
@@ -312,37 +309,43 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[11].NumberValue = (double)pc_thuhut;
                         nRow.Cells[12].NumberValue = (double)pc_khuvuc;
                         nRow.Cells[13].NumberValue = (double)pc_trachnhiem;
-                        nRow.Cells[14].NumberValue = (double)pc_khac;
+                        nRow.Cells[14].NumberValue = (double)pc_tienan;
+                        nRow.Cells[15].NumberValue = (double)pc_khac;
 
-                        nRow.Cells[16].NumberValue = (double)luongkpi;
-                        nRow.Cells[18].NumberValue = (double)congthucte;
-                        nRow.Cells[19].NumberValue = (double)khoancong;
-                        nRow.Cells[25].NumberValue = (double)TNCN_banthan;
-                        nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
-                        nRow.Cells[32].NumberValue = (double)khoantru;
-                        nRow.Cells[33].NumberValue = (double)khoancong_sauthue;
-                        if (note_khoancong != null)
-                            nRow.Cells[19].AddComment().Text = note_khoancong;
+                        nRow.Cells[17].NumberValue = (double)luongkpi;
+                        nRow.Cells[19].NumberValue = (double)congthucte;
+                        nRow.Cells[20].NumberValue = (double)khoantru;
+                        nRow.Cells[21].NumberValue = (double)khoancong;
+                        nRow.Cells[22].NumberValue = (double)luongdoanhso;
+
+                        nRow.Cells[28].NumberValue = (double)TNCN_banthan;
+                        nRow.Cells[29].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[35].NumberValue = (double)khoantru_sauthue;
+                        nRow.Cells[36].NumberValue = (double)khoancong_sauthue;
                         if (note_khoantru != null)
-                            nRow.Cells[32].AddComment().Text = note_khoantru;
+                            nRow.Cells[20].AddComment().Text = note_khoantru;
+                        if (note_khoancong != null)
+                            nRow.Cells[21].AddComment().Text = note_khoancong;
+                        if (note_khoantru_sauthue != null)
+                            nRow.Cells[35].AddComment().Text = note_khoantru_sauthue;
                         if (note != null)
-                            nRow.Cells[20].AddComment().Text = note;
+                            nRow.Cells[18].AddComment().Text = note;
                         if (note_khoancong_sauthue != null)
-                            nRow.Cells[33].AddComment().Text = note_khoancong_sauthue;
+                            nRow.Cells[36].AddComment().Text = note_khoancong_sauthue;
 
 
-                        nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                        nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
+                        nRow.Cells[31].Formula = "=ROUND(Y" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
+                        nRow.Cells[34].Formula = "=ROUND(Y" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[34].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[37].FormulaNumberValue)
                         {
-                            nRow.Cells[35].NumberValue = (double)tamungdot1;
+                            nRow.Cells[38].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[39].Value = stk;
-                        nRow.Cells[40].Value = diachilamviec;
-                        nRow.Cells[41].Value = masothue;
+                        nRow.Cells[42].Value = stk;
+                        nRow.Cells[43].Value = diachilamviec;
+                        nRow.Cells[44].Value = masothue;
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -377,31 +380,32 @@ namespace it_template.Areas.Info.Controllers
                         person.tc_thamnien = (decimal)pc_thamnien;
                         person.tc_thuhut = (decimal)pc_thuhut;
                         person.tc_khuvuc = (decimal)pc_khuvuc;
+                        person.tc_tienan = (decimal)pc_tienan;
                         person.tc_khac = (decimal)pc_khac;
 
-                        person.tong_tc = Convert.ToDecimal(nRow.Cells[15].FormulaValue);
+                        person.tong_tc = Convert.ToDecimal(nRow.Cells[16].FormulaValue);
 
                         person.luongcb = (decimal)luongcb;
-                        person.luongdongbhxh = Convert.ToDecimal(nRow.Cells[21].FormulaValue);
+                        person.luongdongbhxh = Convert.ToDecimal(nRow.Cells[24].FormulaValue);
 
                         person.luongkpi = (decimal)luongkpi;
                         person.tong_tn = (decimal)tong_thunhap;
 
-                        person.tongthunhap = Convert.ToDecimal(nRow.Cells[20].FormulaValue);
+                        person.tongthunhap = Convert.ToDecimal(nRow.Cells[23].FormulaValue);
 
-                        person.thunhapchiuthue = Convert.ToDecimal(nRow.Cells[24].FormulaValue);
+                        person.thunhapchiuthue = Convert.ToDecimal(nRow.Cells[27].FormulaValue);
 
 
                         person.tncn_banthan = (decimal)TNCN_banthan;
                         person.tncn_songuoiphuthuoc = (int)TNCN_nguoiphuthuoc;
-                        person.tncn_nguoiphuthuoc = Convert.ToDecimal(nRow.Cells[27].FormulaValue);
-                        person.tncn_bhxh = Convert.ToDecimal(nRow.Cells[28].FormulaValue);
-                        person.thunhaptinhthue = Convert.ToDecimal(nRow.Cells[29].FormulaValue);
-                        person.thue_tncn = Convert.ToDecimal(nRow.Cells[30].FormulaValue);
-                        person.dpcd = Convert.ToDecimal(nRow.Cells[31].FormulaValue);
-                        person.thuclanh = Convert.ToDecimal(nRow.Cells[34].FormulaValue);
-                        person.tamungdot1 = Convert.ToDecimal(nRow.Cells[35].EnvalutedValue);
-                        person.conlai = Convert.ToDecimal(nRow.Cells[36].FormulaValue);
+                        person.tncn_nguoiphuthuoc = Convert.ToDecimal(nRow.Cells[30].FormulaValue);
+                        person.tncn_bhxh = Convert.ToDecimal(nRow.Cells[31].FormulaValue);
+                        person.thunhaptinhthue = Convert.ToDecimal(nRow.Cells[32].FormulaValue);
+                        person.thue_tncn = Convert.ToDecimal(nRow.Cells[33].FormulaValue);
+                        person.dpcd = Convert.ToDecimal(nRow.Cells[34].FormulaValue);
+                        person.thuclanh = Convert.ToDecimal(nRow.Cells[37].FormulaValue);
+                        person.tamungdot1 = Convert.ToDecimal(nRow.Cells[38].EnvalutedValue);
+                        person.conlai = Convert.ToDecimal(nRow.Cells[39].FormulaValue);
                         person.tongphep = (decimal)item["tongphep"];
 
                         decimal phepconlai = (decimal)_tinhcong.phepnam(record, date_to);
@@ -466,8 +470,8 @@ namespace it_template.Areas.Info.Controllers
                 Worksheet sheet = workbook.Worksheets[1];
                 var now = DateTime.Now;
                 var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
-                sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AF17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
+                sheet.Range["Q6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
+                sheet.Range["AI17"].Value = $"Hòa Hiệp, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
 
                 int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
@@ -511,6 +515,7 @@ namespace it_template.Areas.Info.Controllers
                         var tinh = TinhModel.Where(d => d.MaTinh == DIADIEM).FirstOrDefault();
                         var chucvu = item["chucvu"];
 
+
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
@@ -528,6 +533,7 @@ namespace it_template.Areas.Info.Controllers
                         var pc_khuvuc = record.pc_khuvuc ?? 0;
                         var pc_thamnien = record.pc_thamnien ?? 0;
                         var pc_hieusuat = record.pc_hieusuat ?? 0;
+                        var pc_tienan = record.pc_tienan ?? 0;
                         var pc_thuhut = record.pc_thuhut ?? 0;
                         var pc_khac = record.pc ?? 0;
 
@@ -538,9 +544,13 @@ namespace it_template.Areas.Info.Controllers
                         var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
+                        var khoantru_sauthue = person.khoantru_sauthue ?? 0;
                         var khoancong_sauthue = person.khoancong_sauthue ?? 0;
+                        var luongdoanhso = person.luongdoanhso ?? 0;
+
                         var note_khoantru = person.note_khoantru;
                         var note_khoancong = person.note_khoancong;
+                        var note_khoantru_sauthue = person.note_khoantru_sauthue;
                         var note_khoancong_sauthue = person.note_khoancong_sauthue;
                         var note = person.note;
                         var is_bhxh = record.is_bhxh;
@@ -558,7 +568,6 @@ namespace it_template.Areas.Info.Controllers
 
                         var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
                         var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
-
                         var nRow = sheet.Rows[start_r];
 
                         if (record.LOAIHD == "DV")
@@ -569,7 +578,7 @@ namespace it_template.Areas.Info.Controllers
                             TNCN_nguoiphuthuoc = 0; // Không giảm trừ
                                                     //tyle = 0;
                                                     //tyle_dpcd = 0;
-                            nRow.Cells[30].Formula = "=ROUND(AD" + (start_r + 1) + " * 10%, 0)";
+                            nRow.Cells[33].Formula = "=ROUND(AG" + (start_r + 1) + " * 10%, 0)";
 
                             //nRow.Cells[7].Value2 = "";
                         }
@@ -590,7 +599,7 @@ namespace it_template.Areas.Info.Controllers
                         }
                         if (is_thue != true)
                         {
-                            nRow.Cells[30].ClearAll(); // không đóng thuế TNCN
+                            nRow.Cells[33].ClearAll(); // không đóng thuế TNCN
                         }
 
                         nRow.Cells[0].NumberValue = ++stt;
@@ -608,38 +617,43 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[11].NumberValue = (double)pc_thuhut;
                         nRow.Cells[12].NumberValue = (double)pc_khuvuc;
                         nRow.Cells[13].NumberValue = (double)pc_trachnhiem;
-                        nRow.Cells[14].NumberValue = (double)pc_khac;
+                        nRow.Cells[14].NumberValue = (double)pc_tienan;
+                        nRow.Cells[15].NumberValue = (double)pc_khac;
 
-                        nRow.Cells[16].NumberValue = (double)luongkpi;
-                        nRow.Cells[18].NumberValue = (double)congthucte;
-                        nRow.Cells[19].NumberValue = (double)khoancong;
-                        nRow.Cells[25].NumberValue = (double)TNCN_banthan;
-                        nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
-                        nRow.Cells[32].NumberValue = (double)khoantru;
-                        nRow.Cells[33].NumberValue = (double)khoancong_sauthue;
-                        if (note_khoancong != null)
-                            nRow.Cells[19].AddComment().Text = note_khoancong;
+                        nRow.Cells[17].NumberValue = (double)luongkpi;
+                        nRow.Cells[19].NumberValue = (double)congthucte;
+                        nRow.Cells[20].NumberValue = (double)khoantru;
+                        nRow.Cells[21].NumberValue = (double)khoancong;
+                        nRow.Cells[22].NumberValue = (double)luongdoanhso;
+
+                        nRow.Cells[28].NumberValue = (double)TNCN_banthan;
+                        nRow.Cells[29].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[35].NumberValue = (double)khoantru_sauthue;
+                        nRow.Cells[36].NumberValue = (double)khoancong_sauthue;
                         if (note_khoantru != null)
-                            nRow.Cells[32].AddComment().Text = note_khoantru;
+                            nRow.Cells[20].AddComment().Text = note_khoantru;
+                        if (note_khoancong != null)
+                            nRow.Cells[21].AddComment().Text = note_khoancong;
+                        if (note_khoantru_sauthue != null)
+                            nRow.Cells[35].AddComment().Text = note_khoantru_sauthue;
                         if (note != null)
-                            nRow.Cells[20].AddComment().Text = note;
+                            nRow.Cells[18].AddComment().Text = note;
                         if (note_khoancong_sauthue != null)
-                            nRow.Cells[33].AddComment().Text = note_khoancong_sauthue;
+                            nRow.Cells[36].AddComment().Text = note_khoancong_sauthue;
 
 
-                        nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                        nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
+                        nRow.Cells[31].Formula = "=ROUND(Y" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
+                        nRow.Cells[34].Formula = "=ROUND(Y" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[34].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[37].FormulaNumberValue)
                         {
-                            nRow.Cells[35].NumberValue = (double)tamungdot1;
+                            nRow.Cells[38].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[39].Value = stk;
-                        nRow.Cells[40].Value = diachilamviec;
-                        nRow.Cells[41].Value = masothue;
-
+                        nRow.Cells[42].Value = stk;
+                        nRow.Cells[43].Value = diachilamviec;
+                        nRow.Cells[44].Value = masothue;
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -676,8 +690,8 @@ namespace it_template.Areas.Info.Controllers
                 Worksheet sheet = workbook.Worksheets[2];
                 var now = DateTime.Now;
                 var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
-                sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AF17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
+                sheet.Range["Q6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
+                sheet.Range["AI17"].Value = $"Hòa Hiệp, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
 
                 int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
@@ -721,6 +735,7 @@ namespace it_template.Areas.Info.Controllers
                         var tinh = TinhModel.Where(d => d.MaTinh == DIADIEM).FirstOrDefault();
                         var chucvu = item["chucvu"];
 
+
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
@@ -738,6 +753,7 @@ namespace it_template.Areas.Info.Controllers
                         var pc_khuvuc = record.pc_khuvuc ?? 0;
                         var pc_thamnien = record.pc_thamnien ?? 0;
                         var pc_hieusuat = record.pc_hieusuat ?? 0;
+                        var pc_tienan = record.pc_tienan ?? 0;
                         var pc_thuhut = record.pc_thuhut ?? 0;
                         var pc_khac = record.pc ?? 0;
 
@@ -748,9 +764,13 @@ namespace it_template.Areas.Info.Controllers
                         var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
+                        var khoantru_sauthue = person.khoantru_sauthue ?? 0;
                         var khoancong_sauthue = person.khoancong_sauthue ?? 0;
+                        var luongdoanhso = person.luongdoanhso ?? 0;
+
                         var note_khoantru = person.note_khoantru;
                         var note_khoancong = person.note_khoancong;
+                        var note_khoantru_sauthue = person.note_khoantru_sauthue;
                         var note_khoancong_sauthue = person.note_khoancong_sauthue;
                         var note = person.note;
                         var is_bhxh = record.is_bhxh;
@@ -768,7 +788,6 @@ namespace it_template.Areas.Info.Controllers
 
                         var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
                         var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
-
                         var nRow = sheet.Rows[start_r];
 
                         if (record.LOAIHD == "DV")
@@ -779,7 +798,7 @@ namespace it_template.Areas.Info.Controllers
                             TNCN_nguoiphuthuoc = 0; // Không giảm trừ
                                                     //tyle = 0;
                                                     //tyle_dpcd = 0;
-                            nRow.Cells[30].Formula = "=ROUND(AD" + (start_r + 1) + " * 10%, 0)";
+                            nRow.Cells[33].Formula = "=ROUND(AG" + (start_r + 1) + " * 10%, 0)";
 
                             //nRow.Cells[7].Value2 = "";
                         }
@@ -800,7 +819,7 @@ namespace it_template.Areas.Info.Controllers
                         }
                         if (is_thue != true)
                         {
-                            nRow.Cells[30].ClearAll(); // không đóng thuế TNCN
+                            nRow.Cells[33].ClearAll(); // không đóng thuế TNCN
                         }
 
                         nRow.Cells[0].NumberValue = ++stt;
@@ -818,37 +837,43 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[11].NumberValue = (double)pc_thuhut;
                         nRow.Cells[12].NumberValue = (double)pc_khuvuc;
                         nRow.Cells[13].NumberValue = (double)pc_trachnhiem;
-                        nRow.Cells[14].NumberValue = (double)pc_khac;
+                        nRow.Cells[14].NumberValue = (double)pc_tienan;
+                        nRow.Cells[15].NumberValue = (double)pc_khac;
 
-                        nRow.Cells[16].NumberValue = (double)luongkpi;
-                        nRow.Cells[18].NumberValue = (double)congthucte;
-                        nRow.Cells[19].NumberValue = (double)khoancong;
-                        nRow.Cells[25].NumberValue = (double)TNCN_banthan;
-                        nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
-                        nRow.Cells[32].NumberValue = (double)khoantru;
-                        nRow.Cells[33].NumberValue = (double)khoancong_sauthue;
-                        if (note_khoancong != null)
-                            nRow.Cells[19].AddComment().Text = note_khoancong;
+                        nRow.Cells[17].NumberValue = (double)luongkpi;
+                        nRow.Cells[19].NumberValue = (double)congthucte;
+                        nRow.Cells[20].NumberValue = (double)khoantru;
+                        nRow.Cells[21].NumberValue = (double)khoancong;
+                        nRow.Cells[22].NumberValue = (double)luongdoanhso;
+
+                        nRow.Cells[28].NumberValue = (double)TNCN_banthan;
+                        nRow.Cells[29].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[35].NumberValue = (double)khoantru_sauthue;
+                        nRow.Cells[36].NumberValue = (double)khoancong_sauthue;
                         if (note_khoantru != null)
-                            nRow.Cells[32].AddComment().Text = note_khoantru;
+                            nRow.Cells[20].AddComment().Text = note_khoantru;
+                        if (note_khoancong != null)
+                            nRow.Cells[21].AddComment().Text = note_khoancong;
+                        if (note_khoantru_sauthue != null)
+                            nRow.Cells[35].AddComment().Text = note_khoantru_sauthue;
                         if (note != null)
-                            nRow.Cells[20].AddComment().Text = note;
+                            nRow.Cells[18].AddComment().Text = note;
                         if (note_khoancong_sauthue != null)
-                            nRow.Cells[33].AddComment().Text = note_khoancong_sauthue;
+                            nRow.Cells[36].AddComment().Text = note_khoancong_sauthue;
 
 
-                        nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                        nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
+                        nRow.Cells[31].Formula = "=ROUND(Y" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
+                        nRow.Cells[34].Formula = "=ROUND(Y" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[34].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[37].FormulaNumberValue)
                         {
-                            nRow.Cells[35].NumberValue = (double)tamungdot1;
+                            nRow.Cells[38].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[39].Value = stk;
-                        nRow.Cells[40].Value = diachilamviec;
-                        nRow.Cells[41].Value = masothue;
+                        nRow.Cells[42].Value = stk;
+                        nRow.Cells[43].Value = diachilamviec;
+                        nRow.Cells[44].Value = masothue;
 
                         //if (record.MANV == "NMK170962")
                         //{
@@ -889,8 +914,8 @@ namespace it_template.Areas.Info.Controllers
                 Worksheet sheet = workbook.Worksheets[3];
                 var now = DateTime.Now;
                 var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
-                sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AF17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
+                sheet.Range["Q6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
+                sheet.Range["AI17"].Value = $"Hòa Hiệp, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
 
                 int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
@@ -934,6 +959,7 @@ namespace it_template.Areas.Info.Controllers
                         var tinh = TinhModel.Where(d => d.MaTinh == DIADIEM).FirstOrDefault();
                         var chucvu = item["chucvu"];
 
+
                         var congtrongthang = item["tongcong"];
                         var congthucte = item["tong"];
                         var tenchucvu = chucvu != null ? chucvu.TENCHUCVU : "";
@@ -951,6 +977,7 @@ namespace it_template.Areas.Info.Controllers
                         var pc_khuvuc = record.pc_khuvuc ?? 0;
                         var pc_thamnien = record.pc_thamnien ?? 0;
                         var pc_hieusuat = record.pc_hieusuat ?? 0;
+                        var pc_tienan = record.pc_tienan ?? 0;
                         var pc_thuhut = record.pc_thuhut ?? 0;
                         var pc_khac = record.pc ?? 0;
 
@@ -961,9 +988,13 @@ namespace it_template.Areas.Info.Controllers
                         var tamungdot1 = record.tien_luong_dot1;
                         var khoantru = person.khoantru ?? 0;
                         var khoancong = person.khoancong ?? 0;
+                        var khoantru_sauthue = person.khoantru_sauthue ?? 0;
                         var khoancong_sauthue = person.khoancong_sauthue ?? 0;
+                        var luongdoanhso = person.luongdoanhso ?? 0;
+
                         var note_khoantru = person.note_khoantru;
                         var note_khoancong = person.note_khoancong;
+                        var note_khoantru_sauthue = person.note_khoantru_sauthue;
                         var note_khoancong_sauthue = person.note_khoancong_sauthue;
                         var note = person.note;
                         var is_bhxh = record.is_bhxh;
@@ -981,7 +1012,6 @@ namespace it_template.Areas.Info.Controllers
 
                         var tyle = tyle_bhxh + tyle_bhtn + tyle_bhyt;
                         var stk = (record.sotk_icb ?? "") + " - " + (record.sotk_vba ?? "");
-
                         var nRow = sheet.Rows[start_r];
 
                         if (record.LOAIHD == "DV")
@@ -992,7 +1022,7 @@ namespace it_template.Areas.Info.Controllers
                             TNCN_nguoiphuthuoc = 0; // Không giảm trừ
                                                     //tyle = 0;
                                                     //tyle_dpcd = 0;
-                            nRow.Cells[30].Formula = "=ROUND(AD" + (start_r + 1) + " * 10%, 0)";
+                            nRow.Cells[33].Formula = "=ROUND(AG" + (start_r + 1) + " * 10%, 0)";
 
                             //nRow.Cells[7].Value2 = "";
                         }
@@ -1013,7 +1043,7 @@ namespace it_template.Areas.Info.Controllers
                         }
                         if (is_thue != true)
                         {
-                            nRow.Cells[30].ClearAll(); // không đóng thuế TNCN
+                            nRow.Cells[33].ClearAll(); // không đóng thuế TNCN
                         }
 
                         nRow.Cells[0].NumberValue = ++stt;
@@ -1031,38 +1061,43 @@ namespace it_template.Areas.Info.Controllers
                         nRow.Cells[11].NumberValue = (double)pc_thuhut;
                         nRow.Cells[12].NumberValue = (double)pc_khuvuc;
                         nRow.Cells[13].NumberValue = (double)pc_trachnhiem;
-                        nRow.Cells[14].NumberValue = (double)pc_khac;
+                        nRow.Cells[14].NumberValue = (double)pc_tienan;
+                        nRow.Cells[15].NumberValue = (double)pc_khac;
 
-                        nRow.Cells[16].NumberValue = (double)luongkpi;
-                        nRow.Cells[18].NumberValue = (double)congthucte;
-                        nRow.Cells[19].NumberValue = (double)khoancong;
-                        nRow.Cells[25].NumberValue = (double)TNCN_banthan;
-                        nRow.Cells[26].NumberValue = (double)TNCN_nguoiphuthuoc;
-                        nRow.Cells[32].NumberValue = (double)khoantru;
-                        nRow.Cells[33].NumberValue = (double)khoancong_sauthue;
-                        if (note_khoancong != null)
-                            nRow.Cells[19].AddComment().Text = note_khoancong;
+                        nRow.Cells[17].NumberValue = (double)luongkpi;
+                        nRow.Cells[19].NumberValue = (double)congthucte;
+                        nRow.Cells[20].NumberValue = (double)khoantru;
+                        nRow.Cells[21].NumberValue = (double)khoancong;
+                        nRow.Cells[22].NumberValue = (double)luongdoanhso;
+
+                        nRow.Cells[28].NumberValue = (double)TNCN_banthan;
+                        nRow.Cells[29].NumberValue = (double)TNCN_nguoiphuthuoc;
+                        nRow.Cells[35].NumberValue = (double)khoantru_sauthue;
+                        nRow.Cells[36].NumberValue = (double)khoancong_sauthue;
                         if (note_khoantru != null)
-                            nRow.Cells[32].AddComment().Text = note_khoantru;
+                            nRow.Cells[20].AddComment().Text = note_khoantru;
+                        if (note_khoancong != null)
+                            nRow.Cells[21].AddComment().Text = note_khoancong;
+                        if (note_khoantru_sauthue != null)
+                            nRow.Cells[35].AddComment().Text = note_khoantru_sauthue;
                         if (note != null)
-                            nRow.Cells[20].AddComment().Text = note;
+                            nRow.Cells[18].AddComment().Text = note;
                         if (note_khoancong_sauthue != null)
-                            nRow.Cells[33].AddComment().Text = note_khoancong_sauthue;
+                            nRow.Cells[36].AddComment().Text = note_khoancong_sauthue;
 
 
-                        nRow.Cells[28].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
-                        nRow.Cells[31].Formula = "=ROUND(V" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
+                        nRow.Cells[31].Formula = "=ROUND(Y" + (start_r + 1) + " * " + tyle + "%, 0)"; ///BHXH
+                        nRow.Cells[34].Formula = "=ROUND(Y" + (start_r + 1) + " * " + tyle_dpcd + "%, 0)";
 
                         sheet.CalculateAllValue();
-                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[34].FormulaNumberValue)
+                        if (tamungdot1 != null && tamungdot1 < nRow.Cells[37].FormulaNumberValue)
                         {
-                            nRow.Cells[35].NumberValue = (double)tamungdot1;
+                            nRow.Cells[38].NumberValue = (double)tamungdot1;
                             sheet.CalculateAllValue();
                         }
-                        nRow.Cells[39].Value = stk;
-                        nRow.Cells[40].Value = diachilamviec;
-                        nRow.Cells[41].Value = masothue;
-
+                        nRow.Cells[42].Value = stk;
+                        nRow.Cells[43].Value = diachilamviec;
+                        nRow.Cells[44].Value = masothue;
                         //if (record.MANV == "NMK170962")
                         //{
                         //    Console.Write(nRow);
@@ -1258,7 +1293,7 @@ namespace it_template.Areas.Info.Controllers
                 var now = DateTime.Now;
                 var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["AF17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
+                sheet.Range["AF17"].Value = $"Hòa Hiệp, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
                 int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
@@ -1317,9 +1352,9 @@ namespace it_template.Areas.Info.Controllers
                         var TNCN_banthan = 11000000;
                         var TNCN_nguoiphuthuoc = person.tncn_songuoiphuthuoc ?? 0;
                         var tamungdot1 = person.tamungdot1 ?? 0;
-                        var khoantru = person.khoantru ?? 0;
+                        var khoantru = person.khoantru_sauthue ?? 0;
                         var khoancong = person.khoancong ?? 0;
-                        var note_khoantru = person.note_khoantru;
+                        var note_khoantru = person.note_khoantru_sauthue;
                         var note_khoancong = person.note_khoancong;
                         var note = person.note;
                         var is_bhxh = person.is_bhxh;
@@ -1455,7 +1490,7 @@ namespace it_template.Areas.Info.Controllers
                 var now = DateTime.Now;
                 var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
                 sheet.Range["P6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["W17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
+                sheet.Range["W17"].Value = $"Hòa Hiệp, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
                 int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
@@ -1515,9 +1550,9 @@ namespace it_template.Areas.Info.Controllers
 
                         var TNCN_nguoiphuthuoc = person.tncn_songuoiphuthuoc ?? 0;
                         var tamungdot1 = person.tamungdot1 ?? 0;
-                        var khoantru = person.khoantru ?? 0;
+                        var khoantru = person.khoantru_sauthue ?? 0;
                         var khoancong = person.khoancong ?? 0;
-                        var note_khoantru = person.note_khoantru;
+                        var note_khoantru = person.note_khoantru_sauthue;
                         var note_khoancong = person.note_khoancong;
                         var note = person.note;
                         //var is_bhxh = person.is;
@@ -1619,7 +1654,7 @@ namespace it_template.Areas.Info.Controllers
                 var now = DateTime.Now;
                 var end_time = new DateTime(date_to.Year, date_to.Month, DateTime.DaysInMonth(date_to.Year, date_to.Month));
                 sheet.Range["D6"].Value = $"Tháng {date_to.ToString("MM")} Năm {date_to.ToString("yyyy")} (công tính từ ngày {date_from.ToString("dd/MM/yy")}-{date_to.ToString("dd/MM/yy")})";
-                sheet.Range["P17"].Value = $"Đông Hòa, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
+                sheet.Range["P17"].Value = $"Hòa Hiệp, ngày {end_time.ToString("dd")} tháng {end_time.ToString("MM")} năm {end_time.ToString("yyyy")}";
                 int stt = 0;
                 int sourceRowIndex = 10; // Dòng gốc để sao chép định dạng
                 foreach (var bophan1 in list_bophan1)
@@ -1679,9 +1714,9 @@ namespace it_template.Areas.Info.Controllers
 
                         var TNCN_nguoiphuthuoc = person.tncn_nguoiphuthuoc ?? 0;
                         var tamungdot1 = person.tamungdot1 ?? 0;
-                        var khoantru = person.khoantru ?? 0;
+                        var khoantru = person.khoantru_sauthue ?? 0;
                         var khoancong = person.khoancong ?? 0;
-                        var note_khoantru = person.note_khoantru;
+                        var note_khoantru = person.note_khoantru_sauthue;
                         var note_khoancong = person.note_khoancong;
                         var note = person.note;
                         var is_bhxh = person.is_bhxh;
@@ -2009,6 +2044,22 @@ namespace it_template.Areas.Info.Controllers
         public async Task<JsonResult> SaveSalaryUser(SalaryUserModel SalaryUserModel)
         {
             var SalaryUserModel_old = _context.SalaryUserModel.Where(d => d.id == SalaryUserModel.id).FirstOrDefault();
+            if (ModelState.ContainsKey("xeploai"))
+            {
+                SalaryUserModel_old.xeploai = SalaryUserModel.xeploai;
+            }
+            if (ModelState.ContainsKey("luongxeploai"))
+            {
+                SalaryUserModel_old.luongxeploai = SalaryUserModel.luongxeploai;
+            }
+            if (ModelState.ContainsKey("luongdoanhso"))
+            {
+                SalaryUserModel_old.luongdoanhso = SalaryUserModel.luongdoanhso;
+            }
+            if (ModelState.ContainsKey("khoantru_sauthue"))
+            {
+                SalaryUserModel_old.khoantru_sauthue = SalaryUserModel.khoantru_sauthue;
+            }
             if (ModelState.ContainsKey("khoantru"))
             {
                 SalaryUserModel_old.khoantru = SalaryUserModel.khoantru;
@@ -2024,6 +2075,11 @@ namespace it_template.Areas.Info.Controllers
             if (ModelState.ContainsKey("note_khoancong"))
             {
                 SalaryUserModel_old.note_khoancong = SalaryUserModel.note_khoancong;
+            }
+
+            if (ModelState.ContainsKey("note_khoantru_sauthue"))
+            {
+                SalaryUserModel_old.note_khoantru_sauthue = SalaryUserModel.note_khoantru_sauthue;
             }
             if (ModelState.ContainsKey("note_khoantru"))
             {
@@ -2052,6 +2108,11 @@ namespace it_template.Areas.Info.Controllers
 
             foreach (var item in list_user)
             {
+                if (ModelState.ContainsKey("khoantru_sauthue"))
+                {
+
+                    item.khoantru_sauthue = SalaryUserModel.khoantru_sauthue;
+                }
                 if (ModelState.ContainsKey("khoantru"))
                 {
 
@@ -2068,6 +2129,10 @@ namespace it_template.Areas.Info.Controllers
                 if (ModelState.ContainsKey("note_khoancong"))
                 {
                     item.note_khoancong = SalaryUserModel.note_khoancong;
+                }
+                if (ModelState.ContainsKey("note_khoantru_sauthue"))
+                {
+                    item.note_khoantru_sauthue = SalaryUserModel.note_khoantru_sauthue;
                 }
                 if (ModelState.ContainsKey("note_khoantru"))
                 {
@@ -2188,7 +2253,7 @@ namespace it_template.Areas.Info.Controllers
             System.Security.Claims.ClaimsPrincipal currentUser = this.User;
             var user_id = UserManager.GetUserId(currentUser);
             var user = await UserManager.GetUserAsync(currentUser);
-            var person = _context.PersonnelModel.Where(d => d.EMAIL == user.Email).FirstOrDefault();
+            var person = _context.PersonnelModel.Where(d => d.EMAIL.ToLower() == user.Email.ToLower()).FirstOrDefault();
             var MANV = person.MANV;
             var maphong = person.MAPHONG;
 
@@ -2211,15 +2276,15 @@ namespace it_template.Areas.Info.Controllers
             var differences = new Dictionary<string, (object OldValue, object NewValue, int column)>();
 
             var dict = new Dictionary<string, int>();
-            dict.Add("ngaycongthucte", 18);
-            dict.Add("tongthunhap", 20);
+            dict.Add("ngaycongthucte", 19);
+            dict.Add("tongthunhap", 21);
             dict.Add("luongcb", 6);
-            dict.Add("luongdongbhxh", 21);
-            dict.Add("luongkpi", 16);
-            dict.Add("tong_tc", 14);
+            dict.Add("luongdongbhxh", 23);
+            dict.Add("luongkpi", 17);
+            dict.Add("tong_tc", 15);
             //dict.Add("khoancong", 19);
             //dict.Add("khoantru", 31);
-            dict.Add("thuclanh", 34);
+            dict.Add("thuclanh", 36);
             //dict.Add("thunhaptinhthue", 28);
             //dict.Add("thunhapchiuthue", 23);
 

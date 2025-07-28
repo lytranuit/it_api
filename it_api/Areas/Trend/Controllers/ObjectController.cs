@@ -162,6 +162,7 @@ namespace it_template.Areas.Trend.Controllers
         public JsonResult Get(int id)
         {
             var data = _context.ObjectModel.Where(d => d.id == id).Include(d => d.targets).ThenInclude(d => d.target).FirstOrDefault();
+            data.targets = data.targets.OrderBy(d => d.order).ToList();
             return Json(data);
         }
         private void CopyValues<T>(T target, T source)

@@ -20,6 +20,8 @@ namespace Info.Models
 
         [NotMapped]
         public HikModel first_hik { get; set; }
+        [NotMapped]
+        public int trangthai { get; set; }
 
     }
 }

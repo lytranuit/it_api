@@ -848,7 +848,7 @@ namespace it_template.Areas.Trend.Controllers
                 date_to_prev = date_to_prev.Value.ToLocalTime();
             }
             var data = new ArrayList();
-
+            //var objects = _context.ObjectModel.Where(d => d.id == LimitModel.object_id).FirstOrDefault();
 
             if (LimitModel.object_id == 2)
             {
@@ -1742,7 +1742,7 @@ namespace it_template.Areas.Trend.Controllers
 
                 ////Lấy 
                 ///
-
+                var object_target = _context.ObjectTargetModel.Where(d => d.object_id == LimitModel.object_id).OrderBy(d => d.order).Select(d => d.target_id).ToList();
                 var from = date_from_prev != null ? date_from_prev : date_from;
                 var results = _context.ResultModel.Where(d => d.deleted_at == null && list_point.Contains(d.point_id.Value) && d.date >= from && d.date <= date_to)
                    .Include(d => d.target)
@@ -1766,11 +1766,19 @@ namespace it_template.Areas.Trend.Controllers
                 foreach (var point in points)
                 {
                     //var data_point_prev = list_prev.Where(d => d.point_id == point.id).ToList();
-                    var batch = point.data.GroupBy(d => d.target).Select(d => new
+
+                    var batch1 = point.data.GroupBy(d => d.target).Select(d => new
                     {
                         id = d.Key.id,
                         target = d.Key,
                     }).OrderBy(d => d.id).ToList();
+
+                    ///Sắp xếp lại theo thứ tự của object_target
+                    var batch = object_target
+                         .Select(id => batch1.FirstOrDefault(b => b.id == id))
+                         .Where(b => b != null)
+                         .ToList();
+
                     var date_batch = point.data.GroupBy(d => d.date).Select(d => d.Key).ToList();
                     var text = "table_" + point.id + "_" + stt++;
 
@@ -1883,6 +1891,17 @@ namespace it_template.Areas.Trend.Controllers
                             TR = p.AppendText(column.target.name_en);
                             TR.CharacterFormat.FontSize = 10;
                             TR.CharacterFormat.Italic = true;
+
+
+                            if (column.target.unit != null)
+                            {
+                                p = FRow.Cells[i].AddParagraph();
+                                p.Format.HorizontalAlignment = HorizontalAlignment.Center;
+                                //Set data format
+                                TR = p.AppendText("(" + column.target.unit + ")");
+                                TR.CharacterFormat.FontSize = 10;
+                                TR.CharacterFormat.Italic = true;
+                            }
                             i++;
                         }
                         row_current++;

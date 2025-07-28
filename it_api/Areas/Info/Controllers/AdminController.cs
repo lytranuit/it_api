@@ -238,7 +238,7 @@ namespace it_template.Areas.Info.Controllers
         }
         public async Task<JsonResult> cate()
         {
-            var cate = _context.CategoryModel.Where(d => d.deleted_at == null).Take(3).ToList();
+            var cate = _context.CategoryModel.Where(d => d.deleted_at == null).OrderBy(d => d.created_at).ToList();
             foreach (var item in cate)
             {
                 item.list_news = _context.NewsCategoryModel.Where(d => d.category_id == item.id).Include(d => d.news).Where(d => d.news.deleted_at == null).Select(d => d.news).Take(10).Select(d => new NewsModel()

@@ -152,10 +152,20 @@ namespace it_template.Areas.Info.Controllers
             var is_admin = await UserManager.IsInRoleAsync(user, "Administrator");
             var is_manager = await UserManager.IsInRoleAsync(user, "Manager HR");
             var is_hr = await UserManager.IsInRoleAsync(user, "HR");
+            var person = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
 
-            if (is_manager)
+            ///Check is_truongbophan
+            var phong = _context.DepartmentModel.Where(d => d.truongbophan_id == person.id).FirstOrDefault();
+            if (phong != null) // is_truongbophan
             {
-                var person = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
+                if (status != 3)
+                {
+                    var maphong = person.MAPHONG;
+                    customerData = customerData.Where(d => d.MAPHONG == maphong);
+                }
+            }
+            else if (is_manager)
+            {
                 if (person != null)
                 {
                     var maphong = person.MAPHONG;
@@ -330,6 +340,21 @@ namespace it_template.Areas.Info.Controllers
             var list_nv = datapost_all.Select(d => d.MANV).ToList();
             var ChamcongModel = _context.ChamcongModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && list_nv.Contains(d.MANV)).ToList();
             var list_hik = _context.HikModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && d.device != "A.CT.1").OrderBy(d => d.date).ThenBy(d => d.time).ToList();
+            var list_hik_hcm = _context.HikHCMModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && d.device != "A.CT.1").OrderBy(d => d.date).ThenBy(d => d.time).ToList();
+            var converted_hcm = list_hik_hcm.Select(x => new HikModel
+            {
+                id = "HCM-" + x.id,
+                person_name = x.person_name,
+                device = x.device,
+                deviceno = x.deviceno,
+                card = x.card,
+                date = x.date,
+                time = x.time,
+                datetime = x.datetime
+            }).ToList();
+            list_hik.AddRange(converted_hcm);
+            list_hik = list_hik.OrderBy(d => d.date).ThenBy(d => d.time).ToList();
+
             var list_holidays = _context.HolidayModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to).Select(d => d.date).ToList();
 
             var user_shift_f = _context.ShiftUserModel.Include(d => d.shift).Where(d => d.shift.deleted_at == null && (d.shift.code == "F-S" || d.shift.code == "F-C")).Select(d => d.person_id).Distinct().ToList();

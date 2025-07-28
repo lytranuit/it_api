@@ -72,8 +72,8 @@ namespace Vue.Services
 
             sheet.Range["F16"].Formula = "=$F$6 *" + tyle_dpcd + "%";
 
-            sheet.Range["D19"].NumberValue = (double)((SalaryUserModel.thuclanh ?? 0) + (SalaryUserModel.khoantru ?? 0));
-            sheet.Range["D20"].NumberValue = (double)(SalaryUserModel.khoantru ?? 0);
+            sheet.Range["D19"].NumberValue = (double)((SalaryUserModel.thuclanh ?? 0) + (SalaryUserModel.khoantru_sauthue ?? 0));
+            sheet.Range["D20"].NumberValue = (double)(SalaryUserModel.khoantru_sauthue ?? 0);
             //sheet.Range["D20"].NumberValue = (double)(SalaryUserModel.thuclanh ?? 0);
             sheet.Range["D22"].NumberValue = (double)(SalaryUserModel.tamungdot1 ?? 0);
             //sheet.Range["D23"].NumberValue = (double)(SalaryUserModel.conlai ?? 0);
@@ -92,6 +92,20 @@ namespace Vue.Services
             var list_nv = datapost.Select(d => d.MANV).ToList();
             var ChamcongModel = _context.ChamcongModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && list_nv.Contains(d.MANV)).ToList();
             var list_hik = _context.HikModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && d.device != "A.CT.1").OrderBy(d => d.date).ThenBy(d => d.time).ToList();
+            var list_hik_hcm = _context.HikHCMModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && d.device != "A.CT.1").OrderBy(d => d.date).ThenBy(d => d.time).ToList();
+            var converted_hcm = list_hik_hcm.Select(x => new HikModel
+            {
+                id = "HCM-" + x.id,
+                person_name = x.person_name,
+                device = x.device,
+                deviceno = x.deviceno,
+                card = x.card,
+                date = x.date,
+                time = x.time,
+                datetime = x.datetime
+            }).ToList();
+            list_hik.AddRange(converted_hcm);
+            list_hik = list_hik.OrderBy(d => d.date).ThenBy(d => d.time).ToList();
             var list_holidays = _context.HolidayModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to).Select(d => d.date).ToList();
             foreach (var record in datapost)
             {
@@ -123,6 +137,7 @@ namespace Vue.Services
                     foreach (var date in date_working)
                     {
                         var first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date.Date && d.time.Value >= shift.time_from && d.time.Value <= shift.time_to).FirstOrDefault();
+
                         list_chamcong.Add(new ChamCong()
                         {
                             ShiftModel = shift,
@@ -130,8 +145,6 @@ namespace Vue.Services
                             first_hik = first_hik,
 
                         });
-
-
                     }
                 }
                 var chamcong = list_chamcong.GroupBy(c => c.Date).Select(c => new
@@ -387,8 +400,8 @@ namespace Vue.Services
             // Nếu ngày tương lai qua năm mới, reset ngày phép về 0
             //if (ngayTuongLai.Year > ngayHienTai.Year)
             //{
-                //soNgayPhepHienTai = 1;
-                //ngayHienTai = new DateTime(ngayTuongLai.Year, 1, 1);  // Đặt ngày hiện tại thành đầu năm mới
+            //soNgayPhepHienTai = 1;
+            //ngayHienTai = new DateTime(ngayTuongLai.Year, 1, 1);  // Đặt ngày hiện tại thành đầu năm mới
             //}
 
             // Tính số lần qua ngày 26 từ ngày hiện tại đến ngày tương lai

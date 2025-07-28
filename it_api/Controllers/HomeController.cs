@@ -799,9 +799,48 @@ namespace Vue.Controllers
                 System.Threading.Thread.Sleep(2000);
                 driver.FindElement(By.Name("subscribees")).Clear();
                 driver.FindElement(By.Name("subscribees")).SendKeys(string.Join("\n", list_email));
+
+                // Đợi popup hiện ra nếu có
+                try
+                {
+                    //var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
+
+                    // Nếu có nút đồng ý/đóng popup
+                    var checkinBtn = driver.FindElement(By.Id("mixpanelTrackingChoiceOptIn")); // thay selector nếu cần
+                    checkinBtn.Click();
+                    var saveBtn = driver.FindElement(By.Id("mixpanelTrackingSave")); // thay selector nếu cần
+                    saveBtn.Click();
+
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    // Popup không xuất hiện, tiếp tục
+                }
+                System.Threading.Thread.Sleep(1000);
                 driver.FindElement(By.Name("setmemberopts_btn")).Click();
 
                 System.Threading.Thread.Sleep(2000);
+                desiredUrl1 = $"{uri1.Scheme}://{uri1.Host}:{uri1.Port}/{cpress1}/3rdparty/mailman/admin/asta.all_astahealthcare.com/members";
+
+                driver.Navigate().GoToUrl(desiredUrl1);
+                System.Threading.Thread.Sleep(2000);
+
+                foreach (var email in list_email)
+                {
+                    driver.FindElement(By.Name("findmember")).Clear();
+                    driver.FindElement(By.Name("findmember")).SendKeys(email);
+                    driver.FindElement(By.Name("findmember_btn")).Click();
+                    System.Threading.Thread.Sleep(1000);
+                    string encodedEmail = email.Replace("@", "%40") + "_mod";
+                    var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+                    var checkbox = wait.Until(d => d.FindElement(By.Name(encodedEmail)));
+                    checkbox.Click();
+
+                    driver.FindElement(By.Name("setmemberopts_btn")).Click();
+                    System.Threading.Thread.Sleep(1000);
+                }
+
                 driver.Close();
                 driver.SwitchTo().Window(originalWindow1);
 

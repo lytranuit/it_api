@@ -19,6 +19,7 @@
 
 	<ItemGroup>
 	  <None Remove="appsettings.Development.json~RF3ce72485.TMP" />
+	  <None Remove="Areas\Trend\Controllers\ObjectController.cs~RF1f228fde.TMP" />
 	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\AudioRender.dll" />
 	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCCore.dll" />
 	  <None Remove="C:\Users\tran.dl\.nuget\packages\hik.api\2.0.0\contentFiles\any\any\HikvisionSDK\HCNetSDK.dll" />

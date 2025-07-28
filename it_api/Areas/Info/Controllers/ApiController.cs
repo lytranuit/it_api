@@ -237,8 +237,24 @@ namespace it_template.Areas.Info.Controllers
                 }
 
             }
-
+            //Mặc định
             var email_BGD = "yen.tp@astahealthcare.com";
+            ///Là trưởng bộ phân thì BDG là người quản lý trực tiếp
+            if (person.id == info.truongbophan.Id)
+            {
+                email_BGD = quanlytructiep.EMAIL;
+            }
+            else if (person.MAPHONG == "22.01" || person.MAPHONG == "22") /// PTTT
+            {
+                email_BGD = "thai.mq@astahealthcare.com";
+            }
+            else if (person.MAPHONG == "19") /// KINH DOANH
+            {
+                email_BGD = "khanh.cn@astahealthcare.com";
+            }
+
+
+
             var BGD = _context.PersonnelModel.SingleOrDefault(d => d.EMAIL.ToLower() == email_BGD.ToLower());
             var user_BGD = _context.UserModel.SingleOrDefault(d => d.Email.ToLower() == email_BGD.ToLower());
             info.BGD.Id = BGD.id;

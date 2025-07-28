@@ -129,13 +129,18 @@ namespace it_template.Areas.Info.Controllers
             var search = Request.Form["filters[search]"].FirstOrDefault();
             var id = Request.Form["filters[id]"].FirstOrDefault();
             var type = Request.Form["filters[type]"].FirstOrDefault();
+            var type1_string = Request.Form["filters[type1]"].FirstOrDefault();
+            int type1 = type1_string != null ? Convert.ToInt32(type1_string) : 0;
             var department = Request.Form["filters[department]"].FirstOrDefault();
             var date_from_string = Request.Form["filters[date_from]"].FirstOrDefault();
             var date_to_string = Request.Form["filters[date_to]"].FirstOrDefault();
+            var date_filter_string = Request.Form["filters[date_filter]"].FirstOrDefault();
             DateTime date_from = date_from_string != null ? date_from = DateTime.ParseExact(date_from_string, "yyyy-MM-dd",
                                            System.Globalization.CultureInfo.InvariantCulture) : date_from = DateTime.Now;
             DateTime date_to = date_to_string != null ? date_to = DateTime.ParseExact(date_to_string, "yyyy-MM-dd",
                                            System.Globalization.CultureInfo.InvariantCulture) : date_to = DateTime.Now;
+            DateTime date_filter = date_filter_string != null ? date_filter = DateTime.ParseExact(date_filter_string, "yyyy-MM-dd",
+                                           System.Globalization.CultureInfo.InvariantCulture) : date_filter = DateTime.Now;
             var calendar = _context.CalendarModel.Where(d => d.id == type).FirstOrDefault();
             TimeSpan start_time = calendar.time_from.Value;
             TimeSpan end_time = calendar.time_to.Value;
@@ -153,9 +158,19 @@ namespace it_template.Areas.Info.Controllers
             var is_manager = await UserManager.IsInRoleAsync(user, "Manager HR");
             var is_hr = await UserManager.IsInRoleAsync(user, "HR");
 
-            if (is_manager)
+            var person = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
+
+            ///Check is_truongbophan
+            var phong = _context.DepartmentModel.Where(d => d.truongbophan_id == person.id).FirstOrDefault();
+            if (phong != null) // is_truongbophan
             {
-                var person = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
+
+                var maphong = person.MAPHONG;
+                customerData = customerData.Where(d => d.MAPHONG == maphong);
+
+            }
+            else if (is_manager)
+            {
                 if (person != null)
                 {
                     var maphong = person.MAPHONG;
@@ -192,7 +207,12 @@ namespace it_template.Areas.Info.Controllers
 
             int recordsFiltered = customerData.Count();
             var datapost = customerData.OrderByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV).Skip(skip).Take(pageSize).ToList();
-            var data = new ArrayList();
+
+            if (type1 > 0)
+            {
+                datapost = customerData.OrderByDescending(d => d.NGAYNHANVIEC).ThenBy(d => d.MANV).ToList();
+            }
+
             var utility = GetSchedule(type);
             var date_working = utility.GetWorkingDaysBetweenTwoWorkingDateTimes(date_from, date_to, false);
             if (utility.IsAWorkDay(date_from))
@@ -203,6 +223,16 @@ namespace it_template.Areas.Info.Controllers
             var list_chaman = _context.ChamanModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && list_nv.Contains(d.MANV) && d.calendar_id == type).ToList();
             var list_hik = _context.HikModel.Where(d => d.date.Value.Date >= date_from && d.date.Value.Date <= date_to && d.time >= start_time && d.time <= end_time && d.device == "A.CT.1").OrderBy(d => d.date).ThenBy(d => d.time).ToList();
 
+            ///LẤY DEALINE
+            var now = DateTime.Now;
+            var deadline = DateTime.Now.Date;
+            if (now > DateTime.Now.Date.AddHours(15).AddMinutes(15))
+            {
+                deadline = deadline.AddDays(1);
+            }
+
+            ///DATA
+            var data = new List<IDictionary<string, dynamic>>();
             foreach (var record in datapost)
             {
                 var d = new ExpandoObject() as IDictionary<string, dynamic>;
@@ -210,6 +240,7 @@ namespace it_template.Areas.Info.Controllers
 
                 d.Add("MANV", record.MANV);
                 d.Add("HOVATEN", record.HOVATEN);
+                var trangthai = 0;
                 var tong = 0;
                 foreach (var date in date_working)
                 {
@@ -221,7 +252,8 @@ namespace it_template.Areas.Info.Controllers
                             date = date,
                             MANV = record.MANV,
                             NV_id = record.id,
-                            calendar_id = type
+                            calendar_id = type,
+                            trangthai = 0
                         };
                     }
                     else
@@ -232,11 +264,50 @@ namespace it_template.Areas.Info.Controllers
 
                     chaman.first_hik = list_hik.Where(d => d.id == record.MACC && d.date.Value.Date == date.Date && d.time.Value >= new TimeSpan(10, 30, 0) && d.time.Value <= new TimeSpan(14, 0, 0)).FirstOrDefault();
 
+                    if (date <= deadline && chaman.id != null && chaman.value == true && chaman.first_hik != null)
+                    {
+                        ////Chấm ăn + có ăn
+                        chaman.trangthai = 1;
+                    }
+                    else if (date <= deadline && chaman.id != null && chaman.value == true && chaman.first_hik == null)
+                    {
+                        ///Chấm ăn + không ăn
+                        chaman.trangthai = 2;
+                    }
+                    else if (date <= deadline && chaman.id == null && chaman.first_hik != null)
+                    {
+                        ///Không chấm ăn + có ăn
+                        chaman.trangthai = 3;
+                    }
+
+
+
                     d.Add(date.ToString("yyyyMMdd"), chaman);
                 }
                 d.Add("tong", tong);
                 data.Add(d);
             }
+            if (type1 > 0)
+            {
+
+                var filteredData = new List<IDictionary<string, dynamic>>();
+                var keyDate = date_filter.ToString("yyyyMMdd");
+                foreach (IDictionary<string, dynamic> item in data)
+                {
+                    if (item.TryGetValue(keyDate, out var val))
+                    {
+                        var chaman = val as ChamanModel;
+                        if (chaman != null && chaman.trangthai == type1)
+                        {
+                            filteredData.Add(item);
+                        }
+                    }
+                }
+                recordsFiltered = filteredData.Count();
+                data = filteredData.Skip(skip).Take(pageSize).ToList();
+            }
+
+
             var tong_date = new ExpandoObject() as IDictionary<string, dynamic>;
             foreach (var date in date_working)
             {
@@ -244,18 +315,16 @@ namespace it_template.Areas.Info.Controllers
 
                 tong_date.Add(date.ToString("yyyyMMdd"), tong);
             }
-            var now = DateTime.Now;
-            var deadline = DateTime.Now.Date;
-            if (now > DateTime.Now.Date.AddHours(15).AddMinutes(15))
-            {
-                deadline = deadline.AddDays(1);
-            }
-            var person1 = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
-            bool? autoeat = false;
-            if (person1 != null)
-            {
-                autoeat = person1.autoeat;
-            }
+
+            //data = 
+
+
+            //var person1 = _context.PersonnelModel.Where(d => d.EMAIL == email).FirstOrDefault();
+            //bool? autoeat = false;
+            //if (person1 != null)
+            //{
+            //    autoeat = person1.autoeat;
+            //}
             var jsonData = new
             {
                 draw = draw,
@@ -265,7 +334,7 @@ namespace it_template.Areas.Info.Controllers
                 tong_date,
                 list_chaman,
                 deadline,
-                auto = autoeat
+                //auto = autoeat
             };
             return Json(jsonData, new System.Text.Json.JsonSerializerOptions()
             {
@@ -513,4 +582,13 @@ namespace it_template.Areas.Info.Controllers
             return baseHolidays;
         }
     }
+
+    public class NhanVienChamAnViewModel
+    {
+        public string MANV { get; set; }
+        public string HOVATEN { get; set; }
+        public int Tong { get; set; } = 0;
+        public List<ChamanModel> ChamAnTheoNgay { get; set; } = new();
+    }
+
 }

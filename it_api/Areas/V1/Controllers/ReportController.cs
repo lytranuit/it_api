@@ -11,6 +11,7 @@ using Spire.Doc.Documents;
 using Spire.Doc.Fields;
 using System.Data;
 using System.Reflection;
+using Vue.Areas.V1.Models;
 using Vue.Data;
 using Vue.Models;
 using static iText.Svg.SvgConstants;
@@ -2262,6 +2263,381 @@ namespace it_template.Areas.V1.Controllers
                 document.MailMerge.ExecuteWidthRegion(datatable_details);
 
             }
+            string[] fieldName = raw.Keys.ToArray();
+            string[] fieldValue = raw.Values.ToArray();
+
+            string[] MergeFieldNames = document.MailMerge.GetMergeFieldNames();
+            string[] GroupNames = document.MailMerge.GetMergeGroupNames();
+
+            document.MailMerge.Execute(fieldName, fieldValue);
+
+
+
+            document.SaveToFile("./wwwroot" + documentPath, Spire.Doc.FileFormat.Docx);
+
+            return Json(new { success = true, link = Domain + documentPath, });
+
+
+        }
+        public async Task<JsonResult> changerequest(string sochange, DateTime ngaydenghi)
+        {
+            if (sochange == null || ngaydenghi == null)
+            {
+                return Json(new { success = false });
+            }
+
+            ////Lấy 
+            ///
+
+
+            var viewPath = _configuration["Source:Path_Private"] + "\\qa\\templates\\change_request.docx";
+            var documentPath = "/temp/change_request_" + DateTime.Now.ToFileTimeUtc() + ".docx";
+            string Domain = (HttpContext.Request.IsHttps ? "https://" : "http://") + HttpContext.Request.Host.Value;
+
+
+            var report = "";
+
+
+            ///XUẤT PDF
+
+            //Creates Document instance
+            Spire.Doc.Document document = new Spire.Doc.Document();
+            //Section section = document.AddSection();
+
+            document.LoadFromFile(viewPath, Spire.Doc.FileFormat.Docx);
+
+            var DTA_CHANGECONTROL = _qlsxContext.DTA_CHANGECONTROL.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+
+
+            var raw = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    {"sochange",DTA_CHANGECONTROL.sochange },
+                    {"ngaydenghi",DTA_CHANGECONTROL.ngaydenghi.ToString("dd/MM/yyyy")},
+                    {"tenbp",DTA_CHANGECONTROL.tenbp},
+
+                    {"doituong",DTA_CHANGECONTROL.doituong ?? "" },
+                    {"tinhtrang",DTA_CHANGECONTROL.tinhtrang ?? "" },
+                    {"mota",DTA_CHANGECONTROL.mota ?? "" },
+                    {"a_check",DTA_CHANGECONTROL.a_facility == "YES" ? "☒" : "☐" },
+                    {"b_check",DTA_CHANGECONTROL.b_equipment == "YES" ? "☒" : "☐" },
+                    {"c_check",DTA_CHANGECONTROL.c_utilities == "YES" ? "☒" : "☐" },
+                    {"d_check",DTA_CHANGECONTROL.d_computerized == "YES" ? "☒" : "☐" },
+                    {"e_check",DTA_CHANGECONTROL.e_raw == "YES" ? "☒" : "☐" },
+                    {"f_check",DTA_CHANGECONTROL.f_packaging == "YES" ? "☒" : "☐" },
+                    {"g_check",DTA_CHANGECONTROL.g_consumables == "YES" ? "☒" : "☐" },
+                    {"h_check",DTA_CHANGECONTROL.h_product == "YES" ? "☒" : "☐" },
+                    {"i_check",DTA_CHANGECONTROL.i_batch == "YES" ? "☒" : "☐" },
+                    {"j_check",DTA_CHANGECONTROL.j_production == "YES" ? "☒" : "☐" },
+                    {"k_check",DTA_CHANGECONTROL.k_specifications == "YES" ? "☒" : "☐" },
+                    {"l_check",DTA_CHANGECONTROL.l_other == "YES" ? "☒" : "☐" },
+                    {"other_detail",DTA_CHANGECONTROL.other_detail ?? "N/A" },
+                    {"lydo",DTA_CHANGECONTROL.lydo ?? "" },
+                    {"dukien",DTA_CHANGECONTROL.dukien != null ? DTA_CHANGECONTROL.dukien.Value.ToString("dd/MM/yyyy") : ""},
+                    {"tdth_check",DTA_CHANGECONTROL.thaydoitamthoi == "YES" ? "☒" : "☐"},
+                    {"tdct_check",DTA_CHANGECONTROL.thaydoitamthoi == "NO" ? "☒" : "☐"},
+                    {"ngungsanxuat_yes",DTA_CHANGECONTROL.ngungsanxuat == "Có" ? "☒" : "☐"},
+                    {"ngungsanxuat_no",DTA_CHANGECONTROL.ngungsanxuat == "Không" ? "☒" : "☐"},
+                    {"lygiai",DTA_CHANGECONTROL.lygiai ?? ""},
+                    {"thucthi_yes",DTA_CHANGECONTROL.thucthi == "Có" ? "☒" : "☐"},
+                    {"thucthi_no",DTA_CHANGECONTROL.thucthi == "Không" ? "☒" : "☐"},
+                    {"qa_yes",DTA_CHANGECONTROL.chapthuan_qa == "Có" ? "☒" : "☐"},
+                    {"qa_no",DTA_CHANGECONTROL.chapthuan_qa == "Không" ? "☒" : "☐"},
+                    {"dt_yes",DTA_CHANGECONTROL.chapthuan_partner == "Có" ? "☒" : "☐"},
+                    {"dt_no",DTA_CHANGECONTROL.chapthuan_partner == "Không" ? "☒" : "☐"},
+
+
+
+                };
+
+            var table = 1;
+            var table_remove = new List<int>();
+            ///////A
+            if (DTA_CHANGECONTROL.a_facility == "YES")
+            {
+                var DTA_CHANGECONTROL_A = _qlsxContext.DTA_CHANGECONTROL_A.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("pm_check", DTA_CHANGECONTROL_A.loaithaydoi == "Xây dựng phòng mới" ? "☒" : "☐");
+                raw.Add("td_check", DTA_CHANGECONTROL_A.loaithaydoi == "Thay đổi phòng hiện có" ? "☒" : "☐");
+                raw.Add("ngaythaydoi", DTA_CHANGECONTROL_A.ngaythaydoi != null ? DTA_CHANGECONTROL_A.ngaythaydoi.Value.ToString("dd/MM/yyyy") : "");
+                raw.Add("tenphong", DTA_CHANGECONTROL_A.tenphong ?? "");
+                raw.Add("mucdich", DTA_CHANGECONTROL_A.mucdich ?? "");
+                raw.Add("thaydoibanve_yes", DTA_CHANGECONTROL_A.thaydoibanve == "Có" ? "☒" : "☐");
+                raw.Add("thaydoibanve_no", DTA_CHANGECONTROL_A.thaydoibanve == "Không" ? "☒" : "☐");
+                raw.Add("thaydoiduongdi_yes", DTA_CHANGECONTROL_A.thaydoiduongdi == "Có" ? "☒" : "☐");
+                raw.Add("thaydoiduongdi_no", DTA_CHANGECONTROL_A.thaydoiduongdi == "Không" ? "☒" : "☐");
+                raw.Add("csa_check", DTA_CHANGECONTROL_A.capsach == "A" ? "☒" : "☐");
+                raw.Add("csb_check", DTA_CHANGECONTROL_A.capsach == "B" ? "☒" : "☐");
+                raw.Add("csc_check", DTA_CHANGECONTROL_A.capsach == "C" ? "☒" : "☐");
+                raw.Add("csd_check", DTA_CHANGECONTROL_A.capsach == "D" ? "☒" : "☐");
+                raw.Add("kpl_check", DTA_CHANGECONTROL_A.capsach == "Kiểm soát không phân loại cấp sạch" ? "☒" : "☐");
+                raw.Add("khac_check", DTA_CHANGECONTROL_A.capsach == "Khác" ? "☒" : "☐");
+                raw.Add("nhathau_check", DTA_CHANGECONTROL_A.thuchien == "Nhà thầu hợp đồng" ? "☒" : "☐");
+                raw.Add("noibo_check", DTA_CHANGECONTROL_A.thuchien == "Nội bộ" ? "☒" : "☐");
+                raw.Add("tienich_yes", DTA_CHANGECONTROL_A.thaydoitienich == "Có" ? "☒" : "☐");
+                raw.Add("tienich_no", DTA_CHANGECONTROL_A.thaydoitienich == "Không" ? "☒" : "☐");
+                raw.Add("ghichu", DTA_CHANGECONTROL_A.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////B
+            if (DTA_CHANGECONTROL.b_equipment == "YES")
+            {
+                var DTA_CHANGECONTROL_B = _qlsxContext.DTA_CHANGECONTROL_B.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("b_loai1_check", DTA_CHANGECONTROL_B.loaithaydoi.Contains("Đưa vào sử dụng một thiết bị mới") ? "☒" : "☐");
+                raw.Add("b_loai2_check", DTA_CHANGECONTROL_B.loaithaydoi.Contains("Thay thế thiết bị hiện có") ? "☒" : "☐");
+                raw.Add("b_loai3_check", DTA_CHANGECONTROL_B.loaithaydoi.Contains("Thay đổi trên thiết bị hiện có") ? "☒" : "☐");
+                raw.Add("b_loai4_check", DTA_CHANGECONTROL_B.loaithaydoi.Contains("Khác") ? "☒" : "☐");
+                raw.Add("b_ngaythaydoi", DTA_CHANGECONTROL_B.ngaythaydoi != null ? DTA_CHANGECONTROL_B.ngaythaydoi.Value.ToString("dd/MM/yyyy") : "");
+                raw.Add("b_giaidoan", DTA_CHANGECONTROL_B.giaidoan ?? "");
+                raw.Add("b_tenphong", DTA_CHANGECONTROL_B.tenphong ?? "");
+                raw.Add("b_csa_check", DTA_CHANGECONTROL_B.capsach == "A" ? "☒" : "☐");
+                raw.Add("b_csb_check", DTA_CHANGECONTROL_B.capsach == "B" ? "☒" : "☐");
+                raw.Add("b_csc_check", DTA_CHANGECONTROL_B.capsach == "C" ? "☒" : "☐");
+                raw.Add("b_csd_check", DTA_CHANGECONTROL_B.capsach == "D" ? "☒" : "☐");
+                raw.Add("b_kpl_check", DTA_CHANGECONTROL_B.capsach == "Kiểm soát không phân loại cấp sạch" ? "☒" : "☐");
+                raw.Add("b_khac_check", DTA_CHANGECONTROL_B.capsach == "Khác" ? "☒" : "☐");
+                raw.Add("b_thietbido_yes", DTA_CHANGECONTROL_B.thietbido == "Có" ? "☒" : "☐");
+                raw.Add("b_thietbido_no", DTA_CHANGECONTROL_B.thietbido == "Không" ? "☒" : "☐");
+                raw.Add("b_thaydoinhaxuong_yes", DTA_CHANGECONTROL_B.thaydoinhaxuong == "Có" ? "☒" : "☐");
+                raw.Add("b_thaydoinhaxuong_no", DTA_CHANGECONTROL_B.thaydoinhaxuong == "Không" ? "☒" : "☐");
+                raw.Add("b_anhhuongtienich_yes", DTA_CHANGECONTROL_B.anhhuongtienich == "Có" ? "☒" : "☐");
+                raw.Add("b_anhhuongtienich_no", DTA_CHANGECONTROL_B.anhhuongtienich == "Không" ? "☒" : "☐");
+                raw.Add("b_phanmemdikem_yes", DTA_CHANGECONTROL_B.phanmemdikem == "Có" ? "☒" : "☐");
+                raw.Add("b_phanmemdikem_no", DTA_CHANGECONTROL_B.phanmemdikem == "Không" ? "☒" : "☐");
+                raw.Add("b_tacdongsanpham_yes", DTA_CHANGECONTROL_B.tacdongsanpham == "Có" ? "☒" : "☐");
+                raw.Add("b_tacdongsanpham_no", DTA_CHANGECONTROL_B.tacdongsanpham == "Không" ? "☒" : "☐");
+                raw.Add("b_ghichu", DTA_CHANGECONTROL_B.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////C
+            if (DTA_CHANGECONTROL.c_utilities == "YES")
+            {
+                var DTA_CHANGECONTROL_C = _qlsxContext.DTA_CHANGECONTROL_C.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("c_loai1_check", DTA_CHANGECONTROL_C.loaithaydoi.Contains("HVAC") ? "☒" : "☐");
+                raw.Add("c_loai2_check", DTA_CHANGECONTROL_C.loaithaydoi.Contains("PW - nước tinh khiết") ? "☒" : "☐");
+                raw.Add("c_loai3_check", DTA_CHANGECONTROL_C.loaithaydoi.Contains("CA - khí nén") ? "☒" : "☐");
+                raw.Add("c_loai4_check", DTA_CHANGECONTROL_C.loaithaydoi.Contains("Khác") ? "☒" : "☐");
+                raw.Add("c_ngaythaydoi", DTA_CHANGECONTROL_C.ngaythaydoi != null ? DTA_CHANGECONTROL_C.ngaythaydoi.Value.ToString("dd/MM/yyyy") : "");
+                raw.Add("c_mota", DTA_CHANGECONTROL_C.mota ?? "");
+                raw.Add("c_csa_check", DTA_CHANGECONTROL_C.capsach == "A" ? "☒" : "☐");
+                raw.Add("c_csb_check", DTA_CHANGECONTROL_C.capsach == "B" ? "☒" : "☐");
+                raw.Add("c_csc_check", DTA_CHANGECONTROL_C.capsach == "C" ? "☒" : "☐");
+                raw.Add("c_csd_check", DTA_CHANGECONTROL_C.capsach == "D" ? "☒" : "☐");
+                raw.Add("c_kpl_check", DTA_CHANGECONTROL_C.capsach == "Kiểm soát không phân loại cấp sạch" ? "☒" : "☐");
+                raw.Add("c_khac_check", DTA_CHANGECONTROL_C.capsach == "Khác" ? "☒" : "☐");
+                raw.Add("c_nhathau_check", DTA_CHANGECONTROL_C.thuchien == "Nhà thầu bên ngoài" ? "☒" : "☐");
+                raw.Add("c_noibo_check", DTA_CHANGECONTROL_C.thuchien == "Nội bộ" ? "☒" : "☐");
+                raw.Add("c_thamdinh_na_check", DTA_CHANGECONTROL_C.thuchienthamdinh == "N/A" ? "☒" : "☐");
+                raw.Add("c_thamdinh_benngoai_check", DTA_CHANGECONTROL_C.thuchienthamdinh == "Bên ngoài" ? "☒" : "☐");
+                raw.Add("c_thamdinh_noibo_check", DTA_CHANGECONTROL_C.thuchienthamdinh == "Nội bộ" ? "☒" : "☐");
+                raw.Add("c_ghichu", DTA_CHANGECONTROL_C.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////D
+            if (DTA_CHANGECONTROL.d_computerized == "YES")
+            {
+                var DTA_CHANGECONTROL_D = _qlsxContext.DTA_CHANGECONTROL_D.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("d_loai1_check", DTA_CHANGECONTROL_D.loaithaydoi.Contains("Hệ thống vi tính hóa mới") ? "☒" : "☐");
+                raw.Add("d_loai2_check", DTA_CHANGECONTROL_D.loaithaydoi.Contains("Hệ thống vi tính hóa hiện có") ? "☒" : "☐");
+                raw.Add("d_mucdich", DTA_CHANGECONTROL_D.mucdich ?? "");
+                raw.Add("d_ghichu", DTA_CHANGECONTROL_D.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////E
+            if (DTA_CHANGECONTROL.e_raw == "YES")
+            {
+                var DTA_CHANGECONTROL_E = _qlsxContext.DTA_CHANGECONTROL_E.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("e_loai1_check", DTA_CHANGECONTROL_E.loaithaydoi.Contains("Thay đổi số lượng thành phần công thức") ? "☒" : "☐");
+                raw.Add("e_loai2_check", DTA_CHANGECONTROL_E.loaithaydoi.Contains("Thay đổi công thức") ? "☒" : "☐");
+                raw.Add("e_loai3_check", DTA_CHANGECONTROL_E.loaithaydoi.Contains("Khác") ? "☒" : "☐");
+
+                raw.Add("e_ruiro1_check", DTA_CHANGECONTROL_E.phantichruiro == "Có" ? "☒" : "☐");
+                raw.Add("e_ruiro2_check", DTA_CHANGECONTROL_E.phantichruiro == "Không / sẽ được cung cấp sau" ? "☒" : "☐");
+                raw.Add("e_ruiro3_check", DTA_CHANGECONTROL_E.phantichruiro == "Không / không yêu cầu" ? "☒" : "☐");
+
+                raw.Add("e_ghichu", DTA_CHANGECONTROL_E.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////F
+            if (DTA_CHANGECONTROL.f_packaging == "YES")
+            {
+                var DTA_CHANGECONTROL_F = _qlsxContext.DTA_CHANGECONTROL_F.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("f_socap_check", DTA_CHANGECONTROL_F.loaithaydoi.Contains("Sơ cấp") ? "☒" : "☐");
+                raw.Add("f_thucap_check", DTA_CHANGECONTROL_F.loaithaydoi.Contains("Thứ cấp") ? "☒" : "☐");
+                raw.Add("f_coin_check", DTA_CHANGECONTROL_F.loaithaydoi.Contains("Có in") ? "☒" : "☐");
+                raw.Add("f_khongin_check", DTA_CHANGECONTROL_F.loaithaydoi.Contains("Không in") ? "☒" : "☐");
+                raw.Add("f_khac_check", DTA_CHANGECONTROL_F.loaithaydoi.Contains("Khác") ? "☒" : "☐");
+
+                raw.Add("f_thaydoi_yes", DTA_CHANGECONTROL_F.thaydoisanpham == "Có" ? "☒" : "☐");
+                raw.Add("f_thaydoi_no", DTA_CHANGECONTROL_F.thaydoisanpham == "Không" ? "☒" : "☐");
+
+                raw.Add("f_ondinh_yes", DTA_CHANGECONTROL_F.dulieudoondinh == "Có" ? "☒" : "☐");
+                raw.Add("f_ondinh_no", DTA_CHANGECONTROL_F.dulieudoondinh == "Không" ? "☒" : "☐");
+                raw.Add("f_ondinh_na", DTA_CHANGECONTROL_F.dulieudoondinh == "N/A" ? "☒" : "☐");
+
+                raw.Add("f_ghichu", DTA_CHANGECONTROL_F.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////G
+            if (DTA_CHANGECONTROL.g_consumables == "YES")
+            {
+                var DTA_CHANGECONTROL_G = _qlsxContext.DTA_CHANGECONTROL_G.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("g_loai1_check", DTA_CHANGECONTROL_G.loaithaydoi.Contains("Chất vệ sinh") ? "☒" : "☐");
+                raw.Add("g_loai2_check", DTA_CHANGECONTROL_G.loaithaydoi.Contains("Chất khử trùng") ? "☒" : "☐");
+                raw.Add("g_loai3_check", DTA_CHANGECONTROL_G.loaithaydoi.Contains("Vật tư tiêu hao phòng thí nghiệm") ? "☒" : "☐");
+                raw.Add("g_loai4_check", DTA_CHANGECONTROL_G.loaithaydoi.Contains("Vật tư tiêu hao sản xuất") ? "☒" : "☐");
+                raw.Add("g_loai5_check", DTA_CHANGECONTROL_G.loaithaydoi.Contains("Khác") ? "☒" : "☐");
+                raw.Add("g_tennsx", DTA_CHANGECONTROL_G.tennsx ?? "");
+                raw.Add("g_mucdich", DTA_CHANGECONTROL_G.mucdich ?? "");
+
+                raw.Add("g_danhgia_yes", DTA_CHANGECONTROL_G.danhgia == "Có" ? "☒" : "☐");
+                raw.Add("g_danhgia_no", DTA_CHANGECONTROL_G.danhgia == "Không" ? "☒" : "☐");
+
+                raw.Add("g_dulieu_yes", DTA_CHANGECONTROL_G.dulieudanhgia == "Có" ? "☒" : "☐");
+                raw.Add("g_dulieu_no", DTA_CHANGECONTROL_G.dulieudanhgia == "Không" ? "☒" : "☐");
+                raw.Add("g_dulieu_na", DTA_CHANGECONTROL_G.dulieudanhgia == "N/A" ? "☒" : "☐");
+
+                raw.Add("g_dinhluong_yes", DTA_CHANGECONTROL_G.dinhluong == "Có" ? "☒" : "☐");
+                raw.Add("g_dinhluong_no", DTA_CHANGECONTROL_G.dinhluong == "Không" ? "☒" : "☐");
+                raw.Add("g_dinhluong_na", DTA_CHANGECONTROL_G.dinhluong == "N/A" ? "☒" : "☐");
+
+                raw.Add("g_khutrung_yes", DTA_CHANGECONTROL_G.khutrung == "Có" ? "☒" : "☐");
+                raw.Add("g_khutrung_no", DTA_CHANGECONTROL_G.khutrung == "Không" ? "☒" : "☐");
+                raw.Add("g_khutrung_na", DTA_CHANGECONTROL_G.khutrung == "N/A" ? "☒" : "☐");
+
+                raw.Add("g_sudung", DTA_CHANGECONTROL_G.sudung ?? "");
+                raw.Add("g_ghichu", DTA_CHANGECONTROL_G.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////H
+            if (DTA_CHANGECONTROL.h_product == "YES")
+            {
+                var DTA_CHANGECONTROL_H = _qlsxContext.DTA_CHANGECONTROL_H.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+
+                raw.Add("h_tenkhuvuc", DTA_CHANGECONTROL_H.tenkhuvuc ?? "");
+
+                raw.Add("h_congthuc_yes", DTA_CHANGECONTROL_H.congthuc == "Có" ? "☒" : "☐");
+                raw.Add("h_congthuc_no", DTA_CHANGECONTROL_H.congthuc == "Không" ? "☒" : "☐");
+
+                raw.Add("h_luuhanh_yes", DTA_CHANGECONTROL_H.luuhanh == "Có" ? "☒" : "☐");
+                raw.Add("h_luuhanh_no", DTA_CHANGECONTROL_H.luuhanh == "Không" ? "☒" : "☐");
+
+                raw.Add("h_tennsx", DTA_CHANGECONTROL_H.tennsx ?? "");
+                raw.Add("h_ghichu", DTA_CHANGECONTROL_H.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////I
+            if (DTA_CHANGECONTROL.i_batch == "YES")
+            {
+                var DTA_CHANGECONTROL_I = _qlsxContext.DTA_CHANGECONTROL_I.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("i_loai1_check", DTA_CHANGECONTROL_I.loaithaydoi.Contains("Thay đổi cỡ lô") ? "☒" : "☐");
+                raw.Add("i_loai2_check", DTA_CHANGECONTROL_I.loaithaydoi.Contains("Thay đổi công thức pha chế") ? "☒" : "☐");
+                raw.Add("i_loai3_check", DTA_CHANGECONTROL_I.loaithaydoi.Contains("Khác") ? "☒" : "☐");
+
+                raw.Add("i_ruiro1_check", DTA_CHANGECONTROL_I.phantichruiro == "Có" ? "☒" : "☐");
+                raw.Add("i_ruiro2_check", DTA_CHANGECONTROL_I.phantichruiro == "Không / sẽ được cung cấp sau" ? "☒" : "☐");
+                raw.Add("i_ruiro3_check", DTA_CHANGECONTROL_I.phantichruiro == "Không / không yêu cầu" ? "☒" : "☐");
+
+                raw.Add("i_ghichu", DTA_CHANGECONTROL_I.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////J
+            if (DTA_CHANGECONTROL.j_production == "YES")
+            {
+                var DTA_CHANGECONTROL_J = _qlsxContext.DTA_CHANGECONTROL_J.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("j_loai1_check", DTA_CHANGECONTROL_J.loaithaydoi.Contains("Sản xuất") ? "☒" : "☐");
+                raw.Add("j_loai2_check", DTA_CHANGECONTROL_J.loaithaydoi.Contains("Đóng gói") ? "☒" : "☐");
+
+                raw.Add("j_thaydoi1_check", DTA_CHANGECONTROL_J.thaydoi.Trim() == "Kiểm soát trong quá trình" ? "☒" : "☐");
+                raw.Add("j_thaydoi2_check", DTA_CHANGECONTROL_J.thaydoi.Trim() == "Thông số quy trình" ? "☒" : "☐");
+                raw.Add("j_thaydoi3_check", DTA_CHANGECONTROL_J.thaydoi.Trim() == "Khác" ? "☒" : "☐");
+
+                raw.Add("j_ruiro1_check", DTA_CHANGECONTROL_J.phantichruiro.Trim() == "Có" ? "☒" : "☐");
+                raw.Add("j_ruiro2_check", DTA_CHANGECONTROL_J.phantichruiro.Trim() == "Không / sẽ được cung cấp sau" ? "☒" : "☐");
+                raw.Add("j_ruiro3_check", DTA_CHANGECONTROL_J.phantichruiro.Trim() == "Không / không yêu cầu" ? "☒" : "☐");
+
+                raw.Add("j_ghichu", DTA_CHANGECONTROL_J.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            ///////K
+            if (DTA_CHANGECONTROL.k_specifications == "YES")
+            {
+                var DTA_CHANGECONTROL_K = _qlsxContext.DTA_CHANGECONTROL_K.Where(d => d.sochange == sochange && d.ngaydenghi == ngaydenghi).FirstOrDefault();
+                raw.Add("k_loai1_check", DTA_CHANGECONTROL_K.loaithaydoi.Contains("Thay đổi tiêu chuẩn xuất xưởng") ? "☒" : "☐");
+                raw.Add("k_loai2_check", DTA_CHANGECONTROL_K.loaithaydoi.Contains("Thay đổi tiêu chuẩn thời hạn sử dụng") ? "☒" : "☐");
+                raw.Add("k_loai3_check", DTA_CHANGECONTROL_K.loaithaydoi.Contains("Thay đổi phương pháp phân tích hiện có") ? "☒" : "☐");
+                raw.Add("k_loai4_check", DTA_CHANGECONTROL_K.loaithaydoi.Contains("Đưa vào sử dụng phương pháp phân tích mới") ? "☒" : "☐");
+                raw.Add("k_loai5_check", DTA_CHANGECONTROL_K.loaithaydoi.Contains("Bỏ phương pháp phân tích hiện có") ? "☒" : "☐");
+                raw.Add("k_loai6_check", DTA_CHANGECONTROL_K.loaithaydoi.Contains("Khác") ? "☒" : "☐");
+
+                raw.Add("k_thaydoi1_check", DTA_CHANGECONTROL_K.thaydoitieuchuan.Trim() == "Thay đổi giới hạn các thông số quy định" ? "☒" : "☐");
+                raw.Add("k_thaydoi2_check", DTA_CHANGECONTROL_K.thaydoitieuchuan.Trim() == "Thay đổi / loại trừ / bổ sung các thông số thử nghiệm" ? "☒" : "☐");
+                raw.Add("k_thaydoi3_check", DTA_CHANGECONTROL_K.thaydoitieuchuan.Trim() == "Khác" ? "☒" : "☐");
+
+                raw.Add("k_ondinh1_check", DTA_CHANGECONTROL_K.nghiencuudoondinh.Trim() == "Có" ? "☒" : "☐");
+                raw.Add("k_ondinh2_check", DTA_CHANGECONTROL_K.nghiencuudoondinh.Trim() == "Không / sẽ cung cấp sau" ? "☒" : "☐");
+                raw.Add("k_ondinh3_check", DTA_CHANGECONTROL_K.nghiencuudoondinh.Trim() == "Không / không yêu cầu" ? "☒" : "☐");
+                raw.Add("k_ondinh4_check", DTA_CHANGECONTROL_K.nghiencuudoondinh.Trim() == "N/A" ? "☒" : "☐");
+
+                raw.Add("k_ghichu", DTA_CHANGECONTROL_K.ghichu ?? "");
+            }
+            else
+            {
+                table_remove.Add(table);
+            }
+            table++;
+            table_remove.Sort((a, b) => b.CompareTo(a));// sắp xếp giảm dần
+            foreach (Section section in document.Sections)
+            {
+                foreach (int index in table_remove)
+                {
+                    // Kiểm tra index hợp lệ
+                    if (index >= 0 && index < section.Tables.Count)
+                    {
+                        section.Tables.RemoveAt(index);
+                    }
+                }
+            }
+
+
             string[] fieldName = raw.Keys.ToArray();
             string[] fieldValue = raw.Values.ToArray();
 

@@ -35,6 +35,7 @@ namespace Info.Models
         public decimal? ngaycongthucte { get; set; }
         public decimal? luongcb { get; set; }
         public decimal? luongdongbhxh { get; set; }
+        public decimal? luongdoanhso { get; set; }
 
 
         public decimal? tc_hieusuat { get; set; }
@@ -44,6 +45,7 @@ namespace Info.Models
         public decimal? tc_thuhut { get; set; }
         public decimal? tc_khuvuc { get; set; }
         public decimal? tc_chucvu { get; set; }
+        public decimal? tc_tienan { get; set; }
         public decimal? tc_khac { get; set; }
         public decimal? tong_tc { get; set; }
 
@@ -71,10 +73,12 @@ namespace Info.Models
         public decimal? phepdauky { get; set; }
         public decimal? khoantru { get; set; }
         public decimal? khoancong { get; set; }
+        public decimal? khoantru_sauthue { get; set; }
         public decimal? khoancong_sauthue { get; set; }
 
         public string? note_khoantru { get; set; }
         public string? note_khoancong { get; set; }
+        public string? note_khoantru_sauthue { get; set; }
         public string? note_khoancong_sauthue { get; set; }
         public string? note { get; set; }
 
@@ -93,5 +97,18 @@ namespace Info.Models
 
         public bool? is_thue { get; set; }
 
+        public Xeploai? xeploai { get; set; } = Xeploai.None;
+        public decimal? luongxeploai { get; set; }
+
+    }
+
+    public enum Xeploai
+    {
+        None = 0,
+        A = 1,
+        B = 2,
+        C = 3,
+        D = 4,
+        E = 5,
     }
 }

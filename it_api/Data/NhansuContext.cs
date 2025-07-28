@@ -22,6 +22,7 @@ namespace Vue.Data
         }
 
 
+        public DbSet<Info.Models.HopthuModel> HopthuModel { get; set; }
         public DbSet<Info.Models.NewsModel> NewsModel { get; set; }
         public DbSet<Info.Models.HotNewsModel> HotNewsModel { get; set; }
         public DbSet<Info.Models.CategoryModel> CategoryModel { get; set; }
@@ -51,6 +52,7 @@ namespace Vue.Data
         public DbSet<Info.Models.ChamanKhachModel> ChamanKhachModel { get; set; }
         public DbSet<Info.Models.ChamcongModel> ChamcongModel { get; set; }
         public DbSet<Info.Models.HikModel> HikModel { get; set; }
+        public DbSet<Info.Models.HikHCMModel> HikHCMModel { get; set; }
         public DbSet<Info.Models.HolidayModel> HolidayModel { get; set; }
         public DbSet<Info.Models.OptionModel> OptionModel { get; set; }
         public DbSet<Info.Models.OrderletterModel> OrderletterModel { get; set; }
@@ -61,6 +63,12 @@ namespace Vue.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Info.Models.HikModel>().HasKey(table => new
+            {
+                table.id,
+                table.device,
+                table.datetime
+            });
+            modelBuilder.Entity<Info.Models.HikHCMModel>().HasKey(table => new
             {
                 table.id,
                 table.device,
